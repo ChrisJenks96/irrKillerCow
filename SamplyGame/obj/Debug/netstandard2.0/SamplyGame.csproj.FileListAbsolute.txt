@@ -15,3 +15,4 @@ C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame
 C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.csproj.CoreCompileInputs.cache
 C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.dll
 C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.pdb
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.csprojAssemblyReference.cache
