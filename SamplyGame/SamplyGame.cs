@@ -15,6 +15,7 @@ namespace SamplyGame
 
 		//int coins;
 		Scene scene;
+		Node camNode;
 		//Text coinsText;
 
 		public Player Player { get; private set; }
@@ -73,10 +74,10 @@ namespace SamplyGame
 			physics.SetGravity(new Vector3(0, 0, 0));
 
 			// Camera
-			var cameraNode = scene.CreateChild();
-			cameraNode.Position = (new Vector3(0.0f, 0.0f, -10.0f));
-			cameraNode.CreateComponent<Camera>();
-			Viewport = new Viewport(Context, scene, cameraNode.GetComponent<Camera>(), null);
+			camNode = scene.CreateChild();
+			camNode.Position = (new Vector3(0.0f, 20.0f, 0.0f));
+			camNode.CreateComponent<Camera>();
+			Viewport = new Viewport(Context, scene, camNode.GetComponent<Camera>(), null);
 
 			if (Platform != Platforms.Android && Platform != Platforms.iOS)
 			{
@@ -134,6 +135,8 @@ namespace SamplyGame
 			aircraftNode.Remove();*/
 
 			Player = new Player();
+			//associate camera with player (so it can track it)
+			Player.mainCameraNode = camNode;
 			var aircraftNode = scene.CreateChild(nameof(Aircraft));
 			aircraftNode.AddComponent(Player);
 			var playersLife = Player.Play();

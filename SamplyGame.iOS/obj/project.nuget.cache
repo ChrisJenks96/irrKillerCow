@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "biRQQ7nfKZovm4gno04AJ5D7pZAMdwU2B/qSDGVsofcjNoE1JtfTWZWIeYIVEfXKQfWjwSLclSqomTuWbMX86g==",
+  "dgSpecHash": "cIlb8hl5XCsPDvv0sC8qUn1j2vE19sPWZf/rLKcS5KcxD2BrH+fo0BvY9Qh/e6+aTBaCyV9wJsUT0twdftcC6A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
+  "projectFilePath": "C:\\Users\\TEST\\KC\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\TEST\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
     "C:\\Users\\TEST\\.nuget\\packages\\urhosharp\\1.9.67\\urhosharp.1.9.67.nupkg.sha512",
