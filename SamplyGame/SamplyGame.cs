@@ -75,7 +75,8 @@ namespace SamplyGame
 
 			// Camera
 			camNode = scene.CreateChild();
-			camNode.Position = (new Vector3(0.0f, 20.0f, 0.0f));
+			camNode.Position = (new Vector3(0.0f, 15.0f, 0.0f));
+			//camNode.Rotation = Quaternion.FromAxisAngle(Vector3.Up, 180.0f);
 			camNode.CreateComponent<Camera>();
 			Viewport = new Viewport(Context, scene, camNode.GetComponent<Camera>(), null);
 

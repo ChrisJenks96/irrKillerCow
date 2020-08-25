@@ -75,7 +75,7 @@ namespace SamplyGame
 				return;
 
 			//camera locks onto the player
-			mainCameraNode.LookAt(Node.Position, new Vector3(0, 1, 0), TransformSpace.World);
+			mainCameraNode.LookAt(Node.Position, Vector3.Up, TransformSpace.World);
 
 			var input = Application.Current.Input;
 			var aircraft = Node;
@@ -103,8 +103,7 @@ namespace SamplyGame
 
 			if (hasInput)
 			{
-				Vector3 destWorldPos = ((SamplyGame)Application).Viewport.ScreenToWorldPoint(positionX, positionY, 10);
-				//destWorldPos.Z = 0;
+				Vector3 destWorldPos = ((SamplyGame)Application).Viewport.ScreenToWorldPoint(positionX, positionY, 0);
 				destWorldPos.Y = 0;
 				aircraft.Translate(destWorldPos - aircraft.WorldPosition, TransformSpace.World);
 				/*foreach (var weapon in Node.Components.OfType<Weapon>()){
