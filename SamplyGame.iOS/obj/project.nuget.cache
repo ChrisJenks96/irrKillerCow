@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "oH+ttoUvmGJ5p5U/xRQT71hGtly6Q4GAW5S7CfHJ5V9ncmJnXiW6B9VbxS0VYKLfXdraid9jmIgHMh0OOFjJMg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\TEST\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\TEST\\.nuget\\packages\\urhosharp\\1.9.67\\urhosharp.1.9.67.nupkg.sha512",
+    "C:\\Users\\TEST\\.nuget\\packages\\xamarin.essentials\\1.3.1\\xamarin.essentials.1.3.1.nupkg.sha512"
+  ],
+  "logs": []
+}
