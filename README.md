@@ -1,3 +1,1 @@
-A simple game
-
-![Screenshot](Screenshots/Video.gif)
+Killer Cow - Android/iOS
