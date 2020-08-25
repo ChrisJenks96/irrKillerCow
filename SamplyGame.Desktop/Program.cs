@@ -32,8 +32,8 @@ namespace SamplyGame.Desktop
             {
                 ResourcePrefixPaths = new[] { rootFolder },
                 ResourcePaths = new[] { "Data" },
-                Width = 720,
-                Height = 1280
+                Width = 360,
+                Height = 640
             };
             if (Debugger.IsAttached && Environment.OSVersion.Platform == PlatformID.Win32NT)
             {

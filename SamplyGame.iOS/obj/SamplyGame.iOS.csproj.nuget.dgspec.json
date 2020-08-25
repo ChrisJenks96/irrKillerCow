@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\SamplyGame.iOS.csproj": {}
+    "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\SamplyGame.iOS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\SamplyGame.iOS.csproj": {
+    "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\SamplyGame.iOS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
+        "projectUniqueName": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
         "projectName": "SamplyGame.iOS",
-        "projectPath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
+        "projectPath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\SamplyGame.iOS.csproj",
         "packagesPath": "C:\\Users\\TEST\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame.iOS\\obj\\",
+        "outputPath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame.iOS\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "fallbackFolders": [
@@ -32,8 +32,8 @@
         "frameworks": {
           "xamarinios10": {
             "projectReferences": {
-              "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj": {
-                "projectPath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj"
+              "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj": {
+                "projectPath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj"
               }
             }
           }
@@ -65,14 +65,14 @@
         }
       }
     },
-    "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj": {
+    "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj",
+        "projectUniqueName": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj",
         "projectName": "SamplyGame",
-        "projectPath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj",
+        "projectPath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj",
         "packagesPath": "C:\\Users\\TEST\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\obj\\",
+        "outputPath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\"

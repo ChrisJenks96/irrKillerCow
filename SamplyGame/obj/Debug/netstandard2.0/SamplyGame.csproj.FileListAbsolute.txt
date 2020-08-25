@@ -7,3 +7,11 @@ C:\Users\TEST\Documents\UrhoSamples2019-master\SamplyGame\SamplyGame\obj\Debug\n
 C:\Users\TEST\Documents\UrhoSamples2019-master\SamplyGame\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.csproj.CoreCompileInputs.cache
 C:\Users\TEST\Documents\UrhoSamples2019-master\SamplyGame\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.dll
 C:\Users\TEST\Documents\UrhoSamples2019-master\SamplyGame\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.pdb
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\bin\Debug\netstandard2.0\SamplyGame.deps.json
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\bin\Debug\netstandard2.0\SamplyGame.dll
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\bin\Debug\netstandard2.0\SamplyGame.pdb
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.AssemblyInfoInputs.cache
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.AssemblyInfo.cs
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.csproj.CoreCompileInputs.cache
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.dll
+C:\Users\TEST\URHO_KILLER_COW_GIT\SamplyGame\obj\Debug\netstandard2.0\SamplyGame.pdb

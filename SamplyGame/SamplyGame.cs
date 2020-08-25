@@ -11,11 +11,11 @@ namespace SamplyGame
 {
 	public class SamplyGame : Application
 	{
-		const string CoinstFormat = "{0} coins";
+		//const string CoinstFormat = "{0} coins";
 
-		int coins;
+		//int coins;
 		Scene scene;
-		Text coinsText;
+		//Text coinsText;
 
 		public Player Player { get; private set; }
 
@@ -41,15 +41,15 @@ namespace SamplyGame
 		{
 			base.Start();
 			CreateScene();
-			Input.SubscribeToKeyDown(e =>
+			/*Input.SubscribeToKeyDown(e =>
 			{
 				if (e.Key == Key.Esc) Exit();
 				if (e.Key == Key.C) AddCollisionDebugBox(scene, true);
 				if (e.Key == Key.V) AddCollisionDebugBox(scene, false);
-			});
+			});*/
 		}
 
-		static void AddCollisionDebugBox(Node rootNode, bool add)
+		/*static void AddCollisionDebugBox(Node rootNode, bool add)
 		{
 			var nodes = rootNode.GetChildrenWithComponent<CollisionShape>(true);
 			foreach (var node in nodes)
@@ -62,7 +62,7 @@ namespace SamplyGame
 				subNode.Scale = node.GetComponent<CollisionShape>().WorldBoundingBox.Size;
 				box.Color = new Color(Color.Red, 0.4f);
 			}
-		}
+		}*/
 
 		async void CreateScene()
 		{
@@ -85,6 +85,7 @@ namespace SamplyGame
 				effectRenderPath.Append(fxaaRp);
 				Viewport.RenderPath = effectRenderPath;
 			}
+
 			Renderer.SetViewport(0, Viewport);
 
 			var zoneNode = scene.CreateChild();
@@ -93,37 +94,33 @@ namespace SamplyGame
 			zone.AmbientColor = new Color(1f, 1f, 1f);
 			
 			// UI
-			coinsText = new Text();
-			coinsText.HorizontalAlignment = HorizontalAlignment.Right;
-			coinsText.SetFont(ResourceCache.GetFont(Assets.Fonts.Font), Graphics.Width / 20);
-			UI.Root.AddChild(coinsText);
+			//coinsText = new Text();
+			//coinsText.HorizontalAlignment = HorizontalAlignment.Right;
+			//coinsText.SetFont(ResourceCache.GetFont(Assets.Fonts.Font), Graphics.Width / 20);
+			//UI.Root.AddChild(coinsText);
 			Input.SetMouseVisible(true, false);
 
-			// Background
-			var background = new Background();
-			scene.AddComponent(background);
-			background.Start();
-
 			// Lights:
-			var lightNode = scene.CreateChild();
-			lightNode.Position = new Vector3(0, -5, -40);
-			lightNode.AddComponent(new Light { Range = 120, Brightness = 0.8f });
+			//var lightNode = scene.CreateChild();
+			//lightNode.Position = new Vector3(0, -5, -40);
+			//lightNode.AddComponent(new Light { Range = 120, Brightness = 0.8f });
 
 			// Game logic cycle
-			bool firstCycle = true;
+			//bool firstCycle = true;
 			while (true)
 			{
-				var startMenu = scene.CreateComponent<StartMenu>();
+				/*var startMenu = scene.CreateComponent<StartMenu>();
 				await startMenu.ShowStartMenu(!firstCycle); //wait for "start"
 				startMenu.Remove();
+				firstCycle = false;*/
+
 				await StartGame();
-				firstCycle = false;
 			}
 		}
 		
 		async Task StartGame()
 		{
-			UpdateCoins(0);
+			/*UpdateCoins(0);
 			Player = new Player();
 			var aircraftNode = scene.CreateChild(nameof(Aircraft));
 			aircraftNode.AddComponent(Player);
@@ -134,10 +131,16 @@ namespace SamplyGame
 			enemies.StartSpawning();
 			await playersLife;
 			enemies.KillAll();
-			aircraftNode.Remove();
+			aircraftNode.Remove();*/
+
+			Player = new Player();
+			var aircraftNode = scene.CreateChild(nameof(Aircraft));
+			aircraftNode.AddComponent(Player);
+			var playersLife = Player.Play();
+			await playersLife;
 		}
 		
-		async void SpawnCoins()
+		/*async void SpawnCoins()
 		{
 			var player = Player;
 			while (Player.IsAlive && player == Player)
@@ -150,9 +153,9 @@ namespace SamplyGame
 				await scene.RunActionsAsync(new DelayTime(3f));
 				coinNode.Remove();
 			}
-		}
+		}*/
 
-		public void OnCoinCollected() => UpdateCoins(coins + 1);
+		/*public void OnCoinCollected() => UpdateCoins(coins + 1);
 
 		void UpdateCoins(int amount)
 		{
@@ -163,6 +166,6 @@ namespace SamplyGame
 			}
 			coins = amount;
 			coinsText.Value = string.Format(CoinstFormat, coins);
-		}
+		}*/
 	}
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "us+ZqGYYx9jspg9WQZFwgwgnHvCZZ15ty/8HkYqSyNhp3hY+03cnmk6uJsximaGVDZlVi/iAhJR5n8p3Sg2sPg==",
+  "dgSpecHash": "HpnJdYFL1tbvfy6PDlx1dDkECtYhJ+xqgCNoO4NY2AKHpy926jao7sKqUHiKiP8Jgl42mELge5aQVmpGju74Kw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\TEST\\Documents\\UrhoSamples2019-master\\SamplyGame\\SamplyGame\\SamplyGame.csproj",
+  "projectFilePath": "C:\\Users\\TEST\\URHO_KILLER_COW_GIT\\SamplyGame\\SamplyGame.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\TEST\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\TEST\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
