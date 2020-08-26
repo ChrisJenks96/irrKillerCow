@@ -5,6 +5,7 @@ Player::Player(IrrlichtDevice* d)
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
 	mesh = smgr->getMesh("media/sydney.md2");
+
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
@@ -21,12 +22,8 @@ Player::Player(IrrlichtDevice* d)
 
 void Player::LookAt(const vector3df p, const float offset)
 {
-	core::vector3df Rot;
-	float X; float Y;
-	X = p.X - node->getPosition().X;
-	Y = p.Z - node->getPosition().Z;
-	Rot.Y = (irr::f32)(((atan2(X, Y) * 180 / PI2) + 180) + offset);
-	node->setRotation(Rot);
+	const vector3df toTarget = p - node->getPosition();
+	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
 }
 
 Player::~Player()
