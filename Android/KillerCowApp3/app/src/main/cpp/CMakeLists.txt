@@ -30,6 +30,8 @@ add_library( # Sets the name of the library.
              # Associated headers in the same location as their source
              # file are automatically included.
              main.cpp
+             Enemy.cpp
+             Player.cpp
              android_tools.cpp )
 
 # Specifies a path to native header files.

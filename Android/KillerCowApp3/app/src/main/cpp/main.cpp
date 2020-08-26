@@ -3,6 +3,8 @@
 */
 
 #include <irrlicht.h>
+#include "Player.h"
+#include "Enemy.h"
 
 #ifdef _IRR_ANDROID_PLATFORM_
 
@@ -17,18 +19,6 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-
-enum GUI_IDS
-{
-	GUI_INFO_FPS,
-	GUI_IRR_LOGO,
-};
-
-
-/*
-	Android is using multitouch events.
-	We allow users to move around the Irrlicht logo as example of how to use those.
-*/
 class MyEventReceiver : public IEventReceiver
 {
 public:
@@ -69,19 +59,6 @@ public:
 					if ( TouchID == -1 )
 					{
 						fakeMouseEvent.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
-
-						if (Device)
-						{
-							position2d<s32> touchPoint(event.TouchInput.X, event.TouchInput.Y);
-							IGUIElement * logo = Device->getGUIEnvironment()->getRootGUIElement()->getElementFromId ( GUI_IRR_LOGO );
-							if ( logo && logo->isPointInside (touchPoint) )
-							{
-								TouchID = event.TouchInput.ID;
-								SpriteToMove = logo;
-								SpriteStartRect =  SpriteToMove->getRelativePosition();
-								TouchStartPos = touchPoint;
-							}
-						}
 					}
 					break;
 				}
@@ -180,42 +157,9 @@ private:
 
 /* Mainloop.
 */
-void mainloop( IrrlichtDevice *device, IGUIStaticText * infoText )
+void mainloop( IrrlichtDevice *device)
 {
-	u32 loop = 0;	// loop is reset when the app is destroyed unlike runCounter
-	static u32 runCounter = 0;	// static's seem to survive even an app-destroy message (not sure if that's guaranteed).
-	while(device->run())
-	{
-		/*
-			The window seems to be always active in this setup.
-			That's because when it's not active Android will stop the code from running.
-		*/
-		if (device->isWindowActive())
-		{
-			/*
-				Show FPS and some counters to show which parts of an app run
-				in different app-lifecycle states.
-			*/
-			if ( infoText )
-			{
-				stringw str = L"FPS:";
-				str += (s32)device->getVideoDriver()->getFPS();
-				str += L" r:";
-				str += runCounter;
-				str += L" l:";
-				str += loop;
-				infoText->setText ( str.c_str() );
-			}
 
-			device->getVideoDriver()->beginScene(true, true, SColor(0,100,100,100));
-			device->getSceneManager()->drawAll();
-			device->getGUIEnvironment()->drawAll();
-			device->getVideoDriver()->endScene ();
-		}
-		device->yield(); // probably nicer to the battery
-		++runCounter;
-		++loop;
-	}
 }
 
 /* Main application code. */
@@ -318,62 +262,27 @@ void android_main(android_app* app)
 		}
 	}
 
-	/* Set the font-size depending on your device.
-	   dpi=dots per inch. 1 inch = 2.54 cm. */
-	IGUISkin* skin = guienv->getSkin();
-	IGUIFont* font = 0;
-	if ( displayMetrics.xdpi < 100 )	// just guessing some value where fontsize might start to get too small
-		font = guienv->getFont(mediaPath + "fonthaettenschweiler.bmp");
-	else
-		font = guienv->getFont(mediaPath + "bigfont.png");
-	if (font)
-		skin->setFont(font);
+    Player p(device);
+    Enemy e(device);
+    smgr->addCameraSceneNode(0, vector3df(0, 10.0f, -5.0f), p.GetPosition());
 
-	// A field to show some text. Comment out stat->setText in run() if you want to see the dpi instead of the fps.
-	IGUIStaticText *text = guienv->addStaticText(stringw(displayMetrics.xdpi).c_str(),
-		rect<s32>(5,5,635,35), false, false, 0, GUI_INFO_FPS );
-	guienv->addEditBox( L"", rect<s32>(5,40,475,80));
-
-	// add irrlicht logo
-	IGUIImage * logo = guienv->addImage(driver->getTexture(mediaPath + "irrlichtlogo3.png"),
-					core::position2d<s32>(5,85), true, 0, GUI_IRR_LOGO);
-	s32 minLogoWidth = windowWidth/3;
-	if ( logo && logo->getRelativePosition().getWidth() < minLogoWidth )
-	{
-		/* Scale to make it better visible on high-res devices (we could also work with dpi here).
-		*/
-		logo->setScaleImage(true);
-		core::rect<s32> logoPos(logo->getRelativePosition());
-		f32 scale = (f32)minLogoWidth/(f32)logoPos.getWidth();
-		logoPos.LowerRightCorner.X = logoPos.UpperLeftCorner.X + minLogoWidth;
-		logoPos.LowerRightCorner.Y = logoPos.UpperLeftCorner.Y + (s32)((f32)logoPos.getHeight()*scale);
-		logo->setRelativePosition(logoPos);
-	}
-
-	/*
-		Add a 3d model. Note that you might need to add light when using other models.
-		A copy of the model and it's textures must be inside the assets folder to be installed to Android.
-		In this example we do copy it to the assets folder in the Makefile jni/Android.mk
-	*/
-	IAnimatedMesh* mesh = smgr->getMesh(mediaPath + "dwarf.x");
-	if (!mesh)
-	{
-		device->closeDevice();
-		device->drop();
-       	return;
-	}
-	smgr->addAnimatedMeshSceneNode( mesh );
+    u32 then = device->getTimer()->getTime();
 
 
-	/*
-	To look at the mesh, we place a camera.
-	*/
-	smgr->addCameraSceneNode(0, vector3df(15,40,-90), vector3df(0,30,0));
+    while(device->run())
+    {
+        //time
+        const u32 now = device->getTimer()->getTime();
+        const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
+        then = now;
 
-	/*
-		Mainloop. Applications usually never quit themself in Android. The OS is responsible for that.
-	*/
-	mainloop(device, text);
+        e.LookAt(p.GetPosition(), 180.0f);
+        e.MoveTowards(p.GetPosition(), 2.0f * frameDeltaTime);
+        device->getVideoDriver()->beginScene(true, true, SColor(255,100,101,140));
+        device->getSceneManager()->drawAll();
+        device->getVideoDriver()->endScene ();
+    }
+    //mainloop(device, text);
 
 	/* Cleanup */
 	device->setEventReceiver(0);
