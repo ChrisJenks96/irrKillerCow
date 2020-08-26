@@ -7,6 +7,9 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+#include "Player.h"
+#include "Enemy.h"
+
 #ifdef _IRR_WINDOWS_
 #pragma comment(lib, "Irrlicht.lib")
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
@@ -15,42 +18,36 @@ using namespace gui;
 int main()
 {
 	IrrlichtDevice *device =
-		createDevice( video::EDT_SOFTWARE, dimension2d<u32>(640, 480), 16,
+		createDevice( video::EDT_OPENGL, dimension2d<u32>(640, 480), 16,
 			false, false, false, 0);
 
 	if (!device)
 		return 1;
 
-	device->setWindowCaption(L"Hello World! - Irrlicht Engine Demo");
-
+	device->setWindowCaption(L"Killer Cows");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
 
-	IAnimatedMesh* mesh = smgr->getMesh("media/sydney.md2");
-	if (!mesh)
-	{
-		device->drop();
-		return 1;
-	}
-	IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
-
-	if (node)
-	{
-		node->setMaterialFlag(EMF_LIGHTING, false);
-		node->setMD2Animation(scene::EMAT_STAND);
-		node->setMaterialTexture( 0, driver->getTexture("media/sydney.bmp") );
-	}
-
-	smgr->addCameraSceneNode(0, vector3df(0,30,-40), vector3df(0,5,0));
+	Player p(device);
+	Enemy e(device);
+	smgr->addCameraSceneNode(0, vector3df(0, 10.0f, -5.0f), p.GetPosition());
+	
+	u32 then = device->getTimer()->getTime();
 
 	while(device->run())
 	{
+		//time
+		const u32 now = device->getTimer()->getTime();
+		const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
+		then = now;
+
+		e.LookAt(p.GetPosition(), 180.0f);
+		e.MoveTowards(p.GetPosition(), 2.0f * frameDeltaTime);
 		driver->beginScene(true, true, SColor(255,100,101,140));
 		smgr->drawAll();
 		driver->endScene();
 	}
 
 	device->drop();
-
 	return 0;
 }
