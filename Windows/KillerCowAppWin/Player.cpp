@@ -9,11 +9,11 @@ Player::Player(IrrlichtDevice* d)
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
-		node->setPosition(vector3df(0.0f, 0.0f, 0.0f));
+		node->setPosition(vector3df(3.0f, 0.0f, 1.0f));
 		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMD2Animation(scene::EMAT_STAND);
 			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}

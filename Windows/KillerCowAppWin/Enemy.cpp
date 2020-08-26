@@ -13,7 +13,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMD2Animation(scene::EMAT_RUN);
 			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
@@ -42,6 +42,7 @@ void Enemy::Attack(const float dt)
 	if (currAttackLength > attackLength) {
 		isAttacking = false;
 		currAttackLength = 0.0f;
+		node->setMD2Animation(scene::EMAT_RUN);
 	}
 }
 
@@ -55,6 +56,7 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
+			node->setMD2Animation(scene::EMAT_ATTACK);
 			return ENEMY_STATE::ATTACK;
 		}
 	}
@@ -64,8 +66,10 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 		node->setPosition(node->getPosition() + (dir * speed));
 	}
 
-	if (distance < 0.5f)
+	if (distance < 0.5f) {
+		node->setMD2Animation(scene::EMAT_DEATH_FALLBACK);
 		return ENEMY_STATE::RESET;
+	}
 
 	return ENEMY_STATE::NONE;
 }
@@ -73,6 +77,7 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 void Enemy::Reset()
 {
 	float distAway = rand() % (50 + 1) + 20;
+	node->setMD2Animation(scene::EMAT_RUN);
 	RandomPosition(distAway);
 	attackOnce = false;
 }
