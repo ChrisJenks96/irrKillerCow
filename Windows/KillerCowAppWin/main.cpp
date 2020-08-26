@@ -41,7 +41,7 @@ int main()
 		const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 		then = now;
 
-		e.LookAt(p.GetPosition(), 180.0f);
+		e.LookAt(p.GetPosition(), -90.0f);
 		e.MoveTowards(p.GetPosition(), 2.0f * frameDeltaTime);
 		driver->beginScene(true, true, SColor(255,100,101,140));
 		smgr->drawAll();

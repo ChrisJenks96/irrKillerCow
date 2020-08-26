@@ -8,7 +8,10 @@ Enemy::Enemy(IrrlichtDevice* d)
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
-		node->setPosition(vector3df(0.0f, 0.0f, 15.0f));
+
+		vector3df target = vector3df(-20.0f, 0.0f, 34.0f);
+		vector3df p = (target - node->getPosition()).normalize() * 15.0f;
+		node->setPosition(p);
 		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
@@ -21,12 +24,8 @@ Enemy::Enemy(IrrlichtDevice* d)
 
 void Enemy::LookAt(const vector3df p, const float offset)
 {
-	core::vector3df Rot;
-	float X; float Y;
-	X = p.X - node->getPosition().X;
-	Y = p.Z - node->getPosition().Z;
-	Rot.Y = (irr::f32)(((atan2(X, Y) * 180 / PI2) + 180) + offset);
-	node->setRotation(Rot);
+	const vector3df toTarget = p - node->getPosition();
+	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
 }
 
 void Enemy::MoveTowards(const vector3df p, const float speed) 
