@@ -250,8 +250,8 @@ void android_main(android_app* app)
 				   copied to the application assets folder (done in the Makefile).
 	*/
 	SIrrlichtCreationParameters param;
-//	param.DriverType = EDT_OGLES1;				// android:glEsVersion in AndroidManifest.xml should be "0x00010000" (requesting 0x00020000 will also guarantee that ES1 works)
-	param.DriverType = EDT_OGLES2;				// android:glEsVersion in AndroidManifest.xml should be "0x00020000"
+	param.DriverType = EDT_OGLES1;				// android:glEsVersion in AndroidManifest.xml should be "0x00010000" (requesting 0x00020000 will also guarantee that ES1 works)
+//	param.DriverType = EDT_OGLES2;				// android:glEsVersion in AndroidManifest.xml should be "0x00020000"
 	param.WindowSize = dimension2d<u32>(0,0);	// using 0,0 it will automatically set it to the maximal size
 	param.PrivateData = app;
 	param.Bits = 24;
@@ -334,7 +334,7 @@ void android_main(android_app* app)
     //load the non important static meshes for the scene with no behaviour
     StaticMeshesLoad(device);
 
-    //smgr->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.8f, 0.8f, 0.8f), 15.0f);
+    smgr->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.8f, 0.8f, 0.8f), 15.0f);
 
     Player p(device);
     EnemyFactory ef(device, 1);
