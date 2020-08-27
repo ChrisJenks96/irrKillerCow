@@ -12,6 +12,7 @@ using namespace gui;
 class MyEventReceiver : public IEventReceiver
 {
 public:
+    bool Keys[256];
     // We'll create a struct to record info on the mouse state
     struct SMouseState
     {
@@ -23,6 +24,10 @@ public:
     // This is the one method that we have to implement
     virtual bool OnEvent(const SEvent& event)
     {
+        if (event.EventType == irr::EET_KEY_INPUT_EVENT)
+        {
+            Keys[event.KeyInput.Key] = event.KeyInput.PressedDown;
+        }
         // Remember the mouse state
         if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
         {

@@ -95,20 +95,20 @@ int main()
 	StaticMeshesLoad(device);
 
 	Player p(device);
-	EnemyFactory ef(device, 6);
+	EnemyFactory ef(device, 3);
 
 	cam = smgr->addCameraSceneNode(0, vector3df(3.0f, 10.0f, -9.0f), p.GetPosition());
-	
-	ILightSceneNode* l = smgr->addLightSceneNode();
-	l->setLightType(ELT_DIRECTIONAL);
 	//debug ufo up close
 	//smgr->addCameraSceneNode(0, vector3df(0.0f, 3.0f, 7.0f), vector3df(-2.0f, -4.0f, 5.0f));
+	ILightSceneNode* l = smgr->addLightSceneNode();
+	l->setLightType(ELT_DIRECTIONAL);
 
 	u32 then = device->getTimer()->getTime();
 	ICursorControl* cursor = device->getCursorControl();
 
 	s32 MouseX = cursor->getPosition().X;
 	s32 MouseXPrev = MouseX;
+
 	while(device->run())
 	{
 		//time
@@ -116,11 +116,17 @@ int main()
 		const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 		then = now;
 
+		//rotate the player around
 		MouseX = er.GetMouseState().Position.X;
 		s32 MouseXDiff = MouseX - MouseXPrev;
-		printf("%i | %i | %i\n", MouseX, MouseXPrev, MouseXDiff);
-		p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, MouseXDiff * (750.0f * frameDeltaTime), 0.0f));
+		p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (1000.0f * frameDeltaTime)), 0.0f));
 		MouseXPrev = MouseX;
+
+		//firing state for the player
+		if (er.GetMouseState().LeftButtonDown)
+			p.Fire();
+		else
+			p.Idle();
 
 		//rotate the blades around the craft
 		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
