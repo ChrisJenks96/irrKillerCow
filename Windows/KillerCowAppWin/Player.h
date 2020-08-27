@@ -16,6 +16,7 @@ class Player
 		Player(IrrlichtDevice* d);
 		const vector3df& GetPosition() { return node->getPosition(); }
 		void LookAt(const vector3df p, const float offset);
+		IAnimatedMeshSceneNode* GetNode() { return node; }
 		~Player();
 	private:
 		IAnimatedMesh* mesh;

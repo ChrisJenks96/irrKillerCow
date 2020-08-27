@@ -32,7 +32,7 @@ void Enemy::RandomPosition(const float distAway)
 void Enemy::LookAt(const vector3df p, const float offset)
 {
 	const vector3df toTarget = p - node->getPosition();
-	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
+	node->setRotation((toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 }
 
 void Enemy::Attack(const float dt) 

@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="ER.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>

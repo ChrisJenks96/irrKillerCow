@@ -22,7 +22,7 @@ Player::Player(IrrlichtDevice* d)
 
 void Player::LookAt(const vector3df p, const float offset)
 {
-	const vector3df toTarget = p - node->getPosition();
+	const vector3df toTarget = (p - node->getPosition()).normalize();
 	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
 }
 
