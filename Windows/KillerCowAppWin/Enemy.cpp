@@ -18,6 +18,11 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
 	}
+
+	scene::ITriangleSelector* selector = 0;
+	selector = smgr->createTriangleSelector(node);
+	node->setTriangleSelector(selector);
+	selector->drop(); // We're done with this selector, so drop it now.
 }
 
 void Enemy::RandomPosition(const float distAway)

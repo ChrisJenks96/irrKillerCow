@@ -124,7 +124,7 @@ int main()
 
 		//firing state for the player
 		if (er.GetMouseState().LeftButtonDown)
-			p.Fire();
+			p.Fire(device);
 		else
 			p.Idle();
 

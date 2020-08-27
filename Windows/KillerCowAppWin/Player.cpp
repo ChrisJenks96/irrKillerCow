@@ -27,9 +27,21 @@ Player::Player(IrrlichtDevice* d)
 	weaponFiringLight->getLightData().Falloff = 0.0f;
 }
 
-void Player::Fire()
+void Player::Fire(IrrlichtDevice* device)
 {
 	WeaponFiringLightToggle(true);
+
+	core::line3d<f32> ray;
+	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
+	ray.end = ray.start + SceneNodeDir(node) * 1000.0f;
+	// Tracks the current intersection point with the level or a mesh
+	core::vector3df intersection;
+	// Used to show with triangle has been hit
+	core::triangle3df hitTriangle;
+	scene::ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeAndCollisionPointFromRay(
+		ray, intersection, hitTriangle, 0, 0);
+	if (selectedSceneNode)
+		selectedSceneNode->setVisible(false);
 }
 
 void Player::Idle()

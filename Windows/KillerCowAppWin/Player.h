@@ -16,7 +16,7 @@ class Player
 		Player(IrrlichtDevice* d);
 		const vector3df& GetPosition() { return node->getPosition(); }
 		void LookAt(const vector3df p, const float offset);
-		void Fire();
+		void Fire(IrrlichtDevice* device);
 		void WeaponFiringLightToggle(bool t) { weaponFiringLight->setVisible(t); }
 		void Idle();
 		ISceneNode* GetNode() { return node; }
