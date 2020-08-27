@@ -9,7 +9,7 @@ Player::Player(IrrlichtDevice* d)
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
-		node->setPosition(vector3df(3.0f, 0.0f, 1.0f));
+		node->setPosition(vector3df(3.0f, 0.0f, -3.0f));
 		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
