@@ -123,6 +123,13 @@ void CutsceneInit(IrrlichtDevice* device)
 	cam->setTarget(ufoSceneNode->getPosition());
 }
 
+void CutsceneUnload(IrrlichtDevice* device)
+{
+	cutsceneGroundSceneNode[0]->setVisible(false);
+	cutsceneGroundSceneNode[1]->setVisible(false);
+	groundSceneNode->setVisible(true);
+}
+
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 {
 	if (currentCutscene == 0)
@@ -292,9 +299,30 @@ int main()
 			then = now;
 
 			if (state == STATE_GAME)
-				GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+			{
+				//fade back into the game
+				if (cutscene3FadeOut && transition_alpha != 0)
+					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				else
+				{
+					cutscene3FadeOut = false;
+					GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+				}
+				
+			}
+				
 			else if (state == STATE_INTRO_CUTSCENE)
-				CutsceneUpdate(device, frameDeltaTime);
+			{
+				if (cutscene3FadeOut && ufoSceneNode->getPosition().Y < 0.0f){
+					CutsceneUnload(device);
+					state = STATE_GAME;
+					GameInit(device);
+				}
+
+				else
+					CutsceneUpdate(device, frameDeltaTime);
+			}
+				
 
 			printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
 				cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
