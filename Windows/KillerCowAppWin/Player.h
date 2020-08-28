@@ -13,6 +13,7 @@ using namespace gui;
 class Player
 {
 	public:
+		Player() {}
 		Player(IrrlichtDevice* d);
 		const vector3df& GetPosition() { return node->getPosition(); }
 		void LookAt(const vector3df p, const float offset);

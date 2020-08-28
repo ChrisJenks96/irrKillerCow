@@ -4,18 +4,17 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/sydney.md2");
+	mesh = smgr->getMesh("media/cow/Cow.md2");
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
 
 		RandomPosition(distAway);
-		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMD2Animation(scene::EMAT_RUN);
-			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			node->setMD2Animation("idle");
+			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
 	}
 
@@ -47,7 +46,7 @@ void Enemy::Attack(const float dt)
 	if (currAttackLength > attackLength) {
 		isAttacking = false;
 		currAttackLength = 0.0f;
-		node->setMD2Animation(scene::EMAT_RUN);
+		node->setMD2Animation("idle");
 	}
 }
 
@@ -61,7 +60,7 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
-			node->setMD2Animation(scene::EMAT_ATTACK);
+			node->setMD2Animation("idle");
 			return ENEMY_STATE::ATTACK;
 		}
 	}
@@ -72,17 +71,22 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 	}
 
 	if (distance < 0.5f) {
-		node->setMD2Animation(scene::EMAT_DEATH_FALLBACK);
+		node->setMD2Animation("idle");
 		return ENEMY_STATE::RESET;
 	}
+
+	//we've died :(
+	if (!node->isVisible())
+		Reset();
 
 	return ENEMY_STATE::NONE;
 }
 
 void Enemy::Reset()
 {
+	node->setVisible(true);
 	float distAway = rand() % (50 + 1) + 20;
-	node->setMD2Animation(scene::EMAT_RUN);
+	node->setMD2Animation("idle");
 	RandomPosition(distAway);
 	attackOnce = false;
 }

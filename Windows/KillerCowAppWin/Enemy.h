@@ -43,6 +43,7 @@ private:
 class EnemyFactory
 {
 	public:
+		EnemyFactory() {}
 		EnemyFactory(IrrlichtDevice* d, const int size);
 		void Update(const vector3df t, const float dt);
 		~EnemyFactory();
