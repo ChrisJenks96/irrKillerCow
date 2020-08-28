@@ -84,10 +84,12 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 
 void Enemy::Reset()
 {
+	SetAttackStrikeDone(false);
 	node->setVisible(true);
 	float distAway = rand() % (50 + 1) + 20;
 	node->setMD2Animation("idle");
 	RandomPosition(distAway);
+	isAttacking = false;
 	attackOnce = false;
 }
 
@@ -108,11 +110,11 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size)
 	}
 }
 
-void EnemyFactory::Update(const vector3df t, const float dt)
+void EnemyFactory::Update(Player& p, const float dt)
 {
 	for (auto& x : enemies) {
-		x.LookAt(t, -90.0f);
-		ENEMY_STATE es = x.MoveTowards(t, 5.0f * dt);
+		x.LookAt(p.GetPosition(), -90.0f);
+		ENEMY_STATE es = x.MoveTowards(p.GetPosition(), 5.0f * dt);
 		switch (es)
 		{
 			case RESET:
@@ -124,7 +126,33 @@ void EnemyFactory::Update(const vector3df t, const float dt)
 			default:
 				break;
 		}
+
+		if (x.isAttackingFlag() && !x.GetAttackStrikeDone()){
+			x.SetAttackStrikeDone(true);
+			p.RemoveHealth(x.GetAttackDamage());
+		}
 	}
+}
+
+Enemy* EnemyFactory::GetNearestEnemy(Player& p) {
+	float distance = 999.0f;
+	Enemy* e = nullptr;
+	for (auto& x : enemies) {
+		float thisDist = (p.GetPosition() - x.GetPosition()).getLengthSQ();
+		if (thisDist < distance) {
+			distance = thisDist;
+			e = &x;
+		}
+	};
+
+	return e;
+}
+
+void EnemyFactory::ForceReset()
+{
+	for (auto& x : enemies) {
+		x.Reset();
+	};
 }
 
 EnemyFactory::~EnemyFactory()

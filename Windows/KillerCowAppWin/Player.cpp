@@ -14,7 +14,7 @@ Player::Player(IrrlichtDevice* d)
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMD2Animation(scene::EMAT_ATTACK);
+			node->setMD2Animation("attack");
 			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
 	}
@@ -25,6 +25,7 @@ Player::Player(IrrlichtDevice* d)
 	weaponFiringLight->getLightData().InnerCone = 10.0f;
 	weaponFiringLight->getLightData().OuterCone = 20.0f;
 	weaponFiringLight->getLightData().Falloff = 0.0f;
+	WeaponFiringLightToggle(false);
 }
 
 void Player::Fire(IrrlichtDevice* device)

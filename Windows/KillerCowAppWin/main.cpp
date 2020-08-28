@@ -23,6 +23,7 @@ using namespace gui;
 #define STATE_INTRO_CUTSCENE 1
 #define STATE_MENU 2
 #define STATE_OPTIONS 3
+#define STATE_GAME_OVER 4
 
 IrrlichtDevice* device;
 MyEventReceiver er;
@@ -39,6 +40,9 @@ EnemyFactory ef;
 
 //cutscene specifics
 int currentCutscene = 0;
+float gameOverTimer = 0.0f;
+#define GAME_OVER_FADE_OUT_TIME 3.0f
+#define GAME_OVER_FINISH_TIME 5.5f
 
 static void StaticMeshesLoad(IrrlichtDevice* device)
 {
@@ -107,6 +111,8 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 
 		if (ufoBladesSceneNode)
 			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+		ufoBladesSceneNode->setParent(ufoSceneNode);
+		ufoBladesSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 	}
 }
 
@@ -117,7 +123,7 @@ void CutsceneInit(IrrlichtDevice* device)
 	StaticMeshesLoad(device);
 	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
-	ufoBladesSceneNode->setPosition(vector3df(0.0f, 40.0f, 0.0f));
+	//ufoBladesSceneNode->setPosition(vector3df(0.0f, 40.0f, 0.0f));
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 	cam->setPosition(cutscene1CamPosition);
 	cam->setTarget(ufoSceneNode->getPosition());
@@ -162,7 +168,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 				//move the ufo back ready for the next scene (it will shoot past the screen)
 				ufoSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
 				ufoSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
-				ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
+				//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
 				ufoBladesSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
 				currentCutscene = 1;
 			}
@@ -179,7 +185,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 	{
 		cam->setTarget(ufoSceneNode->getPosition());
 		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
-		ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
+		//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
 
 		cutscenespeedAccum += cutsceneUFOSpeed * dt;
 		//lightning strike point
@@ -204,8 +210,6 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 		vector3df dir = (cutscene3CrashPosition - ufoSceneNode->getPosition()).normalize();
 		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + (dir * cutsceneUFOSpeed * dt));
 		ufoSceneNode->setRotation(ufoSceneNode->getRotation() + vector3df(CUTSCENE3_ROTATE_SPEED * dt, 0.0f, 0.0f));
-		ufoBladesSceneNode->setPosition(ufoBladesSceneNode->getPosition() + (dir * cutsceneUFOSpeed * dt));
-		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(CUTSCENE3_ROTATE_SPEED * dt, 750.0f * dt, 0.0f));
 
 		//fade to black
 		if (ufoSceneNode->getPosition().Y < (CUTSCENE_UFO_HEIGHT - 10.0f))
@@ -218,11 +222,10 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 10);
+	ef = EnemyFactory(device, 3);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
-	ufoBladesSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
@@ -247,7 +250,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
 
-	ef.Update(p.GetPosition(), frameDeltaTime);
+	ef.Update(p, frameDeltaTime);
 }
 
 bool Sys_Init()
@@ -255,7 +258,7 @@ bool Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(640, 480), 16,
+	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(320, 480), 16,
 		false, false, true, &er);
 
 	if (!device)
@@ -269,6 +272,15 @@ bool Sys_Init()
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.01f);
 	cam = smgr->addCameraSceneNode();
 	return 0;
+}
+
+void GameReset()
+{
+	p.SetHealth(100);
+	p.SetAnimationName("attack");
+	ef.ForceReset();
+	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
+	cam->setTarget(p.GetPosition());
 }
 
 int main()
@@ -290,7 +302,14 @@ int main()
 		s32 MouseXPrev = MouseX;
 
 		IVideoDriver* driver = device->getVideoDriver();
+		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
+
+		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(15, 13));
+		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
+		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
+		health_outside->setMaxSize(dimension2du(170, 15));
+
 		while (device->run())
 		{
 			//time
@@ -307,6 +326,12 @@ int main()
 				{
 					cutscene3FadeOut = false;
 					GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+					if (p.GetHealth() <= 0) {
+						p.SetAnimationName("crdeth");
+						cam->setPosition(vector3df(cam->getPosition().X, cam->getPosition().Y - 5.0f, cam->getPosition().Z));
+						//play death animation
+						state = STATE_GAME_OVER;
+					}
 				}
 				
 			}
@@ -322,10 +347,21 @@ int main()
 				else
 					CutsceneUpdate(device, frameDeltaTime);
 			}
-				
 
-			printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
-				cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
+			else if (state == STATE_GAME_OVER)
+			{
+				cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
+				gameOverTimer += 1.0f * frameDeltaTime;
+
+				if (gameOverTimer > GAME_OVER_FINISH_TIME) {
+					gameOverTimer = 0.0f;
+					GameReset();
+					state = STATE_GAME;
+				}
+			}
+				
+			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
+				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
 			driver->beginScene(true, true, SColor(255, 100, 101, 140));
 			smgr->drawAll();
@@ -335,6 +371,24 @@ int main()
 				else if (cutscene3FadeOut)
 					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 			}
+
+			else if (state == STATE_GAME_OVER)
+			{
+				if (gameOverTimer > GAME_OVER_FADE_OUT_TIME)
+					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+
+				if (gameOverTimer > GAME_OVER_FINISH_TIME)
+					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+			}
+
+			else if (state == STATE_GAME || state == STATE_GAME_OVER)
+			{
+				health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+				health_outside->draw();
+				if (p.GetHealth() > 0)
+					health_inside->draw();
+			}
+			
 			driver->endScene();
 		}
 	}

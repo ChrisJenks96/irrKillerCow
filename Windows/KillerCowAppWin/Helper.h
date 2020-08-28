@@ -12,6 +12,8 @@ using namespace gui;
 #define PI 3.142
 #define PI2 (PI * 2)
 
+#define HEALTH_GUI_SIZE_X 160
+
 static vector3df SceneNodeDir(ISceneNode* node)
 {
 	matrix4 mat = node->getAbsoluteTransformation();
