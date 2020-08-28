@@ -11,6 +11,7 @@ using namespace gui;
 #include "Enemy.h"
 #include <time.h>
 #include "ER.h"
+#include "LightningSceneNode.h"
 
 #include "Cutscene.h"
 
@@ -33,6 +34,8 @@ IMeshSceneNode* groundSceneNode;
 IMeshSceneNode* ufoSceneNode;
 IMeshSceneNode* ufoBladesSceneNode;
 ILightSceneNode* mainDirLight;
+//custom scenenode
+LightningSceneNode* cutsceneLightning;
 
 //game specifics
 Player p;
@@ -95,7 +98,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoSceneNode = smgr->addMeshSceneNode(mesh);
 		
 		//add the light to the bottom of the craft
-		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 120.0f);
+		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 10.0f);
 		ufoSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoSceneNode)
@@ -114,6 +117,10 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoBladesSceneNode->setParent(ufoSceneNode);
 		ufoBladesSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 	}
+
+	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
+	cutsceneLightning->setMaterialTexture(0, driver->getTexture("media/lightning/blue_bolt.png"));
+	cutsceneLightning->setVisible(false);
 }
 
 //MUST ALWAYS LOAD CUTSCENEINIT FIRST... THIS BOOTS ALL OUR ASSETS FOR THE GAME
@@ -191,6 +198,10 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 		//lightning strike point
 		if (cutscenespeedAccum > CUTSCENE2_LIGHTNING_PASS && cutscenespeedAccum <= CUTSCENE2_LIGHTNING_PASS+3.0f){
 			//LIGHTNING EFFECTS HAPPEN HERE....
+			cutsceneLightning->setVisible(true);
+			cutsceneLightning->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 40.0f, 0.0f));
+			//TESTING... BLOCK UP THE GAME CHAIN
+			currentCutscene = 999;
 		}
 
 		if (cutscenespeedAccum > CUTSCENE2_END)
@@ -269,8 +280,8 @@ bool Sys_Init()
 	ISceneManager* smgr = device->getSceneManager();
 	mainDirLight = smgr->addLightSceneNode();
 	mainDirLight->setLightType(ELT_DIRECTIONAL);
-	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.01f);
-	cam = smgr->addCameraSceneNode();
+	cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.01f);
+	//cam = smgr->addCameraSceneNode();
 	return 0;
 }
 
@@ -396,6 +407,7 @@ int main()
 		}
 	}
 
+	cutsceneLightning->drop();
 	device->drop();
 	return 0;
 }
