@@ -38,5 +38,8 @@
     <ClInclude Include="ER.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Cutscene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

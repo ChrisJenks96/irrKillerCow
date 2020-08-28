@@ -11,24 +11,34 @@ using namespace gui;
 #include "Enemy.h"
 #include <time.h>
 #include "ER.h"
-#include <string>
-#include <sstream>
+
+#include "Cutscene.h"
 
 #ifdef _IRR_WINDOWS_
 #pragma comment(lib, "Irrlicht.lib")
 #pragma comment(linker, "/subsystem:console /ENTRY:mainCRTStartup")
 #endif
 
+#define STATE_GAME 0
+#define STATE_INTRO_CUTSCENE 1
+#define STATE_MENU 2
+#define STATE_OPTIONS 3
+
 IrrlichtDevice* device;
 MyEventReceiver er;
 ICameraSceneNode* cam;
+IMeshSceneNode* cutsceneGroundSceneNode[2];
 IMeshSceneNode* groundSceneNode;
 IMeshSceneNode* ufoSceneNode;
 IMeshSceneNode* ufoBladesSceneNode;
 ILightSceneNode* mainDirLight;
 
+//game specifics
 Player p;
 EnemyFactory ef;
+
+//cutscene specifics
+int currentCutscene = 0;
 
 static void StaticMeshesLoad(IrrlichtDevice* device)
 {
@@ -40,7 +50,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		groundSceneNode = smgr->addMeshSceneNode(mesh);
-		groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
+		
 		groundSceneNode->setScale(vector3df(2.0f));
 		//ground texture id (0,0)
 		groundSceneNode->getMaterial(1).getTextureMatrix(0).setScale(6.0f);
@@ -48,7 +58,30 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		{
 			groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			groundSceneNode->setVisible(false);
 		}
+	}
+
+	//only for cutscene... unload when you're done!!
+	mesh = smgr->getMesh("media/base_plane/cutscene_base_plane.obj");
+	if (mesh)
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			cutsceneGroundSceneNode[i] = smgr->addMeshSceneNode(mesh);
+			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f));
+			//ground texture id (0,0)
+			cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.jpg"));
+			cutsceneGroundSceneNode[i]->getMaterial(0).getTextureMatrix(0).setScale(vector3df(60.0f, 120.0f, 0.0f));
+			if (groundSceneNode)
+			{
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
+				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
+			}
+		}
+
+		cutsceneGroundSceneNode[0]->setVisible(true);
+		cutsceneGroundSceneNode[1]->setVisible(false);
 	}
 
 	//loading in the ufo
@@ -56,10 +89,9 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		ufoSceneNode = smgr->addMeshSceneNode(mesh);
-		ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
+		
 		//add the light to the bottom of the craft
 		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 120.0f);
-		ufoSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 		ufoSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoSceneNode)
@@ -71,8 +103,6 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		ufoBladesSceneNode = smgr->addMeshSceneNode(mesh);
-		ufoBladesSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
-		ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 		ufoBladesSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoBladesSceneNode)
@@ -80,15 +110,114 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	}
 }
 
-void GameSetup(IrrlichtDevice* device)
+//MUST ALWAYS LOAD CUTSCENEINIT FIRST... THIS BOOTS ALL OUR ASSETS FOR THE GAME
+void CutsceneInit(IrrlichtDevice* device)
+{
+	//load the non important static meshes for the scene with no behaviour
+	StaticMeshesLoad(device);
+	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
+	ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
+	ufoBladesSceneNode->setPosition(vector3df(0.0f, 40.0f, 0.0f));
+	ufoBladesSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
+	cam->setPosition(cutscene1CamPosition);
+	cam->setTarget(ufoSceneNode->getPosition());
+}
+
+void CutsceneUpdate(IrrlichtDevice* device, const float dt)
+{
+	if (currentCutscene == 0)
+	{
+		//scroll the cutscene forward to give the illusion of the craft moving
+		cutscenespeedAccum += cutsceneUFOSpeed * dt;
+		if (cutscenespeedAccum > cutscene1GroundDistance){
+			cutscene1currentGround++;
+			cutscene1EndPass++;
+			if (cutscene1currentGround > 1)
+				cutscene1currentGround = 0;
+
+			if (cutscene1currentGround == 1) {
+				cutsceneGroundSceneNode[0]->setVisible(false);
+				cutsceneGroundSceneNode[1]->setVisible(true);
+				cutsceneGroundSceneNode[1]->setPosition(cutsceneGroundSceneNode[0]->getPosition() - vector3df(0.0f, 0.0f, cutscene1GroundDistance));
+			}
+
+			if (cutscene1currentGround == 0) {
+				cutsceneGroundSceneNode[1]->setVisible(false);
+				cutsceneGroundSceneNode[0]->setVisible(true);
+				cutsceneGroundSceneNode[0]->setPosition(cutsceneGroundSceneNode[1]->getPosition() - vector3df(0.0f, 0.0f, cutscene1GroundDistance));
+			}
+			
+			cutscenespeedAccum = 0;
+
+			if (cutscene1EndPass >= NUM_CUTSCENE1_PASSES)
+			{
+				cam->setPosition(cutscene2CamPosition);
+				//move the ufo back ready for the next scene (it will shoot past the screen)
+				ufoSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
+				ufoSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
+				ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
+				ufoBladesSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
+				currentCutscene = 1;
+			}
+				
+		}
+
+		cutsceneGroundSceneNode[cutscene1currentGround]->setPosition(cutsceneGroundSceneNode[cutscene1currentGround]->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
+		//rotate the blades around the craft
+		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 750.0f * dt, 0.0f));
+
+	}
+
+	else if (currentCutscene == 1)
+	{
+		cam->setTarget(ufoSceneNode->getPosition());
+		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
+		ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
+
+		cutscenespeedAccum += cutsceneUFOSpeed * dt;
+		//lightning strike point
+		if (cutscenespeedAccum > CUTSCENE2_LIGHTNING_PASS && cutscenespeedAccum <= CUTSCENE2_LIGHTNING_PASS+3.0f){
+			//LIGHTNING EFFECTS HAPPEN HERE....
+		}
+
+		if (cutscenespeedAccum > CUTSCENE2_END)
+		{
+			cutscene3CrashPosition = ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, CUTSCENE3_CRASH_AHEAD_DISTANCE);
+			cutscene3CrashPosition.Y = -10.0f;
+			currentCutscene = 2;
+		}
+	}
+
+	else if (currentCutscene == 2)
+	{
+		//attach and move the camera onto the ufo for crashing landing cam
+		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
+		cam->setPosition(ufoSceneNode->getPosition() + cutscene3CamPosition);
+		
+		vector3df dir = (cutscene3CrashPosition - ufoSceneNode->getPosition()).normalize();
+		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + (dir * cutsceneUFOSpeed * dt));
+		ufoSceneNode->setRotation(ufoSceneNode->getRotation() + vector3df(CUTSCENE3_ROTATE_SPEED * dt, 0.0f, 0.0f));
+		ufoBladesSceneNode->setPosition(ufoBladesSceneNode->getPosition() + (dir * cutsceneUFOSpeed * dt));
+		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(CUTSCENE3_ROTATE_SPEED * dt, 750.0f * dt, 0.0f));
+
+		//fade to black
+		if (ufoSceneNode->getPosition().Y < (CUTSCENE_UFO_HEIGHT - 10.0f))
+			cutscene3FadeOut = true;
+	}
+}
+
+void GameInit(IrrlichtDevice* device)
 {
 	ISceneManager* smgr = device->getSceneManager();
 
-	//load the non important static meshes for the scene with no behaviour
-	StaticMeshesLoad(device);
-
 	p = Player(device);
 	ef = EnemyFactory(device, 10);
+
+	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
+	ufoSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
+	ufoBladesSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
+	ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
+	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
@@ -130,6 +259,7 @@ bool Sys_Init()
 	ISceneManager* smgr = device->getSceneManager();
 	mainDirLight = smgr->addLightSceneNode();
 	mainDirLight->setLightType(ELT_DIRECTIONAL);
+	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.01f);
 	cam = smgr->addCameraSceneNode();
 	return 0;
 }
@@ -138,7 +268,14 @@ int main()
 {
 	if (Sys_Init() != -1)
 	{
-		//GameSetup(device);
+		int state = STATE_INTRO_CUTSCENE;
+
+		if (state == STATE_GAME)
+			GameInit(device);
+		else if (state == STATE_INTRO_CUTSCENE) {
+			startTransitionFadeOut(device);
+			CutsceneInit(device);
+		}
 
 		u32 then = device->getTimer()->getTime();
 		ICursorControl* cursor = device->getCursorControl();
@@ -154,10 +291,22 @@ int main()
 			const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 			then = now;
 
-			//GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+			if (state == STATE_GAME)
+				GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+			else if (state == STATE_INTRO_CUTSCENE)
+				CutsceneUpdate(device, frameDeltaTime);
+
+			printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
+				cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
 			driver->beginScene(true, true, SColor(255, 100, 101, 140));
 			smgr->drawAll();
+			if (state == STATE_INTRO_CUTSCENE) {
+				if (!cutscene3FadeOut && transition_alpha != 0)
+					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				else if (cutscene3FadeOut)
+					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+			}
 			driver->endScene();
 		}
 	}
