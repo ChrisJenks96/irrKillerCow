@@ -258,7 +258,7 @@ bool Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(320, 480), 16,
+	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(640, 480), 16,
 		false, false, true, &er);
 
 	if (!device)
@@ -307,6 +307,8 @@ int main()
 
 		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(15, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
+		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
+		cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
@@ -387,6 +389,7 @@ int main()
 				health_outside->draw();
 				if (p.GetHealth() > 0)
 					health_inside->draw();
+				cow_icon->draw();
 			}
 			
 			driver->endScene();
