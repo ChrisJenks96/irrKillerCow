@@ -76,6 +76,43 @@ public:
             Box.addInternalPoint(Vertices[i].Pos);
     }
 
+    void ArkUpdate(const float dt)
+    {
+        ArkUpdateTimer += 1.0f * dt;
+        if (ArkUpdateTimer > ArkUpdateRate)
+        {
+            //how many quads in do we want the ark to start changing (root of lightning shouldnt change) 4 = default
+            //go in increments of 4
+            int arkStart = 8;
+            int arkVertInc = 0;
+            float arkUpperLimitY = -3.0f;
+            float arkLowerLimitY = -12.0f;
+            for (int i = arkStart; i < TOTAL_VERTS; i += 4) {
+                float randomOffset = (rand() % 4 + (-2)) * 1.33f;
+                if (randomOffset != 0)
+                {
+                    float newVertY = Vertices[i].Pos.Y - arkVertInc;
+                    if (newVertY < arkLowerLimitY && randomOffset <= 0) {
+                        randomOffset = -randomOffset;
+                    }
+
+                    else if (newVertY > arkUpperLimitY && randomOffset >= 0) {
+                        randomOffset = -randomOffset;
+                    }
+
+                    Vertices[i].Pos += vector3df(randomOffset);
+                    Vertices[i + 1].Pos += vector3df(randomOffset);
+                    Vertices[i + 2].Pos += vector3df(randomOffset);
+                    Vertices[i + 3].Pos += vector3df(randomOffset);
+                }
+
+                arkVertInc += QUAD_SEGMENT_INCREMENT;
+            }
+
+            ArkUpdateTimer = 0.0f;
+        }
+    }
+
     virtual void OnRegisterSceneNode()
     {
         if (IsVisible)
@@ -108,6 +145,9 @@ public:
     }
 
 	private:
+        float ArkUpdateTimer{ 0.0f };
+        float ArkUpdateRate{ 0.05f };
+        bool ArkValueNegative{ false };
 		core::aabbox3d<f32> Box;
         int indCounter = 0;
         u16 indices[TOTAL_IND];

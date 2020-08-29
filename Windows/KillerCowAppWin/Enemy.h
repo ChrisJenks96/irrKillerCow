@@ -39,7 +39,7 @@ public:
 	~Enemy();
 private:
 	bool attackStrikeDone{ false };
-	int attackDamage{ 56 };
+	int attackDamage{ 13 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };

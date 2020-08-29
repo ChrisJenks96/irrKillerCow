@@ -274,6 +274,9 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		if (p.GetEnergy() > 0)
 		{
 			p.Fire(device);
+			cutsceneLightning->ArkUpdate(frameDeltaTime);
+			float lightningLength = 4.0f * ((float)p.GetEnergy() / 100.0f);
+			cutsceneLightning->setScale(vector3df(lightningLength));
 			cutsceneLightning->setVisible(true);
 		}
 	}
