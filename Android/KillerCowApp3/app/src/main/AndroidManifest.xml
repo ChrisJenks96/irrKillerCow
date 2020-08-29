@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="KillerCowApp" >
@@ -12,10 +11,9 @@
         <activity
             android:name="com.example.killercowapp3.MainActivity"
             android:screenOrientation="portrait">
-
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="native-lib" />
+                android:value="native-lib"/>
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

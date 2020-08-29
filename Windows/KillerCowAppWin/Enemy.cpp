@@ -34,6 +34,16 @@ void Enemy::RandomPosition(const float distAway)
 	node->setPosition(p);
 }
 
+void Enemy::RemoveHealth(const float dt)
+{
+	//5 as the cows are hard to kill
+	healthDepleteTimer += 5.0f * dt;
+	if (healthDepleteTimer > healthDepleteRate) {
+		health -= 1;
+		healthDepleteTimer = 0.0f;
+	}
+}
+
 void Enemy::LookAt(const vector3df p, const float offset)
 {
 	const vector3df toTarget = p - node->getPosition();
@@ -51,7 +61,7 @@ void Enemy::Attack(const float dt)
 	}
 }
 
-ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed) 
+ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (isAttacking && attackOnce)
@@ -68,7 +78,7 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 
 	if (!isAttacking) {
 		vector3df dir = (p - node->getPosition()).normalize();
-		node->setPosition(node->getPosition() + (dir * speed));
+		node->setPosition(node->getPosition() + (dir * (speed * dt)));
 	}
 
 	if (distance < 0.5f) {
@@ -83,15 +93,26 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 	return ENEMY_STATE::NONE;
 }
 
+Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
+{
+	for (auto& x : enemies) {
+		if (s->getID() == x.GetNode()->getID())
+			return &x;
+	}
+
+	return NULL;
+}
+
 void Enemy::Reset()
 {
+	health = BASE_COW_HEALTH;
 	SetAttackStrikeDone(false);
-	node->setVisible(true);
 	float distAway = rand() % (50 + 1) + 20;
 	node->setMD2Animation("idle");
 	RandomPosition(distAway);
 	isAttacking = false;
 	attackOnce = false;
+	node->setVisible(true);
 }
 
 Enemy::~Enemy()
@@ -115,13 +136,14 @@ void EnemyFactory::Update(Player& p, const float dt)
 {
 	for (auto& x : enemies) {
 		x.LookAt(p.GetPosition(), -90.0f);
-		ENEMY_STATE es = x.MoveTowards(p.GetPosition(), 5.0f * dt);
+		ENEMY_STATE es = x.MoveTowards(p.GetPosition(), dt);
 		switch (es)
 		{
 			case RESET:
 				x.Reset();
 				break;
 			case ATTACK:
+				playerGettingMunched = true;
 				x.Attack(dt);
 				break;
 			default:

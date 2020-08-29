@@ -47,7 +47,7 @@ void Player::RemoveEnergy(const float dt)
 	}
 }
 
-void Player::Fire(IrrlichtDevice* device)
+ISceneNode* Player::Fire(IrrlichtDevice* device)
 {
 	WeaponFiringLightToggle(true);
 	
@@ -61,7 +61,8 @@ void Player::Fire(IrrlichtDevice* device)
 	scene::ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeAndCollisionPointFromRay(
 		ray, intersection, hitTriangle, 0, 0);
 	if (selectedSceneNode)
-		selectedSceneNode->setVisible(false);
+		return selectedSceneNode;
+	return NULL;
 }
 
 void Player::Idle()

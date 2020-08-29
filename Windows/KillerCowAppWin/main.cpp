@@ -40,6 +40,10 @@ LightningSceneNode* cutsceneLightning;
 //game specifics
 Player p;
 EnemyFactory ef;
+bool globalPlayerMunchFlag = false;
+int cowsKilled = 0;
+ITexture* menuBkg;
+IGUIFont* font;
 
 //cutscene specifics
 int currentCutscene = 0;
@@ -273,7 +277,18 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
 		{
-			p.Fire(device);
+			ISceneNode* e = p.Fire(device);
+			if (e != NULL){
+				Enemy* enemy = ef.FindEnemy(e);
+				enemy->RemoveHealth(frameDeltaTime);
+				enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+				if (enemy->GetHealth() <= 0) {
+					cowsKilled += 1;
+					e->setVisible(false);
+					enemy->Reset();
+				}
+			}
+
 			cutsceneLightning->ArkUpdate(frameDeltaTime);
 			float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
 			cutsceneLightning->setScale(vector3df(lightningLength));
@@ -287,11 +302,44 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		cutsceneLightning->setVisible(false);
 		if (p.GetEnergy() <= 100)
 			p.AddEnergy(frameDeltaTime);
+		ef.ResetEmission();
 	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
 	ef.Update(p, frameDeltaTime);
+
+	if (ef.isPlayerGettingMunched() && !globalPlayerMunchFlag){
+		globalPlayerMunchFlag = true;
+		p.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+	}
+
+	else if (globalPlayerMunchFlag){
+		globalPlayerMunchFlag = false;
+		ef.SetPlayerGettingMunched(false);
+		p.ResetEmission();
+	}
+}
+
+void MenuInit(IrrlichtDevice* device)
+{
+	menuBkg = device->getVideoDriver()->getTexture("media/gui/menu.png");
+	font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
+}
+
+void MenuFontDraw(IrrlichtDevice* device)
+{
+	stringw str = L"Click to Start Game";
+	dimension2du s = device->getVideoDriver()->getScreenSize();
+	font->draw(str.c_str(), core::rect<s32>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
+}
+
+void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
+{
+	stringw str = L"X ";
+	str += cowsMuggedOff;
+	dimension2du s = device->getVideoDriver()->getScreenSize();
+	font->draw(str.c_str(), core::rect<s32>(s.Width - 60, 20, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
 bool Sys_Init()
@@ -321,6 +369,7 @@ bool Sys_Init()
 
 void GameReset()
 {
+	globalPlayerMunchFlag = false;
 	p.SetHealth(100);
 	p.SetEnergy(100);
 	p.SetAnimationName("attack");
@@ -333,9 +382,11 @@ int main()
 {
 	if (Sys_Init() != -1)
 	{
-		int state = STATE_INTRO_CUTSCENE;
+		int state = STATE_MENU;
 
-		if (state == STATE_GAME)
+		if (state == STATE_MENU)
+			MenuInit(device);
+		else if (state == STATE_GAME)
 			GameInit(device);
 		else if (state == STATE_INTRO_CUTSCENE) {
 			startTransitionFadeOut(device);
@@ -355,8 +406,8 @@ int main()
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(15, 33));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
-		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
-		cow_icon->setMaxSize(dimension2du(64, 64));
+		//IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
+		//cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
 		health_outside->setMaxSize(dimension2du(170, 15));
 		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 30));
@@ -400,6 +451,13 @@ int main()
 					CutsceneUpdate(device, frameDeltaTime);
 			}
 
+			else if (state == STATE_MENU) {
+				if (er.GetMouseState().LeftButtonDown) {
+					CutsceneInit(device);
+					state = STATE_INTRO_CUTSCENE;
+				}
+			}
+
 			else if (state == STATE_GAME_OVER)
 			{
 				cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
@@ -415,9 +473,15 @@ int main()
 			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
 				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
-			driver->beginScene(true, true, SColor(255, 0, 0, 50));
+			driver->beginScene(true, true, SColor(255, 0, 0, 15));
 			smgr->drawAll();
-			if (state == STATE_INTRO_CUTSCENE) {
+			if (state == STATE_MENU){
+				driver->draw2DImage(menuBkg, recti(0, 0, driver->getScreenSize().Width, driver->getScreenSize().Height),
+					recti(0, 0, menuBkg->getSize().Width, menuBkg->getSize().Height));
+				MenuFontDraw(device);
+			}
+
+			else if (state == STATE_INTRO_CUTSCENE) {
 				if (!cutscene3FadeOut && transition_alpha != 0)
 					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 				else if (cutscene3FadeOut)
@@ -443,14 +507,16 @@ int main()
 				heat_outside->draw();
 				if (p.GetEnergy() > 0)
 					heat_inside->draw();
-				cow_icon->draw();
+				//cow_icon->draw();
+				HighScoreFontDraw(device, cowsKilled);
 			}
 			
 			driver->endScene();
 		}
 	}
 
-	cutsceneLightning->drop();
+	//cutsceneLightning->drop();
+	//cutsceneLightning = 0;
 	device->drop();
 	return 0;
 }

@@ -4,6 +4,12 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
 
+    allprojects {
+        repositories {
+            google()
+        }
+    }
+
     defaultConfig {
         applicationId "com.example.killercowapp3"
         minSdkVersion 16

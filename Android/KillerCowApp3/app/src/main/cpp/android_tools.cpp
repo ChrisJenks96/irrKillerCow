@@ -177,7 +177,7 @@ void setSoftInputVisibility(android_app* app, bool visible)
 		}
 	}
 	
-	app->activity->vm->DetachCurrentThread();	
+	app->activity->vm->DetachCurrentThread();
 }
 
 } // namespace android
