@@ -82,7 +82,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			cutsceneGroundSceneNode[i]->getMaterial(0).getTextureMatrix(0).setScale(vector3df(60.0f, 120.0f, 0.0f));
 			if (groundSceneNode)
 			{
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
 			}
 		}
@@ -98,7 +98,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoSceneNode = smgr->addMeshSceneNode(mesh);
 		
 		//add the light to the bottom of the craft
-		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 10.0f);
+		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 		ufoSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoSceneNode)
@@ -199,15 +199,17 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 		if (cutscenespeedAccum > CUTSCENE2_LIGHTNING_PASS && cutscenespeedAccum <= CUTSCENE2_LIGHTNING_PASS+3.0f){
 			//LIGHTNING EFFECTS HAPPEN HERE....
 			cutsceneLightning->setVisible(true);
-			cutsceneLightning->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 40.0f, 0.0f));
+			//origin of lightning starts at destination of object
+			cutsceneLightning->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, QUAD_SEGMENT_INCREMENT * (QUAD_SEGMENTS-2), 0.0f));
 			//TESTING... BLOCK UP THE GAME CHAIN
-			currentCutscene = 999;
+			//currentCutscene = 999;
 		}
 
 		if (cutscenespeedAccum > CUTSCENE2_END)
 		{
 			cutscene3CrashPosition = ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, CUTSCENE3_CRASH_AHEAD_DISTANCE);
 			cutscene3CrashPosition.Y = -10.0f;
+			cutsceneLightning->setVisible(false);
 			currentCutscene = 2;
 		}
 	}
@@ -240,6 +242,13 @@ void GameInit(IrrlichtDevice* device)
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
+	smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 8.0f, 0.0f), SColorf(0.0f, 0.3f, 0.3f, 0.3f), 20.0f);
+
+	cutsceneLightning->setParent(p.GetNode());
+	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
+	cutsceneLightning->setScale(vector3df(4.0f));
+	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
+
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
 }
@@ -254,9 +263,16 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 	//firing state for the player
 	if (er.GetMouseState().LeftButtonDown)
+	{
 		p.Fire(device);
+		cutsceneLightning->setVisible(true);
+	}
+		
 	else
+	{
+		cutsceneLightning->setVisible(false);
 		p.Idle();
+	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
@@ -269,7 +285,7 @@ bool Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(640, 480), 16,
+	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(320, 480), 16,
 		false, false, true, &er);
 
 	if (!device)
@@ -278,10 +294,14 @@ bool Sys_Init()
 	device->setWindowCaption(L"Killer Cows");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
-	mainDirLight = smgr->addLightSceneNode();
-	mainDirLight->setLightType(ELT_DIRECTIONAL);
-	cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.01f);
-	//cam = smgr->addCameraSceneNode();
+	mainDirLight = smgr->addLightSceneNode(0, core::vector3df(0, -1, 0),
+		SColorf(1.0f, 1.0f, 1.0f, 1.0f), 20000.0f);
+	mainDirLight->getLightData().Type = video::ELT_DIRECTIONAL;
+	mainDirLight->getLightData().Direction = core::vector3df(1, 0, 0);
+	mainDirLight->getLightData().SpecularColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
+	mainDirLight->getLightData().AmbientColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
+	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.4f);
+	cam = smgr->addCameraSceneNode();
 	return 0;
 }
 
@@ -376,7 +396,7 @@ int main()
 			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
 				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
-			driver->beginScene(true, true, SColor(255, 100, 101, 140));
+			driver->beginScene(true, true, SColor(255, 0, 0, 10));
 			smgr->drawAll();
 			if (state == STATE_INTRO_CUTSCENE) {
 				if (!cutscene3FadeOut && transition_alpha != 0)
