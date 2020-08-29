@@ -14,6 +14,8 @@ using namespace gui;
 
 #define HEALTH_GUI_SIZE_X 160
 
+#define LIGHTNING_SCALE 0.4f
+
 static vector3df SceneNodeDir(ISceneNode* node)
 {
 	matrix4 mat = node->getAbsoluteTransformation();

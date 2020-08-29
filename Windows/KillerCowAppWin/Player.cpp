@@ -4,19 +4,19 @@ Player::Player(IrrlichtDevice* d)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/sydney.md2");
+	mesh = smgr->getMesh("media/player/player.obj");
 
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
 		node->setPosition(vector3df(3.0f, 0.0f, -3.0f));
-		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
+		node->setScale(vector3df(0.7f, 0.7f, 0.7f));
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node->setMD2Animation("attack");
-			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			//node->setMD2Animation("attack");
+			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
 	}
 

@@ -253,7 +253,7 @@ void GameInit(IrrlichtDevice* device)
 
 	cutsceneLightning->setParent(p.GetNode());
 	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
-	cutsceneLightning->setScale(vector3df(4.0f));
+	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
 	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
 
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
@@ -275,7 +275,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		{
 			p.Fire(device);
 			cutsceneLightning->ArkUpdate(frameDeltaTime);
-			float lightningLength = 4.0f * ((float)p.GetEnergy() / 100.0f);
+			float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
 			cutsceneLightning->setScale(vector3df(lightningLength));
 			cutsceneLightning->setVisible(true);
 		}
