@@ -65,6 +65,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		{
 			groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			groundSceneNode->setVisible(false);
 		}
 	}
@@ -82,7 +83,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			cutsceneGroundSceneNode[i]->getMaterial(0).getTextureMatrix(0).setScale(vector3df(60.0f, 120.0f, 0.0f));
 			if (groundSceneNode)
 			{
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
 			}
 		}
@@ -101,8 +102,10 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 		ufoSceneNode->setScale(vector3df(1.25f));
 
-		if (ufoSceneNode)
+		if (ufoSceneNode){
 			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+		}
 	}
 
 	//loading in the ufo blades
@@ -113,7 +116,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoBladesSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoBladesSceneNode)
+		{
 			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+		}
+			
 		ufoBladesSceneNode->setParent(ufoSceneNode);
 		ufoBladesSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 	}
@@ -262,21 +269,25 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	MouseXPrev = MouseX;
 
 	//firing state for the player
-	if (er.GetMouseState().LeftButtonDown)
-	{
-		p.Fire(device);
-		cutsceneLightning->setVisible(true);
+	if (er.GetMouseState().LeftButtonDown){
+		p.RemoveEnergy(frameDeltaTime);
+		if (p.GetEnergy() > 0)
+		{
+			p.Fire(device);
+			cutsceneLightning->setVisible(true);
+		}
 	}
 		
 	else
 	{
-		cutsceneLightning->setVisible(false);
 		p.Idle();
+		cutsceneLightning->setVisible(false);
+		if (p.GetEnergy() <= 100)
+			p.AddEnergy(frameDeltaTime);
 	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-
 	ef.Update(p, frameDeltaTime);
 }
 
@@ -285,7 +296,7 @@ bool Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(320, 480), 16,
+	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(640, 480), 32,
 		false, false, true, &er);
 
 	if (!device)
@@ -294,10 +305,10 @@ bool Sys_Init()
 	device->setWindowCaption(L"Killer Cows");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
-	mainDirLight = smgr->addLightSceneNode(0, core::vector3df(0, -1, 0),
+	mainDirLight = smgr->addLightSceneNode(0, core::vector3df(1, 1, 0),
 		SColorf(1.0f, 1.0f, 1.0f, 1.0f), 20000.0f);
-	mainDirLight->getLightData().Type = video::ELT_DIRECTIONAL;
-	mainDirLight->getLightData().Direction = core::vector3df(1, 0, 0);
+	mainDirLight->getLightData().Type = ELT_DIRECTIONAL;
+	mainDirLight->getLightData().Direction = core::vector3df(1, 1, 0);
 	mainDirLight->getLightData().SpecularColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
 	mainDirLight->getLightData().AmbientColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.4f);
@@ -308,6 +319,7 @@ bool Sys_Init()
 void GameReset()
 {
 	p.SetHealth(100);
+	p.SetEnergy(100);
 	p.SetAnimationName("attack");
 	ef.ForceReset();
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
@@ -338,9 +350,13 @@ int main()
 
 		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(15, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
+		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(15, 33));
+		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
 		cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
+		health_outside->setMaxSize(dimension2du(170, 15));
+		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
 		while (device->run())
@@ -396,7 +412,7 @@ int main()
 			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
 				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
-			driver->beginScene(true, true, SColor(255, 0, 0, 10));
+			driver->beginScene(true, true, SColor(255, 0, 0, 50));
 			smgr->drawAll();
 			if (state == STATE_INTRO_CUTSCENE) {
 				if (!cutscene3FadeOut && transition_alpha != 0)
@@ -417,9 +433,13 @@ int main()
 			else if (state == STATE_GAME || state == STATE_GAME_OVER)
 			{
 				health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+				heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
 				health_outside->draw();
 				if (p.GetHealth() > 0)
 					health_inside->draw();
+				heat_outside->draw();
+				if (p.GetEnergy() > 0)
+					heat_inside->draw();
 				cow_icon->draw();
 			}
 			

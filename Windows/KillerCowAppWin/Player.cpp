@@ -14,6 +14,7 @@ Player::Player(IrrlichtDevice* d)
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node->setMD2Animation("attack");
 			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
@@ -28,10 +29,28 @@ Player::Player(IrrlichtDevice* d)
 	WeaponFiringLightToggle(false);
 }
 
+void Player::AddEnergy(const float dt)
+{
+	energyRestoreTimer += 1.0f * dt;
+	if (energyRestoreTimer > energyRestoreRate) {
+		energy += 1;
+		energyRestoreTimer = 0.0f;
+	}
+}
+
+void Player::RemoveEnergy(const float dt)
+{
+	energyDepleteTimer += 1.0f * dt;
+	if (energyDepleteTimer > energyDepleteRate) {
+		energy -= 1;
+		energyDepleteTimer = 0.0f;
+	}
+}
+
 void Player::Fire(IrrlichtDevice* device)
 {
 	WeaponFiringLightToggle(true);
-
+	
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
 	ray.end = ray.start + SceneNodeDir(node) * 1000.0f;

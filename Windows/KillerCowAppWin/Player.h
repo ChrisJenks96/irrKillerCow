@@ -20,16 +20,26 @@ class Player
 		void Fire(IrrlichtDevice* device);
 		void WeaponFiringLightToggle(bool t) { weaponFiringLight->setVisible(t); }
 		void Idle();
+		int GetEnergy() { return energy; }
+		void RemoveEnergy(const float dt);
+		void SetEnergy(int n) { energy = n; }
+		void AddEnergy(const float dt);
 		int GetHealth() { return health; }
 		void RemoveHealth(int n) { health -= n; }
 		void SetHealth(int n) { health = n; }
 		void AddHealth(int n) { health += n; }
 		void SetAnimationName(const char* name) { node->setMD2Animation(name); }
+		int EnergyGUIValueUpdate() { return (int)((float)HEALTH_GUI_SIZE_X * ((float)energy / 100.0f)); }
 		int HealthGUIValueUpdate() {return (int)((float)HEALTH_GUI_SIZE_X * ((float)health / 100.0f));}
 		ISceneNode* GetNode() { return node; }
 		~Player();
 	private:
-		int health{ 100 };
+		float energyDepleteTimer{ 0.0f };
+		float energyDepleteRate{ 0.1f };
+		float energyRestoreTimer{ 0.0f };
+		float energyRestoreRate{ 0.2f };
+		int energy{ 100 };
+;		int health{ 100 };
 		ILightSceneNode* weaponFiringLight;
 		IAnimatedMesh* mesh;
 		IAnimatedMeshSceneNode* node;

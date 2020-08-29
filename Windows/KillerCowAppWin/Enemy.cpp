@@ -13,6 +13,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node->setMD2Animation("idle");
 			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
