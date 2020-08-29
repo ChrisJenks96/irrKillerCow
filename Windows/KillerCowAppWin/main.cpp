@@ -130,7 +130,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	}
 
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
-	cutsceneLightning->setMaterialTexture(0, driver->getTexture("media/lightning/blue_bolt.png"));
+	cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture));
 	cutsceneLightning->setVisible(false);
 }
 
@@ -260,6 +260,9 @@ void GameInit(IrrlichtDevice* device)
 	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
 	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
 
+	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
+	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
+
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
 }
@@ -280,7 +283,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
 				Enemy* enemy = ef.FindEnemy(e);
-				enemy->RemoveHealth(frameDeltaTime);
+				enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 				enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 				if (enemy->GetHealth() <= 0) {
 					cowsKilled += 1;
@@ -347,7 +350,7 @@ bool Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(640, 480), 32,
+	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 16,
 		false, false, true, &er);
 
 	if (!device)

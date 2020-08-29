@@ -32,7 +32,7 @@ public:
 	void SetAttackAttrib(const float dist, const float length) { attackDistance = dist; attackLength = length; }
 	void Attack(const float dt);
 	int GetHealth() { return health; }
-	void RemoveHealth(const float dt);
+	void RemoveHealth(int damage, const float dt);
 	void SetHealth(int n) { health = n; }
 	void AddHealth(int n) { health += n; }
 	bool isAttackingFlag() { return isAttacking; }

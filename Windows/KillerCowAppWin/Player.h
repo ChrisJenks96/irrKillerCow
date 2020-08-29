@@ -33,6 +33,10 @@ class Player
 		int EnergyGUIValueUpdate() { return (int)((float)HEALTH_GUI_SIZE_X * ((float)energy / 100.0f)); }
 		int HealthGUIValueUpdate() {return (int)((float)HEALTH_GUI_SIZE_X * ((float)health / 100.0f));}
 		ISceneNode* GetNode() { return node; }
+		float GetEnergyDepleteRate() { return energyDepleteRate; }
+		void SetEnergyDepleteRate(float s) { energyDepleteRate = s; }
+		float GetEnergyRestoreRate() { return energyRestoreRate; }
+		void SetEnergyRestoreRate(float s) { energyRestoreRate = s; }
 		~Player();
 	private:
 		float energyDepleteTimer{ 0.0f };

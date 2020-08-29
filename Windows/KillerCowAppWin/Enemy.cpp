@@ -34,12 +34,12 @@ void Enemy::RandomPosition(const float distAway)
 	node->setPosition(p);
 }
 
-void Enemy::RemoveHealth(const float dt)
+void Enemy::RemoveHealth(int damage, const float dt)
 {
 	//5 as the cows are hard to kill
 	healthDepleteTimer += 5.0f * dt;
 	if (healthDepleteTimer > healthDepleteRate) {
-		health -= 1;
+		health -= damage;
 		healthDepleteTimer = 0.0f;
 	}
 }

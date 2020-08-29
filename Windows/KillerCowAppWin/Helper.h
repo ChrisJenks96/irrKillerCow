@@ -62,3 +62,24 @@ static void updateFadeOut(IrrlichtDevice* device, irr::f32 speed, irr::f32 curre
 		transition_time_start = current_time;
 	}
 }
+
+#define LIGHTNING_TYPES 5
+typedef struct LIGHTNING_TYPE
+{
+	stringw texture;
+	SColor col;
+	int damage;
+	float energyDepleteRate;
+	float energyRestoreRate;
+} LIGHTNING_TYPE;
+
+static int currentLightningType = 4;
+
+static LIGHTNING_TYPE lightning_types[] =
+{
+	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", SColor(255, 0, 128, 255), 1, 0.1f, 0.2f},
+	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", SColor(255, 255, 255, 0), 1, 0.2f, 0.2f},
+	LIGHTNING_TYPE{"media/lightning/green_bolt.png", SColor(255, 0, 255, 0), 2, 0.2f, 0.3f},
+	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", SColor(255, 255, 0, 255), 3, 0.2f, 0.5f},
+	LIGHTNING_TYPE{"media/lightning/red_bolt.png", SColor(255, 255, 0, 0), 5, 0.3f, 0.03f},
+};

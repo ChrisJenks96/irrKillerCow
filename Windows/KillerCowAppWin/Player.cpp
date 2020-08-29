@@ -21,7 +21,7 @@ Player::Player(IrrlichtDevice* d)
 	}
 
 	//weapon firing lighting effect
-	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -100.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f));
+	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
 	weaponFiringLight->getLightData().InnerCone = 10.0f;
 	weaponFiringLight->getLightData().OuterCone = 20.0f;
