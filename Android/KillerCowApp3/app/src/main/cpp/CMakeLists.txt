@@ -32,7 +32,8 @@ add_library( # Sets the name of the library.
              main.cpp
              Enemy.cpp
              Player.cpp
-             android_tools.cpp )
+             android_tools.cpp
+        )
 
 # Specifies a path to native header files.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
