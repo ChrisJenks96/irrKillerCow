@@ -13,8 +13,8 @@ using namespace gui;
 //how many passes of ground terrain before the next cutscene
 #define NUM_CUTSCENE1_PASSES 3
 //when the lightning strikes
-#define CUTSCENE2_LIGHTNING_PASS 200.0f
-#define CUTSCENE2_END 420.0f
+#define CUTSCENE2_LIGHTNING_PASS 170.0f
+#define CUTSCENE2_END 350.0f
 
 #define CUTSCENE3_CRASH_AHEAD_DISTANCE 400.0f
 #define CUTSCENE3_ROTATE_SPEED 25.0f
