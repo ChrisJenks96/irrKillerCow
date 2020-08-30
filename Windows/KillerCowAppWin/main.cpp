@@ -25,6 +25,7 @@ using namespace gui;
 #define STATE_MENU 2
 #define STATE_OPTIONS 3
 #define STATE_GAME_OVER 4
+#define STATE_POWERUP 5
 
 IrrlichtDevice* device;
 MyEventReceiver er;
@@ -37,11 +38,15 @@ ILightSceneNode* mainDirLight;
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 
+vector3df OldCameraPosition;
+
 //game specifics
 Player p;
 EnemyFactory ef;
 bool globalPlayerMunchFlag = false;
 int cowsKilled = 0;
+float lightningUpgradeTimer = 0.0f;
+float lightningUpgradeWait = 3.0f;
 ITexture* menuBkg;
 IGUIFont* font;
 
@@ -381,6 +386,14 @@ void GameReset()
 	cam->setTarget(p.GetPosition());
 }
 
+void LightningUpgrade(IrrlichtDevice* device)
+{
+	cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
+	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
+	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
+	p.LightningChangeCol(lightning_types[currentLightningType].col);
+}
+
 int main()
 {
 	if (Sys_Init() != -1)
@@ -438,6 +451,28 @@ int main()
 						//play death animation
 						state = STATE_GAME_OVER;
 					}
+
+					if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2) 
+						|| (currentLightningType == 2 && cowsKilled == 3) || (currentLightningType == 3 && cowsKilled == 4) 
+							|| (currentLightningType == 4 && cowsKilled == 5))
+					{
+						currentLightningType++;
+						if (currentLightningType == LIGHTNING_TYPES)
+							currentLightningType = LIGHTNING_TYPES - 1;
+						else
+						{
+							OldCameraPosition = cam->getPosition();
+							cam->setPosition(vector3df(6.0f, 0.0f, 0.0f));
+							cam->setTarget(p.GetPosition());
+							ef.SetVisible(false);
+							p.GetNode()->setRotation(vector3df(0.0f));
+							groundSceneNode->setVisible(false);
+							ufoBladesSceneNode->setVisible(false);
+							ufoSceneNode->setVisible(false);
+							LightningUpgrade(device);
+							state = STATE_POWERUP;
+						}
+					}
 				}
 				
 			}
@@ -469,6 +504,23 @@ int main()
 				if (gameOverTimer > GAME_OVER_FINISH_TIME) {
 					gameOverTimer = 0.0f;
 					GameReset();
+					state = STATE_GAME;
+				}
+			}
+
+			else if (state == STATE_POWERUP)
+			{
+				lightningUpgradeTimer += 1.0f * frameDeltaTime;
+				if (lightningUpgradeTimer > lightningUpgradeWait)
+				{
+					lightningUpgradeTimer = 0.0f;
+					cam->setPosition(OldCameraPosition);
+					cam->setTarget(p.GetPosition());
+					ef.SetVisible(true);
+					ef.ForceReset();
+					groundSceneNode->setVisible(true);
+					ufoBladesSceneNode->setVisible(true);
+					ufoSceneNode->setVisible(true);
 					state = STATE_GAME;
 				}
 			}

@@ -70,6 +70,7 @@ class EnemyFactory
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
 		void ForceReset();
+		void SetVisible(bool s) {for (auto& x : enemies) { x.GetNode()->setVisible(s); }}
 		Enemy* GetNearestEnemy(Player& p);
 		bool isPlayerGettingMunched() { return playerGettingMunched; }
 		void SetPlayerGettingMunched(bool p) { playerGettingMunched = p; }

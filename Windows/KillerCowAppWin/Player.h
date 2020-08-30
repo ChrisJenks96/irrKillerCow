@@ -37,6 +37,7 @@ class Player
 		void SetEnergyDepleteRate(float s) { energyDepleteRate = s; }
 		float GetEnergyRestoreRate() { return energyRestoreRate; }
 		void SetEnergyRestoreRate(float s) { energyRestoreRate = s; }
+		void LightningChangeCol(SColor c){ weaponFiringLight->getLightData().DiffuseColor = c; }
 		~Player();
 	private:
 		float energyDepleteTimer{ 0.0f };
