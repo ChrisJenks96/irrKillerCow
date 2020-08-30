@@ -4,7 +4,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/cow/Cow.md2");
+	mesh = smgr->getMesh("media/cow/cow.md2");
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
@@ -15,7 +15,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node->setMD2Animation("idle");
-			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
 

@@ -4,20 +4,25 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/sydney.md2");
+	mesh = smgr->getMesh("media/cow/cow.md2");
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
 
 		RandomPosition(distAway);
-		node->setScale(vector3df(0.05f, 0.05f, 0.05f));
 		if (node)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMD2Animation(scene::EMAT_RUN);
-			node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node->setMD2Animation("idle");
+			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
+
+	scene::ITriangleSelector* selector = 0;
+	selector = smgr->createTriangleSelector(node);
+	node->setTriangleSelector(selector);
+	selector->drop(); // We're done with this selector, so drop it now.
 }
 
 void Enemy::RandomPosition(const float distAway)
@@ -29,10 +34,20 @@ void Enemy::RandomPosition(const float distAway)
 	node->setPosition(p);
 }
 
+void Enemy::RemoveHealth(int damage, const float dt)
+{
+	//5 as the cows are hard to kill
+	healthDepleteTimer += 5.0f * dt;
+	if (healthDepleteTimer > healthDepleteRate) {
+		health -= damage;
+		healthDepleteTimer = 0.0f;
+	}
+}
+
 void Enemy::LookAt(const vector3df p, const float offset)
 {
 	const vector3df toTarget = p - node->getPosition();
-	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
+	node->setRotation((toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 }
 
 void Enemy::Attack(const float dt) 
@@ -42,11 +57,11 @@ void Enemy::Attack(const float dt)
 	if (currAttackLength > attackLength) {
 		isAttacking = false;
 		currAttackLength = 0.0f;
-		node->setMD2Animation(scene::EMAT_RUN);
+		node->setMD2Animation("idle");
 	}
 }
 
-ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed) 
+ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (isAttacking && attackOnce)
@@ -56,30 +71,48 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float speed)
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
-			node->setMD2Animation(scene::EMAT_ATTACK);
+			node->setMD2Animation("idle");
 			return ENEMY_STATE::ATTACK;
 		}
 	}
 
 	if (!isAttacking) {
 		vector3df dir = (p - node->getPosition()).normalize();
-		node->setPosition(node->getPosition() + (dir * speed));
+		node->setPosition(node->getPosition() + (dir * (speed * dt)));
 	}
 
 	if (distance < 0.5f) {
-		node->setMD2Animation(scene::EMAT_DEATH_FALLBACK);
+		node->setMD2Animation("idle");
 		return ENEMY_STATE::RESET;
 	}
+
+	//we've died :(
+	if (!node->isVisible())
+		Reset();
 
 	return ENEMY_STATE::NONE;
 }
 
+Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
+{
+	for (auto& x : enemies) {
+		if (s->getID() == x.GetNode()->getID())
+			return &x;
+	}
+
+	return NULL;
+}
+
 void Enemy::Reset()
 {
+	health = BASE_COW_HEALTH;
+	SetAttackStrikeDone(false);
 	float distAway = rand() % (50 + 1) + 20;
-	node->setMD2Animation(scene::EMAT_RUN);
+	node->setMD2Animation("idle");
 	RandomPosition(distAway);
+	isAttacking = false;
 	attackOnce = false;
+	node->setVisible(true);
 }
 
 Enemy::~Enemy()
@@ -99,23 +132,50 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size)
 	}
 }
 
-void EnemyFactory::Update(const vector3df t, const float dt)
+void EnemyFactory::Update(Player& p, const float dt)
 {
 	for (auto& x : enemies) {
-		x.LookAt(t, -90.0f);
-		ENEMY_STATE es = x.MoveTowards(t, 5.0f * dt);
+		x.LookAt(p.GetPosition(), -90.0f);
+		ENEMY_STATE es = x.MoveTowards(p.GetPosition(), dt);
 		switch (es)
 		{
 			case RESET:
 				x.Reset();
 				break;
 			case ATTACK:
+				playerGettingMunched = true;
 				x.Attack(dt);
 				break;
 			default:
 				break;
 		}
+
+		if (x.isAttackingFlag() && !x.GetAttackStrikeDone()){
+			x.SetAttackStrikeDone(true);
+			p.RemoveHealth(x.GetAttackDamage());
+		}
 	}
+}
+
+Enemy* EnemyFactory::GetNearestEnemy(Player& p) {
+	float distance = 999.0f;
+	Enemy* e = nullptr;
+	for (auto& x : enemies) {
+		float thisDist = (p.GetPosition() - x.GetPosition()).getLengthSQ();
+		if (thisDist < distance) {
+			distance = thisDist;
+			e = &x;
+		}
+	};
+
+	return e;
+}
+
+void EnemyFactory::ForceReset()
+{
+	for (auto& x : enemies) {
+		x.Reset();
+	};
 }
 
 EnemyFactory::~EnemyFactory()

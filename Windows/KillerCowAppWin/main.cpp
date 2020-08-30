@@ -380,6 +380,7 @@ bool Sys_Init()
 void GameReset()
 {
 	globalPlayerMunchFlag = false;
+	cowsKilled = 0;
 	p.SetHealth(100);
 	p.SetEnergy(100);
 	p.SetAnimationName("idle");
