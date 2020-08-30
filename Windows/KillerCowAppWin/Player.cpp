@@ -74,8 +74,15 @@ void Player::FiringAnimation(const float dt)
 void Player::NotFiringAnimation(const float dt)
 {
 	animationTimer += 1.0f * dt;
+	if (animationID == PLAYER_ANIMATION_CRAWL_WALK && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("idle");
+		//animation 'idle'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_IDLE;
+		animationTimer = 0.0f;
+	}
 	//presume we're on the 'attack_main', 0.2f fade off animation
-	if ((animationID == PLAYER_ANIMATION_ATTACK_MAIN || animationID == PLAYER_ANIMATION_ATTACK_START) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+	else if ((animationID == PLAYER_ANIMATION_ATTACK_MAIN || animationID == PLAYER_ANIMATION_ATTACK_START) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
 		SetAnimationName("attack_end");
 		//animation 'idle'
 		oldAnimationID = animationID;
@@ -119,6 +126,18 @@ void Player::LookAt(const vector3df p, const float offset)
 {
 	const vector3df toTarget = (p - node->getPosition()).normalize();
 	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
+}
+
+bool Player::MoveTowards(const vector3df p, const float dt)
+{
+	float distance = (p - node->getPosition()).getLengthSQ();
+	if ((distance > 1.0f)) {
+		vector3df dir = (p - node->getPosition()).normalize();
+		node->setPosition(node->getPosition() + (dir * (1.0f * dt)));
+		return true;
+	}
+
+	return false;
 }
 
 Player::~Player()

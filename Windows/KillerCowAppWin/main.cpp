@@ -372,7 +372,7 @@ bool Sys_Init()
 	mainDirLight->getLightData().Direction = core::vector3df(1, 1, 0);
 	mainDirLight->getLightData().SpecularColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
 	mainDirLight->getLightData().AmbientColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
-	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.4f);
+	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
 	return 0;
 }
@@ -439,33 +439,60 @@ int main()
 				else
 				{
 					cutscene3FadeOut = false;
-					GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
-					if (p.GetHealth() <= 0) {
-						p.SetAnimationName("crdeth");
-						cam->setPosition(vector3df(cam->getPosition().X, cam->getPosition().Y - 5.0f, cam->getPosition().Z));
-						//play death animation
-						state = STATE_GAME_OVER;
+					if (!cutscene4AlienOutOfShip)
+					{
+						cutscene4AlienMovingTowards = true;
+						cutscene4PlayerPosBegin.Y = p.GetPosition().Y;
+						cutscene4PlayerPosEnd.Y = p.GetPosition().Y;
+						p.GetNode()->setPosition(cutscene4PlayerPosBegin);
+						p.SetAnimationName("crawl_s");
+						p.SetAnimationID(PLAYER_ANIMATION_CRAWL_FROM_SHIP);
+						cutscene4AlienOutOfShip = true;
 					}
 
-					if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2) 
-						|| (currentLightningType == 2 && cowsKilled == 3) || (currentLightningType == 3 && cowsKilled == 4) 
-							|| (currentLightningType == 4 && cowsKilled == 5))
-					{
-						currentLightningType++;
-						if (currentLightningType == LIGHTNING_TYPES)
-							currentLightningType = LIGHTNING_TYPES - 1;
+					else if (cutscene4AlienMovingTowards){
+						if (p.MoveTowards(cutscene4PlayerPosEnd, frameDeltaTime)) {
+							p.LookAt(cutscene4PlayerPosEnd, 0.0f);
+							cam->setTarget(p.GetPosition());
+						}
 						else
 						{
-							OldCameraPosition = cam->getPosition();
-							cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
-							cam->setTarget(p.GetPosition());
-							ef.SetVisible(false);
-							p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
-							groundSceneNode->setVisible(false);
-							ufoBladesSceneNode->setVisible(false);
-							ufoSceneNode->setVisible(false);
-							LightningUpgrade(device);
-							state = STATE_POWERUP;
+							p.SetAnimationID(PLAYER_ANIMATION_CRAWL_WALK);
+							p.SetAnimationName("crawl_walk");
+							cutscene4AlienMovingTowards = false;
+						}
+					}
+
+					else
+					{
+						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+						if (p.GetHealth() <= 0) {
+							p.SetAnimationName("crdeth");
+							cam->setPosition(vector3df(cam->getPosition().X, cam->getPosition().Y - 5.0f, cam->getPosition().Z));
+							//play death animation
+							state = STATE_GAME_OVER;
+						}
+
+						if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2)
+							|| (currentLightningType == 2 && cowsKilled == 3) || (currentLightningType == 3 && cowsKilled == 4)
+							|| (currentLightningType == 4 && cowsKilled == 5))
+						{
+							currentLightningType++;
+							if (currentLightningType == LIGHTNING_TYPES)
+								currentLightningType = LIGHTNING_TYPES - 1;
+							else
+							{
+								OldCameraPosition = cam->getPosition();
+								cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
+								cam->setTarget(p.GetPosition());
+								ef.SetVisible(false);
+								p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
+								groundSceneNode->setVisible(false);
+								ufoBladesSceneNode->setVisible(false);
+								ufoSceneNode->setVisible(false);
+								LightningUpgrade(device);
+								state = STATE_POWERUP;
+							}
 						}
 					}
 				}
@@ -520,8 +547,8 @@ int main()
 				}
 			}
 				
-			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
-				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
+			printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
+				cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
 			driver->beginScene(true, true, SColor(255, 0, 0, 15));
 			smgr->drawAll();

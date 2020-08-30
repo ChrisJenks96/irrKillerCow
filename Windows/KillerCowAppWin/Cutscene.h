@@ -33,3 +33,8 @@ static vector3df cutscene2CamPosition = { -7.55f, 0.46f, 24.6f };
 static vector3df cutscene3CamPosition = { 3.0f, 5.0f, -1.0f };
 static vector3df cutscene3CrashPosition;
 static bool cutscene3FadeOut = false;
+
+static bool cutscene4AlienOutOfShip = false;
+static bool cutscene4AlienMovingTowards = false;
+static vector3df cutscene4PlayerPosBegin = { 0.96f, 0.0f, 1.3f };
+static vector3df cutscene4PlayerPosEnd = { 3.1f, 0.0f, -4.69f };

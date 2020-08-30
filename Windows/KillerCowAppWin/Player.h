@@ -16,6 +16,8 @@ using namespace gui;
 #define PLAYER_ANIMATION_ATTACK_START 1
 #define PLAYER_ANIMATION_ATTACK_MAIN 2
 #define PLAYER_ANIMATION_ATTACK_END 3
+#define PLAYER_ANIMATION_CRAWL_FROM_SHIP 4
+#define PLAYER_ANIMATION_CRAWL_WALK 5
 
 class Player
 {
@@ -45,7 +47,8 @@ class Player
 		float GetEnergyRestoreRate() { return energyRestoreRate; }
 		void SetEnergyRestoreRate(float s) { energyRestoreRate = s; }
 		void LightningChangeCol(SColor c){ weaponFiringLight->getLightData().DiffuseColor = c; }
-
+		void SetAnimationID(int i) { animationID = i; }
+		bool MoveTowards(const vector3df p, const float dt);
 
 		//animations
 		void FiringAnimation(const float dt);
