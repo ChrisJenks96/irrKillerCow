@@ -398,17 +398,10 @@ int main()
 {
 	if (Sys_Init() != -1)
 	{
+		//always boot in menu state
 		int state = STATE_MENU;
-
-		if (state == STATE_MENU)
-			MenuInit(device);
-		else if (state == STATE_GAME)
-			GameInit(device);
-		else if (state == STATE_INTRO_CUTSCENE) {
-			startTransitionFadeOut(device);
-			CutsceneInit(device);
-		}
-
+		MenuInit(device);
+		
 		u32 then = device->getTimer()->getTime();
 		ICursorControl* cursor = device->getCursorControl();
 		s32 MouseX = cursor->getPosition().X;
@@ -462,10 +455,10 @@ int main()
 						else
 						{
 							OldCameraPosition = cam->getPosition();
-							cam->setPosition(vector3df(6.0f, 0.0f, 0.0f));
+							cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
 							cam->setTarget(p.GetPosition());
 							ef.SetVisible(false);
-							p.GetNode()->setRotation(vector3df(0.0f));
+							p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
 							groundSceneNode->setVisible(false);
 							ufoBladesSceneNode->setVisible(false);
 							ufoSceneNode->setVisible(false);
@@ -517,7 +510,6 @@ int main()
 					cam->setPosition(OldCameraPosition);
 					cam->setTarget(p.GetPosition());
 					ef.SetVisible(true);
-					ef.ForceReset();
 					groundSceneNode->setVisible(true);
 					ufoBladesSceneNode->setVisible(true);
 					ufoSceneNode->setVisible(true);

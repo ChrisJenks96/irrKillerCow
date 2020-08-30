@@ -4,7 +4,7 @@ Player::Player(IrrlichtDevice* d)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/player/player.obj");
+	mesh = smgr->getMesh("media/player/player.md2");
 
 	if (mesh)
 	{
@@ -15,6 +15,7 @@ Player::Player(IrrlichtDevice* d)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			//node->setMD2Animation("attack");
 			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
 		}
