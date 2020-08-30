@@ -10,6 +10,13 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+#define ANIMATION_FRAME_TO_TIME(x) x / 10.0f
+
+#define PLAYER_ANIMATION_IDLE 0
+#define PLAYER_ANIMATION_ATTACK_START 1
+#define PLAYER_ANIMATION_ATTACK_MAIN 2
+#define PLAYER_ANIMATION_ATTACK_END 3
+
 class Player
 {
 	public:
@@ -38,8 +45,17 @@ class Player
 		float GetEnergyRestoreRate() { return energyRestoreRate; }
 		void SetEnergyRestoreRate(float s) { energyRestoreRate = s; }
 		void LightningChangeCol(SColor c){ weaponFiringLight->getLightData().DiffuseColor = c; }
+
+
+		//animations
+		void FiringAnimation(const float dt);
+		void NotFiringAnimation(const float dt);
+
 		~Player();
 	private:
+		float animationTimer{ 0.0f };
+		int animationID{ PLAYER_ANIMATION_IDLE };
+		int oldAnimationID{ 0 };
 		float energyDepleteTimer{ 0.0f };
 		float energyDepleteRate{ 0.1f };
 		float energyRestoreTimer{ 0.0f };

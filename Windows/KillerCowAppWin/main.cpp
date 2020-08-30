@@ -285,6 +285,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
 		{
+			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
 				Enemy* enemy = ef.FindEnemy(e);
@@ -306,6 +307,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		
 	else
 	{
+		p.NotFiringAnimation(frameDeltaTime);
 		p.Idle();
 		cutsceneLightning->setVisible(false);
 		if (p.GetEnergy() <= 100)
@@ -380,7 +382,7 @@ void GameReset()
 	globalPlayerMunchFlag = false;
 	p.SetHealth(100);
 	p.SetEnergy(100);
-	p.SetAnimationName("attack");
+	p.SetAnimationName("idle");
 	ef.ForceReset();
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
@@ -504,6 +506,7 @@ int main()
 			else if (state == STATE_POWERUP)
 			{
 				lightningUpgradeTimer += 1.0f * frameDeltaTime;
+				p.NotFiringAnimation(frameDeltaTime);
 				if (lightningUpgradeTimer > lightningUpgradeWait)
 				{
 					lightningUpgradeTimer = 0.0f;

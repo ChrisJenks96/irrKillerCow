@@ -15,9 +15,11 @@ Player::Player(IrrlichtDevice* d)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
-			//node->setMD2Animation("attack");
-			//node->setMaterialTexture(0, driver->getTexture("media/sydney.bmp"));
+			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
+			node->setMaterialTexture(0, driver->getTexture("media/player/player.png"));
+			//set idle animation of player
+			animationID = PLAYER_ANIMATION_IDLE;
+			SetAnimationName("idle");
 		}
 	}
 
@@ -45,6 +47,48 @@ void Player::RemoveEnergy(const float dt)
 	if (energyDepleteTimer > energyDepleteRate) {
 		energy -= 1;
 		energyDepleteTimer = 0.0f;
+	}
+}
+
+void Player::FiringAnimation(const float dt)
+{
+	animationTimer += 1.0f * dt;
+	//presume we've started on 'attack_start'
+	if (animationID == PLAYER_ANIMATION_IDLE && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("attack_s");
+		//animation 'attack_start'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_ATTACK_START;
+		animationTimer = 0.0f;
+	}
+
+	else if (animationID == PLAYER_ANIMATION_ATTACK_START && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("attack_main");
+		//animation 'attack_main'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_ATTACK_MAIN;
+		animationTimer = 0.0f;
+	}
+}
+
+void Player::NotFiringAnimation(const float dt)
+{
+	animationTimer += 1.0f * dt;
+	//presume we're on the 'attack_main', 0.2f fade off animation
+	if ((animationID == PLAYER_ANIMATION_ATTACK_MAIN || animationID == PLAYER_ANIMATION_ATTACK_START) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("attack_end");
+		//animation 'idle'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_ATTACK_END;
+		animationTimer = 0.0f;
+	}
+
+	else if (animationID == PLAYER_ANIMATION_ATTACK_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("idle");
+		//animation 'idle'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_IDLE;
+		animationTimer = 0.0f;
 	}
 }
 
