@@ -94,18 +94,19 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		{
 			cutsceneGroundSceneNode[i] = smgr->addMeshSceneNode(mesh);
 			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f));
-			//ground texture id (0,0)
-			cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.jpg"));
-			cutsceneGroundSceneNode[i]->getMaterial(0).getTextureMatrix(0).setScale(vector3df(60.0f, 120.0f, 0.0f));
 			if (groundSceneNode)
 			{
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
+				//ground texture id (0,0)
+				//cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.jpg"));
+				cutsceneGroundSceneNode[i]->getMaterial(2).getTextureMatrix(0).setScale(vector3df(12.0f, 24.0f, 0.0f));
 			}
 		}
 
 		cutsceneGroundSceneNode[0]->setVisible(true);
-		cutsceneGroundSceneNode[1]->setVisible(false);
+		cutsceneGroundSceneNode[1]->setVisible(false);	
 	}
 
 	//loading in the ufo
@@ -113,14 +114,19 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		ufoSceneNode = smgr->addMeshSceneNode(mesh);
-		
-		//add the light to the bottom of the craft
-		smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 		ufoSceneNode->setScale(vector3df(1.25f));
 
 		if (ufoSceneNode){
 			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			//add the light to the bottom of the craft
+			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
+			ILightSceneNode* spotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
+			spotlight->getLightData().Type = video::ELT_SPOT;
+			spotlight->getLightData().InnerCone = 30.0f;
+			spotlight->getLightData().OuterCone = 70.0f;
+			spotlight->getLightData().Falloff = 30.0f;
+			spotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 		}
 	}
 
@@ -149,6 +155,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 //MUST ALWAYS LOAD CUTSCENEINIT FIRST... THIS BOOTS ALL OUR ASSETS FOR THE GAME
 void CutsceneInit(IrrlichtDevice* device)
 {
+	//main ligth for the game
+	ILightSceneNode* dirLight = device->getSceneManager()->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 0.0f, 0.0f), SColorf(0.0f, 0.2f, 0.2f, 1.0f), 2.0f);
+	dirLight->getLightData().Type = video::ELT_DIRECTIONAL;
+	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
+	
 	//load the non important static meshes for the scene with no behaviour
 	StaticMeshesLoad(device);
 	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
@@ -267,7 +278,7 @@ void GameInit(IrrlichtDevice* device)
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
-	smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 8.0f, 0.0f), SColorf(0.0f, 0.3f, 0.3f, 0.3f), 20.0f);
+	//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 8.0f, 0.0f), SColorf(0.0f, 0.3f, 0.3f, 0.3f), 20.0f);
 
 	cutsceneLightning->setParent(p.GetNode());
 	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
