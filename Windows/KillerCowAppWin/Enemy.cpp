@@ -14,7 +14,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node->setMD2Animation("idle");
+			node->setMD2Animation("walk");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
@@ -57,7 +57,7 @@ void Enemy::Attack(const float dt)
 	if (currAttackLength > attackLength) {
 		isAttacking = false;
 		currAttackLength = 0.0f;
-		node->setMD2Animation("idle");
+		node->setMD2Animation("walk");
 	}
 }
 
@@ -82,7 +82,7 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 	}
 
 	if (distance < 0.5f) {
-		node->setMD2Animation("idle");
+		node->setMD2Animation("walk");
 		return ENEMY_STATE::RESET;
 	}
 
@@ -93,22 +93,40 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 	return ENEMY_STATE::NONE;
 }
 
-Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
+bool Enemy::DeathAnimation(const float dt)
 {
-	for (auto& x : enemies) {
-		if (s->getID() == x.GetNode()->getID())
-			return &x;
+	deathAnimationTimer += 1.0f * dt;
+	if ((animationID != ENEMY_ANIMATION_DEATH && animationID != ENEMY_ANIMATION_DEATH_IDLE) && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4)){
+		SetAnimationName("death");
+		animationID = ENEMY_ANIMATION_DEATH;
+		deathAnimationTimer = 0.0f;
 	}
 
-	return NULL;
+	else if (animationID == ENEMY_ANIMATION_DEATH && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4))
+	{
+		SetAnimationName("death_idle");
+		animationID = ENEMY_ANIMATION_DEATH_IDLE;
+		deathAnimationTimer = 0.0f;
+	}
+
+	//lets see the death idle animation for 1s then we'll tell the player the enemy is dead
+	else if (animationID == ENEMY_ANIMATION_DEATH_IDLE && deathAnimationTimer > 2.0f)
+	{
+		animationID = ENEMY_ANIMATION_WALK;
+		deathAnimationTimer = 0.0f;
+		return true;
+	}
+
+	return false;
 }
 
 void Enemy::Reset()
 {
 	health = BASE_COW_HEALTH;
+	SetDeathAnimationTrigger(false);
 	SetAttackStrikeDone(false);
 	float distAway = rand() % (50 + 1) + 20;
-	node->setMD2Animation("idle");
+	node->setMD2Animation("walk");
 	RandomPosition(distAway);
 	isAttacking = false;
 	attackOnce = false;
@@ -126,19 +144,40 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size)
 	for (int i = 0; i < size; i++) {
 		float distAway = rand() % (50 + 1) + 20;
 		Enemy newEnemy(d, distAway);
+		newEnemy.GetNode()->setID(enemyID);
+		enemyID++;
 		//2.0 units away and for 2 seconds
 		newEnemy.SetAttackAttrib(10.0f, 2.0f);
 		enemies.push_back(newEnemy);
 	}
 }
 
+Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
+{
+	for (auto& x : enemies) {
+		if (s->getID() == x.GetNode()->getID())
+			return &x;
+	}
+
+	return NULL;
+}
+
 void EnemyFactory::Update(Player& p, const float dt)
 {
 	for (auto& x : enemies) {
 		x.LookAt(p.GetPosition(), -90.0f);
-		ENEMY_STATE es = x.MoveTowards(p.GetPosition(), dt);
-		switch (es)
+		if (x.isDeathAnimationTrigger()){
+			if (x.DeathAnimation(dt)){
+				x.GetNode()->setVisible(false);
+				x.Reset();
+			}
+		}
+
+		else
 		{
+			ENEMY_STATE es = x.MoveTowards(p.GetPosition(), dt);
+			switch (es)
+			{
 			case RESET:
 				x.Reset();
 				break;
@@ -148,11 +187,12 @@ void EnemyFactory::Update(Player& p, const float dt)
 				break;
 			default:
 				break;
-		}
+			}
 
-		if (x.isAttackingFlag() && !x.GetAttackStrikeDone()){
-			x.SetAttackStrikeDone(true);
-			p.RemoveHealth(x.GetAttackDamage());
+			if (x.isAttackingFlag() && !x.GetAttackStrikeDone()) {
+				x.SetAttackStrikeDone(true);
+				p.RemoveHealth(x.GetAttackDamage());
+			}
 		}
 	}
 }

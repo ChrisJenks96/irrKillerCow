@@ -255,7 +255,7 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 3);
+	ef = EnemyFactory(device, 5);
 	be = BigEnemy(device, 12.0f);
 	be.GetNode()->setVisible(false);
 
@@ -311,11 +311,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					Enemy* enemy = ef.FindEnemy(e);
 					enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 					enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-					if (enemy->GetHealth() <= 0) {
-						cowsKilled += 1;
-						e->setVisible(false);
-						enemy->Reset();
+					if (enemy->GetHealth() <= 0){
+						if (!enemy->isDeathAnimationTrigger())
+							cowsKilled += 1;
+						enemy->SetDeathAnimationTrigger(true);
 					}
+						
 				}
 			}
 
@@ -496,9 +497,9 @@ int main()
 						}
 
 						//lightning upgrade states
-						/*if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2)
-							|| (currentLightningType == 2 && cowsKilled == 3) || (currentLightningType == 3 && cowsKilled == 4)
-							|| (currentLightningType == 4 && cowsKilled == 5))
+						if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 3)
+							|| (currentLightningType == 2 && cowsKilled == 4) || (currentLightningType == 3 && cowsKilled == 5)
+							|| (currentLightningType == 4 && cowsKilled == 6))
 						{
 							currentLightningType++;
 							if (currentLightningType == LIGHTNING_TYPES)
@@ -516,10 +517,10 @@ int main()
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
-						}*/
+						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						if (cowsKilled == 1 && !bossScene)
+						if (cowsKilled == 2 && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
