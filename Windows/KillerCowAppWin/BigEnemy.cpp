@@ -4,7 +4,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
-	mesh = smgr->getMesh("media/cow/cow.md2");
+	mesh = smgr->getMesh("media/cow/bigcow.md2");
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);

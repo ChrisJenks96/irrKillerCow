@@ -524,8 +524,8 @@ int main()
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
 							be.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, -10.0f, 0.0f));
-							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 10.0f, 0.0f));
-							be.LookAt(p.GetPosition(), -90.0f);
+							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
+							be.LookAt(p.GetPosition(), 180.0f);
 							bossScene = true;
 						}
 
