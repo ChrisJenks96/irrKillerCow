@@ -256,7 +256,7 @@ void GameInit(IrrlichtDevice* device)
 
 	p = Player(device);
 	ef = EnemyFactory(device, 3);
-	be = BigEnemy(device, 8.0f);
+	be = BigEnemy(device, 12.0f);
 	be.GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
@@ -524,7 +524,8 @@ int main()
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
 							be.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, -10.0f, 0.0f));
-							cam->setTarget(be.GetPosition());
+							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 10.0f, 0.0f));
+							be.LookAt(p.GetPosition(), -90.0f);
 							bossScene = true;
 						}
 
