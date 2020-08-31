@@ -4,6 +4,7 @@
 #include <vector>
 #include "Helper.h"
 #include "Player.h"
+#include "LightningSceneNode.h"
 
 using namespace irr;
 using namespace core;
@@ -96,4 +97,20 @@ class EnemyFactory
 		//how many cows are munching us
 		bool playerGettingMunched{ false };
 		std::vector<Enemy> enemies;
+};
+
+#define NUM_LIGHTNING_BOLTS 8
+#define NUM_LIGHTNING_SPLIT_AXIS (NUM_LIGHTNING_BOLTS / 2)
+#define LIGHTNING_ROT_SPEED 0.6f
+
+class EnemyOrb
+{
+	public:
+		EnemyOrb() {}
+		EnemyOrb(IrrlichtDevice* d, ISceneNode* parent, vector3df offset);
+		void Update(const float dt);
+		~EnemyOrb() {}
+	private:
+		LightningSceneNode* bolts[NUM_LIGHTNING_BOLTS];
+		ISceneNode* node;
 };

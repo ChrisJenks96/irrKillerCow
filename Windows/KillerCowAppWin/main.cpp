@@ -12,6 +12,8 @@ using namespace gui;
 #include <time.h>
 #include "ER.h"
 #include "LightningSceneNode.h"
+int QUAD_SEGMENT_INCREMENT = -10.0f;
+
 #include "BigEnemy.h"
 
 #include "Cutscene.h"
@@ -35,9 +37,11 @@ IMeshSceneNode* cutsceneGroundSceneNode[2];
 IMeshSceneNode* groundSceneNode;
 IMeshSceneNode* ufoSceneNode;
 IMeshSceneNode* ufoBladesSceneNode;
-ILightSceneNode* mainDirLight;
+ILightSceneNode* dirLight;
+ILightSceneNode* ufoSpotlight;
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
+EnemyOrb enemyOrb;
 
 vector3df OldCameraPosition;
 
@@ -134,12 +138,12 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
-			ILightSceneNode* spotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
-			spotlight->getLightData().Type = video::ELT_SPOT;
-			spotlight->getLightData().InnerCone = 30.0f;
-			spotlight->getLightData().OuterCone = 70.0f;
-			spotlight->getLightData().Falloff = 30.0f;
-			spotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
+			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
+			ufoSpotlight->getLightData().Type = video::ELT_SPOT;
+			ufoSpotlight->getLightData().InnerCone = 30.0f;
+			ufoSpotlight->getLightData().OuterCone = 70.0f;
+			ufoSpotlight->getLightData().Falloff = 20.0f;
+			ufoSpotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 		}
 	}
 
@@ -160,6 +164,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoBladesSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 	}
 
+	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
 	cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture));
 	cutsceneLightning->setVisible(false);
@@ -169,7 +174,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 void CutsceneInit(IrrlichtDevice* device)
 {
 	//main ligth for the game
-	ILightSceneNode* dirLight = device->getSceneManager()->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 0.0f, 0.0f), SColorf(0.0f, 0.2f, 0.2f, 1.0f), 2.0f);
+	dirLight = device->getSceneManager()->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 0.0f, 0.0f), SColorf(0.0f, 0.1f, 0.1f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = video::ELT_DIRECTIONAL;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 	
@@ -240,6 +245,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 1)
 	{
+		ufoSpotlight->setPosition(vector3df(0.0f, 4.0f, 0.0f));
 		cam->setTarget(ufoSceneNode->getPosition());
 		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
 		//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
@@ -250,6 +256,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			//LIGHTNING EFFECTS HAPPEN HERE....
 			cutsceneLightning->setVisible(true);
 			//origin of lightning starts at destination of object
+			QUAD_SEGMENT_INCREMENT = -10.0f;
 			cutsceneLightning->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, QUAD_SEGMENT_INCREMENT * (QUAD_SEGMENTS-2), 0.0f));
 			//TESTING... BLOCK UP THE GAME CHAIN
 			//currentCutscene = 999;
@@ -266,6 +273,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 2)
 	{
+		ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 		//attach and move the camera onto the ufo for crashing landing cam
 		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
 		cam->setPosition(ufoSceneNode->getPosition() + cutscene3CamPosition);
@@ -287,6 +295,7 @@ void GameInit(IrrlichtDevice* device)
 	p = Player(device);
 	ef = EnemyFactory(device, 5);
 	be = BigEnemy(device, 12.0f);
+	enemyOrb = EnemyOrb(device, be.GetNode(), vector3df(-0.3f, 3.7f, -0.55f));
 	be.GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
@@ -295,7 +304,7 @@ void GameInit(IrrlichtDevice* device)
 	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
 	//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 8.0f, 0.0f), SColorf(0.0f, 0.3f, 0.3f, 0.3f), 20.0f);
-
+	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning->setParent(p.GetNode());
 	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
@@ -306,6 +315,9 @@ void GameInit(IrrlichtDevice* device)
 
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
+
+	ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
+	dirLight->getLightData().DiffuseColor = SColorf(0.15f, 0.15f, 0.15f, 1.0f);
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
@@ -315,6 +327,8 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	s32 MouseXDiff = MouseX - MouseXPrev;
 	p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
 	MouseXPrev = MouseX;
+
+	enemyOrb.Update(frameDeltaTime);
 
 	//firing state for the player
 	if (er.GetMouseState().LeftButtonDown){
@@ -352,6 +366,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				}
 			}
 
+			QUAD_SEGMENT_INCREMENT = -10.0f;
 			cutsceneLightning->ArkUpdate(frameDeltaTime);
 			float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
 			cutsceneLightning->setScale(vector3df(lightningLength));
@@ -426,12 +441,6 @@ bool Sys_Init()
 	device->setWindowCaption(L"Killer Cows");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
-	mainDirLight = smgr->addLightSceneNode(0, core::vector3df(1, 1, 0),
-		SColorf(1.0f, 1.0f, 1.0f, 1.0f), 20000.0f);
-	mainDirLight->getLightData().Type = ELT_DIRECTIONAL;
-	mainDirLight->getLightData().Direction = core::vector3df(1, 1, 0);
-	mainDirLight->getLightData().SpecularColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
-	mainDirLight->getLightData().AmbientColor = video::SColorf(0.0f, 0.0f, 0.0f, 1);
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
 	return 0;
@@ -577,7 +586,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
+						//if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
+						if (cowsKilled == 0 && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
