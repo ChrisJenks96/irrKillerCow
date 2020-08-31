@@ -506,8 +506,11 @@ int main()
 			if (state == STATE_GAME)
 			{
 				//fade back into the game
-				if (cutscene3FadeOut && transition_alpha != 0)
+				if (cutscene3FadeOut && transition_alpha != 0){
+					cutscene3FadeOut = false;
 					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				}
+					
 				else
 				{
 					p.ShieldToggle(er.GUIShieldToggle);
@@ -612,7 +615,7 @@ int main()
 				
 			else if (state == STATE_INTRO_CUTSCENE)
 			{
-				if (cutscene3FadeOut && ufoSceneNode->getPosition().Y < 0.0f){
+				if (ufoSceneNode->getPosition().Y < 0.0f){
 					CutsceneUnload(device);
 					state = STATE_GAME;
 					GameInit(device);

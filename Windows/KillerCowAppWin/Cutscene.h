@@ -14,10 +14,10 @@ using namespace gui;
 #define NUM_CUTSCENE1_PASSES 2
 //when the lightning strikes
 #define CUTSCENE2_LIGHTNING_PASS 140.0f
-#define CUTSCENE2_END 350.0f
+#define CUTSCENE2_END 280.0f
 
 #define CUTSCENE3_CRASH_AHEAD_DISTANCE 400.0f
-#define CUTSCENE3_ROTATE_SPEED 45.0f
+#define CUTSCENE3_ROTATE_SPEED 25.0f
 
 #define CUTSCENE_UFO_HEIGHT 40.0f
 
