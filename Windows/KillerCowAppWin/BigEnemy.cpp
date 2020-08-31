@@ -14,7 +14,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node->setMD2Animation("idle");
+			node->setMD2Animation("attack_main");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 			//way to find out which enemy/bigenemy we killed
 			node->setID(667);

@@ -285,7 +285,7 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 8);
+	ef = EnemyFactory(device, 5);
 	be = BigEnemy(device, 12.0f);
 	be.GetNode()->setVisible(false);
 
