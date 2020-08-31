@@ -36,9 +36,11 @@ public:
 	bool GetAttackStrikeDone() { return attackStrikeDone; }
 	ISceneNode* GetNode() { return node; }
 	void SetAttackStrikeDone(int a) { attackStrikeDone = a; }
-	ENEMY_STATE MoveTowards(const vector3df p, const float dt);
+	bool MoveTowards(const vector3df p, const float dt);
+	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
 	~BigEnemy();
 private:
+	vector3df cachedSpawnPosition;
 	float healthDepleteTimer{ 0.0f };
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_BOSS_HEALTH };

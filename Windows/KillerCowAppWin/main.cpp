@@ -256,7 +256,7 @@ void GameInit(IrrlichtDevice* device)
 
 	p = Player(device);
 	ef = EnemyFactory(device, 3);
-	be = BigEnemy(device, 10.0f);
+	be = BigEnemy(device, 8.0f);
 	be.GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
@@ -406,7 +406,7 @@ void GameReset()
 	p.SetEnergy(100);
 	p.SetAnimationName("idle");
 	ef.ForceReset();
-	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
+	cam->setPosition(vector3df(defaultCamPos));
 	cam->setTarget(p.GetPosition());
 }
 
@@ -523,8 +523,31 @@ int main()
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
+							be.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, -10.0f, 0.0f));
 							cam->setTarget(be.GetPosition());
 							bossScene = true;
+						}
+
+						if (bossScene)
+						{
+							//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
+							if (be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime)) {
+								vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
+								cam->setPosition(cam->getPosition() + p1);
+							}
+							else
+							{
+								cam->setPosition(bossFightCamPos);
+								cam->setTarget(p.GetPosition());
+							}
+						}
+
+						//when boss fight is done, go back to original cam
+						else
+						{
+							vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
+							cam->setPosition(cam->getPosition() + p1);
+							cam->setTarget(p.GetPosition());
 						}
 					}
 				}

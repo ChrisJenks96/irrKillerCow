@@ -30,11 +30,18 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 
 void BigEnemy::RandomPosition(const float distAway)
 {
-	float x = rand() % 721 + (-360);
-	float z = rand() % 721 + (-360);
+	bool inv_x = rand() % 2;
+	bool inv_z = rand() % 2;
+	float x = distAway;
+	float z = x;
+	if (inv_x)
+		x = -x;
+	if (inv_z)
+		z = -z;
+
 	vector3df target = vector3df(x, 0.0f, z);
-	vector3df p = (target - node->getPosition()).normalize() * distAway;
-	node->setPosition(p);
+	node->setPosition(target);
+	cachedSpawnPosition = target;
 }
 
 void BigEnemy::RemoveHealth(int damage, const float dt)
@@ -64,36 +71,16 @@ void BigEnemy::Attack(const float dt)
 	}
 }
 
-ENEMY_STATE BigEnemy::MoveTowards(const vector3df p, const float dt)
+bool BigEnemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
-	if (isAttacking && attackOnce)
-		return ENEMY_STATE::ATTACK;
-
-	else if ((distance < attackDistance)) {
-		if (!attackOnce) {
-			isAttacking = true;
-			attackOnce = true;
-			node->setMD2Animation("idle");
-			return ENEMY_STATE::ATTACK;
-		}
-	}
-
-	if (!isAttacking) {
+	if (distance > 0.5f) {
 		vector3df dir = (p - node->getPosition()).normalize();
 		node->setPosition(node->getPosition() + (dir * (speed * dt)));
+		return true;
 	}
 
-	if (distance < 0.5f) {
-		node->setMD2Animation("idle");
-		return ENEMY_STATE::RESET;
-	}
-
-	//we've died :(
-	if (!node->isVisible())
-		Reset();
-
-	return ENEMY_STATE::NONE;
+	return false;
 }
 
 void BigEnemy::Reset()
