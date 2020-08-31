@@ -72,6 +72,7 @@ static void updateFadeOut(IrrlichtDevice* device, irr::f32 speed, irr::f32 curre
 typedef struct LIGHTNING_TYPE
 {
 	stringw texture;
+	stringw shield_texture;
 	SColor col;
 	int damage;
 	float energyDepleteRate;
@@ -82,9 +83,9 @@ static int currentLightningType = 0;
 
 static LIGHTNING_TYPE lightning_types[] =
 {
-	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", SColor(255, 0, 128, 255), 1, 0.1f, 0.25f},
-	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", SColor(255, 255, 255, 0), 1, 0.2f, 0.2f},
-	LIGHTNING_TYPE{"media/lightning/green_bolt.png", SColor(255, 0, 255, 0), 2, 0.2f, 0.14f},
-	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", SColor(255, 255, 0, 255), 3, 0.2f, 0.08f},
-	LIGHTNING_TYPE{"media/lightning/red_bolt.png", SColor(255, 255, 0, 0), 5, 0.3f, 0.03f},
+	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", "media/shields/shield_blue.png", SColor(255, 0, 128, 255), 1, 0.1f, 0.25f},
+	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", "media/shields/shield_yellow.png", SColor(255, 255, 255, 0), 1, 0.2f, 0.2f},
+	LIGHTNING_TYPE{"media/lightning/green_bolt.png", "media/shields/shield_green.png", SColor(255, 0, 255, 0), 2, 0.2f, 0.14f},
+	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", "media/shields/shield_purple.png", SColor(255, 255, 0, 255), 3, 0.2f, 0.08f},
+	LIGHTNING_TYPE{"media/lightning/red_bolt.png", "media/shields/shield_red.png", SColor(255, 255, 0, 0), 5, 0.3f, 0.03f},
 };

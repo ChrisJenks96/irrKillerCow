@@ -23,6 +23,24 @@ Player::Player(IrrlichtDevice* d)
 		}
 	}
 
+	mesh = smgr->getMesh("media/player/player_shield.obj");
+
+	if (mesh)
+	{
+		nodeShield = smgr->addAnimatedMeshSceneNode(mesh);
+		nodeShield->setParent(node);
+		nodeShield->setScale(vector3df(4.0f));
+		if (nodeShield)
+		{
+			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
+			nodeShield->setMaterialFlag(EMF_LIGHTING, true);
+			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
+			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
+			nodeShield->setVisible(false);
+		}
+	}
+
 	//weapon firing lighting effect
 	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
@@ -99,10 +117,18 @@ void Player::NotFiringAnimation(const float dt)
 	}
 }
 
+void Player::ShieldUVScroll(const float dt)
+{
+	nodeShield->getMaterial(0).getTextureMatrix(0).setTextureTranslate(0, nodeShieldY);
+	nodeShieldY -= 1.2f * dt;
+	if (nodeShieldY >= 1.0f)
+		nodeShieldY = 0.0f;
+}
+
 ISceneNode* Player::Fire(IrrlichtDevice* device)
 {
 	WeaponFiringLightToggle(true);
-	
+
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
 	ray.end = ray.start + SceneNodeDir(node) * 1000.0f;

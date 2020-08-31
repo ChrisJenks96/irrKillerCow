@@ -13,6 +13,7 @@ class MyEventReceiver : public IEventReceiver
 {
 public:
     bool Keys[256];
+    bool GUIShieldToggle{ false };
     // We'll create a struct to record info on the mouse state
     struct SMouseState
     {
@@ -24,6 +25,21 @@ public:
     // This is the one method that we have to implement
     virtual bool OnEvent(const SEvent& event)
     {
+        if (event.EventType == EET_GUI_EVENT)
+        {
+            s32 id = event.GUIEvent.Caller->getID();
+
+            switch (event.GUIEvent.EventType)
+            {
+                case EGET_BUTTON_CLICKED:
+                    switch (id)
+                    {
+                        case 234:
+                            GUIShieldToggle = !GUIShieldToggle;
+                            break;
+                    }
+            }
+        }
         if (event.EventType == irr::EET_KEY_INPUT_EVENT)
         {
             Keys[event.KeyInput.Key] = event.KeyInput.PressedDown;

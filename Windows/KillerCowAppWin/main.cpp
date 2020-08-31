@@ -48,6 +48,9 @@ BigEnemy be;
 
 bool globalPlayerMunchFlag = false;
 int cowsKilled = 0;
+float cowsXp = 0.0f;
+int cowsXpLvl = 0;
+float xpMod = 4.8f;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
 bool bossScene = false;
@@ -312,8 +315,11 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 					enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 					if (enemy->GetHealth() <= 0){
-						if (!enemy->isDeathAnimationTrigger())
+						if (!enemy->isDeathAnimationTrigger()){
+							cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
 							cowsKilled += 1;
+						}
+							
 						enemy->SetDeathAnimationTrigger(true);
 					}
 						
@@ -336,6 +342,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			p.AddEnergy(frameDeltaTime);
 		ef.ResetEmission();
 	}
+
+	//if we have no energy, shut it off
+	if (p.GetEnergy() > 0)
+		p.ShieldUVScroll(frameDeltaTime);
+	else if (p.GetEnergy() <= 0)
+		er.GUIShieldToggle = false;
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
@@ -402,6 +414,8 @@ bool Sys_Init()
 void GameReset()
 {
 	globalPlayerMunchFlag = false;
+	cowsXp = 0;
+	cowsXpLvl = 0;
 	cowsKilled = 0;
 	p.SetHealth(100);
 	p.SetEnergy(100);
@@ -414,6 +428,7 @@ void GameReset()
 void LightningUpgrade(IrrlichtDevice* device)
 {
 	cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
+	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
 	p.LightningChangeCol(lightning_types[currentLightningType].col);
@@ -436,16 +451,24 @@ int main()
 		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
 
+		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(15, 53));
+		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
 		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(15, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(15, 33));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		//IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
 		//cow_icon->setMaxSize(dimension2du(64, 64));
+		IGUIImage* unlock_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 50));
+		unlock_outside->setMaxSize(dimension2du(170, 15));
 		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
 		health_outside->setMaxSize(dimension2du(170, 15));
 		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
+
+		IGUIButton* shieldBtnToggle = gui->addButton(recti(10, 70, 10 + 32, 70 + 32));
+		shieldBtnToggle->setID(234);
+		shieldBtnToggle->setVisible(false);
 
 		while (device->run())
 		{
@@ -461,6 +484,11 @@ int main()
 					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 				else
 				{
+					p.ShieldToggle(er.GUIShieldToggle);
+					if (er.GUIShieldToggle){
+						p.RemoveEnergy(frameDeltaTime);
+					}
+
 					cutscene3FadeOut = false;
 					if (!cutscene4AlienOutOfShip)
 					{
@@ -497,9 +525,9 @@ int main()
 						}
 
 						//lightning upgrade states
-						if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 3)
-							|| (currentLightningType == 2 && cowsKilled == 4) || (currentLightningType == 3 && cowsKilled == 5)
-							|| (currentLightningType == 4 && cowsKilled == 6))
+						if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 4)
+							|| (currentLightningType == 2 && cowsXpLvl == 6) || (currentLightningType == 3 && cowsXpLvl == 8)
+							|| (currentLightningType == 4 && cowsXpLvl == 10))
 						{
 							currentLightningType++;
 							if (currentLightningType == LIGHTNING_TYPES)
@@ -520,7 +548,7 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						if (cowsKilled == 2 && !bossScene)
+						if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -604,8 +632,8 @@ int main()
 				}
 			}
 				
-			printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
-				cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
+			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
+				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
 			driver->beginScene(true, true, SColor(255, 0, 0, 15));
 			smgr->drawAll();
@@ -641,6 +669,16 @@ int main()
 				heat_outside->draw();
 				if (p.GetEnergy() > 0)
 					heat_inside->draw();
+				if (cowsXp > 100) {
+					shieldBtnToggle->setVisible(true);
+					cowsXp = 0;
+					cowsXpLvl += 1;
+				}
+					
+				unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+				unlock_outside->draw();
+				unlock_inside->draw();
+				shieldBtnToggle->draw();
 				//cow_icon->draw();
 				HighScoreFontDraw(device, cowsKilled);
 			}

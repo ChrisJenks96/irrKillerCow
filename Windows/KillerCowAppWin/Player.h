@@ -39,6 +39,7 @@ class Player
 		void SetHealth(int n) { health = n; }
 		void AddHealth(int n) { health += n; }
 		void SetAnimationName(const char* name) { node->setMD2Animation(name); }
+		int UnlockGUIValueUpdate(float cowsXP) { return (int)((float)HEALTH_GUI_SIZE_X * ((float)cowsXP / 100.0f)); }
 		int EnergyGUIValueUpdate() { return (int)((float)HEALTH_GUI_SIZE_X * ((float)energy / 100.0f)); }
 		int HealthGUIValueUpdate() {return (int)((float)HEALTH_GUI_SIZE_X * ((float)health / 100.0f));}
 		ISceneNode* GetNode() { return node; }
@@ -49,6 +50,9 @@ class Player
 		void LightningChangeCol(SColor c){ weaponFiringLight->getLightData().DiffuseColor = c; }
 		void SetAnimationID(int i) { animationID = i; }
 		bool MoveTowards(const vector3df p, const float dt);
+		void ShieldUVScroll(const float dt);
+		void ShieldToggle(bool t) {nodeShield->setVisible(t);}
+		void ShieldTexture(stringw st, IVideoDriver* driver) { nodeShield->setMaterialTexture(0, driver->getTexture(st));  }
 
 		//animations
 		void FiringAnimation(const float dt);
@@ -57,6 +61,7 @@ class Player
 		~Player();
 	private:
 		float animationTimer{ 0.0f };
+		float nodeShieldY{ 0.0f };
 		int animationID{ PLAYER_ANIMATION_IDLE };
 		int oldAnimationID{ 0 };
 		float energyDepleteTimer{ 0.0f };
@@ -67,5 +72,6 @@ class Player
 ;		int health{ 100 };
 		ILightSceneNode* weaponFiringLight;
 		IAnimatedMesh* mesh;
+		ISceneNode* nodeShield;
 		IAnimatedMeshSceneNode* node;
 };
