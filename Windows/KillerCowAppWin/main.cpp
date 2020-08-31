@@ -301,7 +301,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					if (be.GetHealth() <= 0) {
 						be.GetNode()->setVisible(false);
 						cam->setTarget(p.GetPosition());
-						ef.SetVisible(true);
+						ef.ForceReset();
 						cowsKilled += 1;
 						bossScene = false;
 					}

@@ -18,6 +18,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 			//way to find out which enemy/bigenemy we killed
 			node->setID(667);
+			node->setScale(vector3df(2.0f));
 		}
 	}
 
