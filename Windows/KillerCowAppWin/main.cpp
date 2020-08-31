@@ -322,7 +322,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 							
 						enemy->SetDeathAnimationTrigger(true);
 					}
-						
 				}
 			}
 

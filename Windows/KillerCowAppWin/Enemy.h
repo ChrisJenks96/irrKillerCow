@@ -54,6 +54,7 @@ public:
 	void SetAttackStrikeDone(int a) { attackStrikeDone = a; }
 	void SetAnimationName(const char* name) { node->setMD2Animation(name); }
 	void SetAnimationID(int i) { animationID = i; }
+	int GetAnimationID() { return animationID; }
 	bool DeathAnimation(const float dt);
 	ENEMY_STATE MoveTowards(const vector3df p, const float dt);
 	~Enemy();

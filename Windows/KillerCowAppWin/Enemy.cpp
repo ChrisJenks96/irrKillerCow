@@ -14,7 +14,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node->setMD2Animation("walk");
+			node->setMD2Animation("idle");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
@@ -185,7 +185,11 @@ void EnemyFactory::Update(Player& p, const float dt)
 				playerGettingMunched = true;
 				x.Attack(dt);
 				break;
-			default:
+			case NONE:
+				if (x.GetAnimationID() != ENEMY_ANIMATION_WALK){
+					x.SetAnimationID(ENEMY_ANIMATION_WALK);
+					x.SetAnimationName("walk");
+				}
 				break;
 			}
 
