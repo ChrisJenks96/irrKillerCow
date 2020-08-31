@@ -12,6 +12,7 @@ using namespace gui;
 #include <time.h>
 #include "ER.h"
 #include "LightningSceneNode.h"
+#include "BigEnemy.h"
 
 #include "Cutscene.h"
 
@@ -43,10 +44,13 @@ vector3df OldCameraPosition;
 //game specifics
 Player p;
 EnemyFactory ef;
+BigEnemy be;
+
 bool globalPlayerMunchFlag = false;
 int cowsKilled = 0;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
+bool bossScene = false;
 ITexture* menuBkg;
 IGUIFont* font;
 
@@ -252,6 +256,8 @@ void GameInit(IrrlichtDevice* device)
 
 	p = Player(device);
 	ef = EnemyFactory(device, 3);
+	be = BigEnemy(device, 10.0f);
+	be.GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
@@ -288,13 +294,28 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
-				Enemy* enemy = ef.FindEnemy(e);
-				enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-				enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-				if (enemy->GetHealth() <= 0) {
-					cowsKilled += 1;
-					e->setVisible(false);
-					enemy->Reset();
+				if (e->getID() == 667)
+				{
+					be.RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+					be.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+					if (be.GetHealth() <= 0) {
+						be.GetNode()->setVisible(false);
+						cam->setTarget(p.GetPosition());
+						ef.SetVisible(true);
+						cowsKilled += 1;
+						bossScene = false;
+					}
+				}
+				else
+				{
+					Enemy* enemy = ef.FindEnemy(e);
+					enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+					enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+					if (enemy->GetHealth() <= 0) {
+						cowsKilled += 1;
+						e->setVisible(false);
+						enemy->Reset();
+					}
 				}
 			}
 
@@ -474,7 +495,8 @@ int main()
 							state = STATE_GAME_OVER;
 						}
 
-						if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2)
+						//lightning upgrade states
+						/*if ((currentLightningType == 0 && cowsKilled == 1) || (currentLightningType == 1 && cowsKilled == 2)
 							|| (currentLightningType == 2 && cowsKilled == 3) || (currentLightningType == 3 && cowsKilled == 4)
 							|| (currentLightningType == 4 && cowsKilled == 5))
 						{
@@ -494,6 +516,15 @@ int main()
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
+						}*/
+
+						//boss scene (he will always be around and never trully killed but you must keep fighting him
+						if (cowsKilled == 1 && !bossScene)
+						{
+							ef.SetVisible(false);
+							be.GetNode()->setVisible(true);
+							cam->setTarget(be.GetPosition());
+							bossScene = true;
 						}
 					}
 				}

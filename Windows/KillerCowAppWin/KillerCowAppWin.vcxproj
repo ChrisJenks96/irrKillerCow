@@ -145,11 +145,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BigEnemy.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigEnemy.h" />
     <ClInclude Include="Cutscene.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="ER.h" />
