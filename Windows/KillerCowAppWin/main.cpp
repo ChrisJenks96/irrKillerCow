@@ -76,7 +76,12 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		
 		groundSceneNode->setScale(vector3df(2.0f));
 		//ground texture id (0,0)
-		groundSceneNode->getMaterial(1).getTextureMatrix(0).setScale(6.0f);
+		/*for (int i = 0; i < groundSceneNode->getMaterialCount(); i++)
+		{
+			SMaterial& s = groundSceneNode->getMaterial(i);
+			printf("");
+		}*/
+		groundSceneNode->getMaterial(1).getTextureMatrix(0).setScale(18.0f);
 		if (groundSceneNode)
 		{
 			groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
@@ -92,17 +97,25 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	{
 		for (int i = 0; i < 2; i++)
 		{
+			
 			cutsceneGroundSceneNode[i] = smgr->addMeshSceneNode(mesh);
 			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f));
 			if (groundSceneNode)
 			{
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
 				//ground texture id (0,0)
 				//cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.jpg"));
 				cutsceneGroundSceneNode[i]->getMaterial(2).getTextureMatrix(0).setScale(vector3df(12.0f, 24.0f, 0.0f));
 			}
+
+			/*for (int c = 0; c < cutsceneGroundSceneNode[i]->getMaterialCount(); c++)
+			{
+				SMaterial& s = cutsceneGroundSceneNode[i]->getMaterial(c);
+				printf("");
+			}*/
 		}
 
 		cutsceneGroundSceneNode[0]->setVisible(true);
@@ -192,7 +205,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			if (cutscene1currentGround == 1) {
 				cutsceneGroundSceneNode[0]->setVisible(false);
 				cutsceneGroundSceneNode[1]->setVisible(true);
-				cutsceneGroundSceneNode[1]->setPosition(cutsceneGroundSceneNode[0]->getPosition() - vector3df(0.0f, 0.0f, cutscene1GroundDistance));
+				cutsceneGroundSceneNode[1]->setPosition(cutsceneGroundSceneNode[0]->getPosition() - vector3df(0.0f, 0.0f, (cutscene1GroundDistance*2)));
 			}
 
 			if (cutscene1currentGround == 0) {
@@ -205,11 +218,14 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 			if (cutscene1EndPass >= NUM_CUTSCENE1_PASSES)
 			{
+				cutsceneGroundSceneNode[0]->setVisible(false);
+				cutsceneGroundSceneNode[1]->setVisible(true);
+				cutsceneGroundSceneNode[0]->setPosition(cutsceneGroundSceneNode[1]->getPosition() - vector3df(0.0f, 0.0f, cutscene1GroundDistance));
+				cutsceneGroundSceneNode[1]->setPosition(cutsceneGroundSceneNode[0]->getPosition() + vector3df(0.0f, 0.0f, cutscene1GroundDistance));
 				cam->setPosition(cutscene2CamPosition);
 				//move the ufo back ready for the next scene (it will shoot past the screen)
 				ufoSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
 				ufoSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
-				//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
 				ufoBladesSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
 				currentCutscene = 1;
 			}
@@ -269,7 +285,7 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 5);
+	ef = EnemyFactory(device, 8);
 	be = BigEnemy(device, 12.0f);
 	be.GetNode()->setVisible(false);
 
