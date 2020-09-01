@@ -37,6 +37,7 @@ IMeshSceneNode* cutsceneGroundSceneNode[2];
 IMeshSceneNode* groundSceneNode;
 IMeshSceneNode* ufoSceneNode;
 IMeshSceneNode* ufoBladesSceneNode;
+IMeshSceneNode* cowHeadGameOver;
 ILightSceneNode* dirLight;
 ILightSceneNode* ufoSpotlight;
 //custom scenenode
@@ -45,6 +46,8 @@ EnemyOrb enemyOrb;
 vector3df bigEnemyNewPos;
 bool bigEnemyOnMove = false;
 bool bigEnemyFirstMove = false;
+bool bossScene = false;
+bool bossDead = false;
 
 vector3df OldCameraPosition;
 
@@ -54,13 +57,13 @@ EnemyFactory ef;
 BigEnemy be;
 
 bool globalPlayerMunchFlag = false;
+int totalCowsKilled = 0;
 int cowsKilled = 0;
 float cowsXp = 0.0f;
 int cowsXpLvl = 0;
 float xpMod = 4.8f;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
-bool bossScene = false;
 ITexture* menuBkg;
 IGUIFont* font;
 
@@ -68,7 +71,7 @@ IGUIFont* font;
 int currentCutscene = 0;
 float gameOverTimer = 0.0f;
 #define GAME_OVER_FADE_OUT_TIME 3.0f
-#define GAME_OVER_FINISH_TIME 5.5f
+#define GAME_OVER_FINISH_TIME 10.0f
 
 static void StaticMeshesLoad(IrrlichtDevice* device)
 {
@@ -166,6 +169,29 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		ufoBladesSceneNode->setParent(ufoSceneNode);
 		ufoBladesSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 	}
+
+	mesh = smgr->getMesh("media/cow/cow_head.obj");
+	if (mesh)
+	{
+		cowHeadGameOver = smgr->addMeshSceneNode(mesh);
+		cowHeadGameOver->setScale(vector3df(1.25f));
+
+		if (cowHeadGameOver)
+		{
+			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
+			//for (int c = 0; c < cowHeadGameOver->getMaterialCount(); c++)
+			//{
+				//SMaterial& s = cowHeadGameOver->getMaterial(c);
+				//printf("");
+			//}
+			cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
+			cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));
+			cowHeadGameOver->getMaterial(2).setTexture(0, driver->getTexture("media/cow/cow.png"));
+		}
+	}
+
+
+	
 
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
@@ -351,9 +377,10 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					be.RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 					be.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 					if (be.GetHealth() <= 0) {
+						bossDead = true;
 						be.GetNode()->setVisible(false);
 						cam->setTarget(p.GetPosition());
-						ef.ForceReset();
+						//ef.ForceReset();
 						cowsKilled += 1;
 						bossScene = false;
 					}
@@ -474,7 +501,7 @@ void LightningUpgrade(IrrlichtDevice* device)
 	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
-	p.LightningChangeCol(lightning_types[currentLightningType].col);
+	//p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
 int main()
@@ -494,22 +521,24 @@ int main()
 		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
 
-		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(15, 53));
+		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
-		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(15, 13));
+		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(85, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
-		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(15, 33));
+		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(85, 33));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
-		//IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 74, 10));
-		//cow_icon->setMaxSize(dimension2du(64, 64));
-		IGUIImage* unlock_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 50));
+		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 130, 10));
+		cow_icon->setMaxSize(dimension2du(64, 64));
+		IGUIImage* alien_icon = gui->addImage(driver->getTexture("media/gui/alien_icon.png"), vector2di(14, 10));
+		cow_icon->setMaxSize(dimension2du(64, 64));
+		IGUIImage* unlock_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 50));
 		unlock_outside->setMaxSize(dimension2du(170, 15));
-		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 10));
+		IGUIImage* health_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 10));
 		health_outside->setMaxSize(dimension2du(170, 15));
-		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(10, 30));
+		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
-		IGUIButton* shieldBtnToggle = gui->addButton(recti(10, 70, 10 + 32, 70 + 32));
+		IGUIButton* shieldBtnToggle = gui->addButton(recti(10, 90, 10 + 32, 90 + 32));
 		shieldBtnToggle->setID(234);
 		shieldBtnToggle->setVisible(false);
 
@@ -564,14 +593,18 @@ int main()
 					{
 						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
 						if (p.GetHealth() <= 0) {
-							p.SetAnimationName("crdeth");
-							cam->setPosition(vector3df(cam->getPosition().X, cam->getPosition().Y - 5.0f, cam->getPosition().Z));
 							//play death animation
+							p.SetAnimationName("crdeth");
+							cam->setPosition(vector3df(999.0f));
+							cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
+							cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
+							cam->setTarget(cowHeadGameOver->getPosition());
+							totalCowsKilled += cowsKilled;
 							state = STATE_GAME_OVER;
 						}
 
 						//lightning upgrade states
-						if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 4)
+						else if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 4)
 							|| (currentLightningType == 2 && cowsXpLvl == 6) || (currentLightningType == 3 && cowsXpLvl == 8)
 							|| (currentLightningType == 4 && cowsXpLvl == 10))
 						{
@@ -595,7 +628,7 @@ int main()
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
 						//if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
-						if (cowsKilled == 0 && !bossScene)
+						else if (cowsKilled == 0 && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -603,10 +636,11 @@ int main()
 							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
 							be.LookAt(p.GetPosition(), 180.0f);
 							bigEnemyNewPos = be.GetPosition();
+							be.GetNodeDirt()->setPosition(vector3df(bigEnemyNewPos.X, 0.3f, bigEnemyNewPos.Z));
 							bossScene = true;
 						}
 
-						if (bossScene)
+						else if (bossScene)
 						{
 							//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
 							if (!bigEnemyFirstMove && be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime)) {
@@ -636,6 +670,11 @@ int main()
 						//when boss fight is done, go back to original cam
 						else
 						{
+							if (bossDead){
+								be.GetNodeDirt()->setPosition(vector3df(-9.99f));
+								bossDead = false;
+							}
+
 							vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 							cam->setPosition(cam->getPosition() + p1);
 							cam->setTarget(p.GetPosition());
@@ -666,7 +705,7 @@ int main()
 
 			else if (state == STATE_GAME_OVER)
 			{
-				cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
+				//cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
 				gameOverTimer += 1.0f * frameDeltaTime;
 
 				if (gameOverTimer > GAME_OVER_FINISH_TIME) {
@@ -713,35 +752,50 @@ int main()
 
 			else if (state == STATE_GAME_OVER)
 			{
-				if (gameOverTimer > GAME_OVER_FADE_OUT_TIME)
-					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				cowHeadGameOver->setRotation(cowHeadGameOver->getRotation() + vector3df(8.0f * frameDeltaTime, 0.0f, 0.0f));
+				//if (gameOverTimer > GAME_OVER_FADE_OUT_TIME)
+				//	updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 
-				if (gameOverTimer > GAME_OVER_FINISH_TIME)
-					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				//if (gameOverTimer > GAME_OVER_FINISH_TIME)
+				//	updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 			}
 
-			else if (state == STATE_GAME || state == STATE_GAME_OVER)
+			if (state == STATE_GAME || state == STATE_GAME_OVER)
 			{
-				health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
-				heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
-				health_outside->draw();
-				if (p.GetHealth() > 0)
-					health_inside->draw();
-				heat_outside->draw();
-				if (p.GetEnergy() > 0)
-					heat_inside->draw();
-				if (cowsXp > 100) {
-					shieldBtnToggle->setVisible(true);
-					cowsXp = 0;
-					cowsXpLvl += 1;
+				if (state == STATE_GAME_OVER) {
+					dimension2du s = device->getVideoDriver()->getScreenSize();
+					stringw str = L"Cows Destroyed: ";
+					str += cowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0), video::SColor(255, 255, 255, 255));
+					str = L"Total Cows Destroyed: ";
+					str += totalCowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0), video::SColor(255, 255, 255, 255));
 				}
-					
-				unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
-				unlock_outside->draw();
-				unlock_inside->draw();
-				shieldBtnToggle->draw();
-				//cow_icon->draw();
-				HighScoreFontDraw(device, cowsKilled);
+
+				else
+				{
+					health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+					heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
+					health_outside->draw();
+					if (p.GetHealth() > 0)
+						health_inside->draw();
+					heat_outside->draw();
+					if (p.GetEnergy() > 0)
+						heat_inside->draw();
+					if (cowsXp > 100) {
+						shieldBtnToggle->setVisible(true);
+						cowsXp = 0;
+						cowsXpLvl += 1;
+					}
+
+					unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+					unlock_outside->draw();
+					unlock_inside->draw();
+					shieldBtnToggle->draw();
+					cow_icon->draw();
+					alien_icon->draw();
+					HighScoreFontDraw(device, cowsKilled);
+				}
 			}
 			
 			driver->endScene();

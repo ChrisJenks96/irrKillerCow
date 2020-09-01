@@ -40,6 +40,7 @@ public:
 	bool MoveTowards(const vector3df p, const float dt);
 	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
 	bool PollNewPosition(const float dt);
+	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
 	~BigEnemy();
 private:
 	float newPositionTimer{ 0.0f };
@@ -59,4 +60,5 @@ private:
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;
+	IAnimatedMeshSceneNode* node_dirt;
 };

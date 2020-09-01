@@ -35,6 +35,7 @@ Player::Player(IrrlichtDevice* d)
 			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
 			nodeShield->setMaterialFlag(EMF_LIGHTING, true);
 			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			nodeShield->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
 			nodeShield->setVisible(false);

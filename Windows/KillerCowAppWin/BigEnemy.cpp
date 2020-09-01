@@ -35,9 +35,21 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 			node_cap->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_cap->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
-			//way to find out which enemy/bigenemy we killed
-			//node->setID(667);
-			//node->setScale(vector3df(2.0f));
+		}
+	}
+
+	mesh = smgr->getMesh("media/base_plane/dirt.obj");
+	if (mesh)
+	{
+		node_dirt = smgr->addAnimatedMeshSceneNode(mesh);
+		if (node_dirt)
+		{
+			node_dirt->setScale(vector3df(1.5f));
+			node_dirt->setMaterialFlag(EMF_LIGHTING, true);
+			node_dirt->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
+			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node_dirt->setPosition(vector3df(-9.99f));
+			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
 
