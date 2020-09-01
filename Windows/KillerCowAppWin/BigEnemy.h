@@ -52,13 +52,13 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_BOSS_HEALTH };
 	bool attackStrikeDone{ false };
-	int attackDamage{ 13 };
+	int attackDamage{ 4 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 3.0f };
+	float speed{ 2.0f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;

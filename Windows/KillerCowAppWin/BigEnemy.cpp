@@ -62,7 +62,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		{
 			node_drill->setMaterialFlag(EMF_LIGHTING, true);
 			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node_drill->setPosition(vector3df(999.0f));
+			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
 			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}

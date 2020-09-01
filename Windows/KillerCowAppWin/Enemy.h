@@ -67,7 +67,7 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_COW_HEALTH };
 	bool attackStrikeDone{ false };
-	int attackDamage{ 63 };
+	int attackDamage{ 6 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
@@ -88,6 +88,8 @@ class EnemyFactory
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
 		void ForceReset();
+		void SetHealthAll(int health) { for (auto& x : enemies) { x.SetHealth(health); } }
+		void ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled);
 		void SetVisible(bool s) {for (auto& x : enemies) { x.GetNode()->setVisible(s); }}
 		Enemy* GetNearestEnemy(Player& p);
 		bool isPlayerGettingMunched() { return playerGettingMunched; }
@@ -97,21 +99,4 @@ class EnemyFactory
 		//how many cows are munching us
 		bool playerGettingMunched{ false };
 		std::vector<Enemy> enemies;
-};
-
-#define NUM_LIGHTNING_BOLTS 8
-#define NUM_LIGHTNING_SPLIT_AXIS (NUM_LIGHTNING_BOLTS / 2)
-#define LIGHTNING_ROT_SPEED 0.6f
-
-class EnemyOrb
-{
-	public:
-		EnemyOrb() {}
-		EnemyOrb(IrrlichtDevice* d);
-		void Update(const float dt);
-		ISceneNode* GetNode() { return node; }
-		~EnemyOrb() {}
-	private:
-		LightningSceneNode* bolts[NUM_LIGHTNING_BOLTS];
-		ISceneNode* node;
 };

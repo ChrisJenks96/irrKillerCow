@@ -2,6 +2,7 @@
 
 #include <irrlicht.h>
 #include "Helper.h"
+#include "EnemyOrb.h"
 
 using namespace irr;
 using namespace core;
@@ -53,6 +54,7 @@ class Player
 		void ShieldUVScroll(const float dt);
 		void ShieldToggle(bool t) {nodeShield->setVisible(t);}
 		void ShieldTexture(stringw st, IVideoDriver* driver) { nodeShield->setMaterialTexture(0, driver->getTexture(st));  }
+		EnemyOrb& GetOrb() { return orb; }
 
 		//animations
 		void FiringAnimation(const float dt);
@@ -74,4 +76,5 @@ class Player
 		IAnimatedMesh* mesh;
 		ISceneNode* nodeShield;
 		IAnimatedMeshSceneNode* node;
+		EnemyOrb orb;
 };

@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="BigEnemy.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyOrb.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
@@ -154,6 +155,7 @@
     <ClInclude Include="BigEnemy.h" />
     <ClInclude Include="Cutscene.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyOrb.h" />
     <ClInclude Include="ER.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="LightningSceneNode.h" />

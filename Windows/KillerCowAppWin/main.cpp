@@ -14,8 +14,8 @@ using namespace gui;
 #include "LightningSceneNode.h"
 int QUAD_SEGMENT_INCREMENT = -10.0f;
 
+#include "EnemyOrb.h"
 #include "BigEnemy.h"
-
 #include "Cutscene.h"
 
 #ifdef _IRR_WINDOWS_
@@ -51,6 +51,7 @@ float bigEnemyCapsuleTakeoff = 1.0f;
 float bigEnemyMoveMax = 2.1f;
 float bigEnemyCapVelocity = -0.0f;
 bool bigEnemyOnMove = false;
+bool bigEnemyStopShooting = false;
 bool bigEnemyFirstMove = false;
 bool bigEnemyWalkOutCap = false;
 bool bigEnemyCapOutOfRange = false;
@@ -64,6 +65,7 @@ Player p;
 EnemyFactory ef;
 BigEnemy be;
 
+bool playerNukeGoneOff = false;
 bool globalPlayerMunchFlag = false;
 int totalCowsKilled = 0;
 int cowsKilled = 0;
@@ -355,6 +357,8 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
+
+
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
@@ -366,13 +370,21 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	enemyOrb.Update(frameDeltaTime);
 	if (bigEnemyCapOutOfRange)
 	{
-		vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
-		float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
-		enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
-		if (dist < 0.2f) {
-			enemyOrb.GetNode()->setPosition(be.GetPosition());
-			p.RemoveHealth(be.GetAttackDamage());
+		if (!bigEnemyStopShooting){
+			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
+			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
+			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
+			if (dist < 0.2f) {
+				enemyOrb.GetNode()->setPosition(be.GetPosition());
+				p.RemoveHealth(be.GetAttackDamage());
+				if (bigEnemyOnMove)
+					bigEnemyStopShooting = true;
+			}	
 		}
+
+		else			
+			enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
+
 	}
 
 	//the enemy entrance etc...
@@ -384,6 +396,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
 		{
+			if (!playerNukeGoneOff){
+				p.SetEnergy(p.GetEnergy() - 50);
+				p.GetOrb().GetNode()->setVisible(true);
+				playerNukeGoneOff = true;
+			}
+				
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
@@ -433,11 +451,30 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		ef.ResetEmission();
 	}
 
+	if (playerNukeGoneOff)
+	{
+		p.GetOrb().GetNode()->setScale(p.GetOrb().GetNode()->getScale() + vector3df(10.0f * frameDeltaTime));
+		p.GetOrb().GetNode()->setPosition(p.GetPosition());
+		p.GetOrb().Update(frameDeltaTime);
+
+		//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
+		if (p.GetOrb().GetNode()->getScale().Y > 50.0f) {
+			playerNukeGoneOff = false;
+			ef.SetHealthAll(0);
+			ef.ForceDeath(xpMod, cowsXp, cowsKilled);
+			p.GetOrb().GetNode()->setScale(vector3df(1.6f));
+			p.GetOrb().GetNode()->setVisible(false);
+		}
+			
+	}
+
 	//if we have no energy, shut it off
 	if (p.GetEnergy() > 0)
 		p.ShieldUVScroll(frameDeltaTime);
-	else if (p.GetEnergy() <= 0)
+	else if (p.GetEnergy() <= 0) {
+		p.SetEnergy(0);
 		er.GUIShieldToggle = false;
+	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
@@ -649,8 +686,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						else if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						//else if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -667,6 +704,7 @@ int main()
 							bigEnemyWalkOutCap = false;
 							bigEnemyOnMove = false;
 							bigEnemyCapOutOfRange = false;
+							bigEnemyStopShooting = false;
 							bigEnemyCapVelocity = -1.0f;
 						}
 
@@ -703,8 +741,10 @@ int main()
 
 								else if (bigEnemyOnMove){
 									bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
-									if (!bigEnemyOnMove)
+									if (!bigEnemyOnMove) {
+										bigEnemyStopShooting = false;
 										be.LookAt(p.GetPosition(), 180.0f);
+									}
 								}
 								
 								if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)

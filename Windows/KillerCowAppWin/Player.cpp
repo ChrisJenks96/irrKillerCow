@@ -42,6 +42,10 @@ Player::Player(IrrlichtDevice* d)
 		}
 	}
 
+	orb = EnemyOrb(d);
+	orb.GetNode()->setVisible(false);
+	orb.GetNode()->setPosition(node->getPosition());
+
 	//weapon firing lighting effect
 	/*weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
