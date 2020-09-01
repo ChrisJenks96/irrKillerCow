@@ -14,6 +14,7 @@ class MyEventReceiver : public IEventReceiver
 public:
     bool Keys[256];
     bool GUIShieldToggle{ false };
+    bool GUINukeToggle{ false };
     // We'll create a struct to record info on the mouse state
     struct SMouseState
     {
@@ -36,6 +37,9 @@ public:
                     {
                         case 234:
                             GUIShieldToggle = !GUIShieldToggle;
+                            break;
+                        case 235:
+                            GUINukeToggle = !GUINukeToggle;
                             break;
                     }
             }

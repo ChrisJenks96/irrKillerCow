@@ -391,17 +391,21 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	else
 		enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 
+	if (er.GUINukeToggle)
+	{
+		if (!playerNukeGoneOff) {
+			p.SetEnergy(p.GetEnergy() - 50);
+			p.GetOrb().GetNode()->setVisible(true);
+			playerNukeGoneOff = true;
+			er.GUINukeToggle = false;
+		}
+	}
+
 	//firing state for the player
 	if (er.GetMouseState().LeftButtonDown){
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
-		{
-			if (!playerNukeGoneOff){
-				p.SetEnergy(p.GetEnergy() - 50);
-				p.GetOrb().GetNode()->setVisible(true);
-				playerNukeGoneOff = true;
-			}
-				
+		{	
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
@@ -510,7 +514,7 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 	stringw str = L"X ";
 	str += cowsMuggedOff;
 	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<s32>(s.Width - 60, 20, 0, 0), video::SColor(255, 255, 255, 255));
+	font->draw(str.c_str(), core::rect<s32>(s.Width - 60, 32, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
 bool Sys_Init()
@@ -591,7 +595,11 @@ int main()
 
 		IGUIButton* shieldBtnToggle = gui->addButton(recti(10, 90, 10 + 32, 90 + 32));
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(false);
+		shieldBtnToggle->setVisible(true);
+
+		IGUIButton* nukeBtnToggle = gui->addButton(recti(52, 90, 52 + 32, 90 + 32));
+		nukeBtnToggle->setID(235);
+		nukeBtnToggle->setVisible(true);
 
 		while (device->run())
 		{
@@ -888,6 +896,7 @@ int main()
 					unlock_outside->draw();
 					unlock_inside->draw();
 					shieldBtnToggle->draw();
+					nukeBtnToggle->draw();
 					cow_icon->draw();
 					alien_icon->draw();
 					HighScoreFontDraw(device, cowsKilled);
