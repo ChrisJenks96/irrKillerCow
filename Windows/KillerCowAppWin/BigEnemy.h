@@ -41,6 +41,7 @@ public:
 	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
 	bool PollNewPosition(const float dt);
 	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
+	IAnimatedMeshSceneNode* GetNodeDrill() { return node_drill; }
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
@@ -61,5 +62,6 @@ private:
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;
+	IAnimatedMeshSceneNode* node_drill;
 	IAnimatedMeshSceneNode* node_dirt;
 };

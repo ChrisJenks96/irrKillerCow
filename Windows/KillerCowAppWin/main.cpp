@@ -593,6 +593,8 @@ int main()
 					else
 					{
 						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+						be.GetNodeDrill()->setRotation(be.GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
+
 						if (p.GetHealth() <= 0) {
 							//play death animation
 							p.SetAnimationName("crdeth");
@@ -642,6 +644,7 @@ int main()
 							be.GetNodeDirt()->setPosition(vector3df(be.GetNode()->getPosition().X, 0.1f, be.GetNode()->getPosition().Z));
 							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
 							be.LookAt(p.GetPosition(), 180.0f);
+							be.SetHealth(BASE_BOSS_HEALTH);
 							bossScene = true;
 							bigEnemyFirstMove = false;
 							bigEnemyWalkOutCap = false;
@@ -697,7 +700,6 @@ int main()
 										bigEnemyCapOutOfRange = true;
 								}
 								
-
 								cam->setPosition(bossFightCamPos);
 								cam->setTarget(p.GetPosition());
 							}

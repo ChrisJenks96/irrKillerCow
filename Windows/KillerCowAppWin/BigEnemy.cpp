@@ -53,6 +53,19 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		}
 	}
 
+	mesh = smgr->getMesh("media/cow/cap_drill.obj");
+	if (mesh)
+	{
+		node_drill = smgr->addAnimatedMeshSceneNode(mesh, node_cap);
+		if (node_drill)
+		{
+			node_drill->setMaterialFlag(EMF_LIGHTING, true);
+			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
+			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+		}
+	}
+
 	scene::ITriangleSelector* selector = 0;
 	selector = smgr->createTriangleSelector(node);
 	node->setTriangleSelector(selector);
