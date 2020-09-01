@@ -43,9 +43,17 @@ ILightSceneNode* ufoSpotlight;
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 EnemyOrb enemyOrb;
+vector3df bigEnemyOldPos;
 vector3df bigEnemyNewPos;
+//how far the enemy moves out of the capsule
+float bigEnemyMoveCounter = 0.0f;
+float bigEnemyCapsuleTakeoff = 1.0f;
+float bigEnemyMoveMax = 2.1f;
+float bigEnemyCapVelocity = -0.0f;
 bool bigEnemyOnMove = false;
 bool bigEnemyFirstMove = false;
+bool bigEnemyWalkOutCap = false;
+bool bigEnemyCapOutOfRange = false;
 bool bossScene = false;
 bool bossDead = false;
 
@@ -179,19 +187,12 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		if (cowHeadGameOver)
 		{
 			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
-			//for (int c = 0; c < cowHeadGameOver->getMaterialCount(); c++)
-			//{
-				//SMaterial& s = cowHeadGameOver->getMaterial(c);
-				//printf("");
-			//}
+			cowHeadGameOver->setPosition(vector3df(999.0f));
 			cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
 			cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));
 			cowHeadGameOver->getMaterial(2).setTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
-
-
-	
 
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
@@ -600,6 +601,8 @@ int main()
 							cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
 							cam->setTarget(cowHeadGameOver->getPosition());
 							totalCowsKilled += cowsKilled;
+							//reset boss shite
+							bossScene = false;
 							state = STATE_GAME_OVER;
 						}
 
@@ -628,40 +631,73 @@ int main()
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
 						//if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
-						else if (cowsKilled == 0 && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
-							be.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, -10.0f, 0.0f));
+							be.RandomPosition(12.0f, true);
+							bigEnemyNewPos = be.GetPosition();
+							be.GetNode()->setPosition(vector3df(be.GetNode()->getPosition().X, -10.0f, be.GetNode()->getPosition().Z));
+							be.GetNodeCap()->setPosition(be.GetNode()->getPosition() + vector3df(-0.2f, 3.5f, -0.2f));
+							be.GetNodeDirt()->setPosition(vector3df(be.GetNode()->getPosition().X, 0.1f, be.GetNode()->getPosition().Z));
 							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
 							be.LookAt(p.GetPosition(), 180.0f);
-							bigEnemyNewPos = be.GetPosition();
-							be.GetNodeDirt()->setPosition(vector3df(bigEnemyNewPos.X, 0.3f, bigEnemyNewPos.Z));
 							bossScene = true;
+							bigEnemyFirstMove = false;
+							bigEnemyWalkOutCap = false;
+							bigEnemyOnMove = false;
+							bigEnemyCapOutOfRange = false;
+							bigEnemyCapVelocity = -1.0f;
 						}
 
 						else if (bossScene)
 						{
 							//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
-							if (!bigEnemyFirstMove && be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime)) {
+							if (!bigEnemyFirstMove && be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime, true)) {
 								vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
 								cam->setPosition(cam->getPosition() + p1);
+								//log the current pos (which will be the final on the next step)
+								bigEnemyOldPos = be.GetPosition();
 							}
 							else
 							{
 								bigEnemyFirstMove = true;
-								if (!bigEnemyOnMove && be.PollNewPosition(frameDeltaTime)) {
+
+								//heads towards the centre (the ufo is the middle)
+								//BECAREFUL OF THE Y AXIS!!!!!!!!!
+								if (!bigEnemyWalkOutCap){
+									bigEnemyWalkOutCap = !be.MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
+									bigEnemyMoveCounter += 1.0f * frameDeltaTime;
+
+									if (bigEnemyMoveCounter > bigEnemyMoveMax) {
+										bigEnemyMoveCounter = 0.0f;
+										bigEnemyWalkOutCap = true;
+									}
+								}
+
+								else if (bigEnemyWalkOutCap && !bigEnemyOnMove && be.PollNewPosition(frameDeltaTime)) {
 									bigEnemyNewPos = be.RandomPosition(12.0f, false);
 									be.LookAt(bigEnemyNewPos, 180.0f);
 									bigEnemyOnMove = true;
 								}
 
 								else if (bigEnemyOnMove){
-									bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime);
+									bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
 									if (!bigEnemyOnMove)
 										be.LookAt(p.GetPosition(), 180.0f);
 								}
 								
+								if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)
+								{
+									//shoot the capsule off out of the scene
+									be.GetNodeCap()->setPosition(be.GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
+										(bigEnemyMoveCounter - bigEnemyCapsuleTakeoff)) * frameDeltaTime, 0.0f));
+									bigEnemyCapVelocity -= 50.0f * frameDeltaTime;
+									if (be.GetNodeCap()->getPosition().Y > 100.0f)
+										bigEnemyCapOutOfRange = true;
+								}
+								
+
 								cam->setPosition(bossFightCamPos);
 								cam->setTarget(p.GetPosition());
 							}

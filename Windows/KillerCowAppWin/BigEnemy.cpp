@@ -25,11 +25,11 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 	mesh = smgr->getMesh("media/cow/big_cow_cap.obj");
 	if (mesh)
 	{
-		node_cap = smgr->addAnimatedMeshSceneNode(mesh, node);
+		node_cap = smgr->addAnimatedMeshSceneNode(mesh);
 		if (node_cap)
 		{
-			node_cap->setRotation(vector3df(0.0f, 180.0f, 0.0f));
-			node_cap->setPosition(vector3df(-0.2f, 3.5f, -0.2f));
+			node_cap->setRotation(vector3df(0.0f, 20.0f, 0.0f));
+			node_cap->setPosition(vector3df(999.0f));
 			node_cap->setScale(vector3df(1.5f));
 			node_cap->setMaterialFlag(EMF_LIGHTING, true);
 			node_cap->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
@@ -48,7 +48,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 			node_dirt->setMaterialFlag(EMF_LIGHTING, true);
 			node_dirt->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node_dirt->setPosition(vector3df(-9.99f));
+			node_dirt->setPosition(vector3df(999.0f));
 			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
@@ -106,11 +106,13 @@ void BigEnemy::Attack(const float dt)
 	}
 }
 
-bool BigEnemy::MoveTowards(const vector3df p, const float dt)
+bool BigEnemy::MoveTowards(const vector3df p, const float dt, bool includeCap)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (distance > 0.5f) {
 		vector3df dir = (p - node->getPosition()).normalize();
+		if (includeCap)
+			node_cap->setPosition((node->getPosition() + vector3df(-0.2f, 3.5f, -0.2f)) + (dir * (speed * dt)));
 		node->setPosition(node->getPosition() + (dir * (speed * dt)));
 		return true;
 	}

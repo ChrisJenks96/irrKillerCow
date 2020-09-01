@@ -37,10 +37,11 @@ public:
 	bool GetAttackStrikeDone() { return attackStrikeDone; }
 	ISceneNode* GetNode() { return node; }
 	void SetAttackStrikeDone(int a) { attackStrikeDone = a; }
-	bool MoveTowards(const vector3df p, const float dt);
+	bool MoveTowards(const vector3df p, const float dt, bool includeCap);
 	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
 	bool PollNewPosition(const float dt);
 	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
+	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
 	float newPositionTimer{ 0.0f };
