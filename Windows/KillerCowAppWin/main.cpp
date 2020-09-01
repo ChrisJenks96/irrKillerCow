@@ -325,7 +325,7 @@ void GameInit(IrrlichtDevice* device)
 	p = Player(device);
 	ef = EnemyFactory(device, 5);
 	be = BigEnemy(device, 12.0f);
-	enemyOrb = EnemyOrb(device, be.GetNode(), vector3df(-0.3f, 3.7f, -0.55f));
+	enemyOrb = EnemyOrb(device);
 	be.GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
@@ -364,6 +364,20 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	MouseXPrev = MouseX;
 
 	enemyOrb.Update(frameDeltaTime);
+	if (bigEnemyCapOutOfRange)
+	{
+		vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
+		float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
+		enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
+		if (dist < 0.2f) {
+			enemyOrb.GetNode()->setPosition(be.GetPosition());
+			p.RemoveHealth(be.GetAttackDamage());
+		}
+	}
+
+	//the enemy entrance etc...
+	else
+		enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 
 	//firing state for the player
 	if (er.GetMouseState().LeftButtonDown){
@@ -376,7 +390,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				if (e->getID() == 667)
 				{
 					be.RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-					be.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 					if (be.GetHealth() <= 0) {
 						bossDead = true;
 						be.GetNode()->setVisible(false);
@@ -618,6 +631,10 @@ int main()
 								currentLightningType = LIGHTNING_TYPES - 1;
 							else
 							{
+								//re top up all player stats
+								p.SetHealth(100);
+								p.SetEnergy(100);
+
 								OldCameraPosition = cam->getPosition();
 								cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
 								cam->setTarget(p.GetPosition());
@@ -632,8 +649,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -709,6 +726,7 @@ int main()
 						else
 						{
 							if (bossDead){
+								enemyOrb.GetNode()->setPosition(vector3df(999.0f));
 								be.GetNodeDirt()->setPosition(vector3df(-9.99f));
 								bossDead = false;
 							}

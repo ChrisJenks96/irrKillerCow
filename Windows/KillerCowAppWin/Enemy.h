@@ -107,8 +107,9 @@ class EnemyOrb
 {
 	public:
 		EnemyOrb() {}
-		EnemyOrb(IrrlichtDevice* d, ISceneNode* parent, vector3df offset);
+		EnemyOrb(IrrlichtDevice* d);
 		void Update(const float dt);
+		ISceneNode* GetNode() { return node; }
 		~EnemyOrb() {}
 	private:
 		LightningSceneNode* bolts[NUM_LIGHTNING_BOLTS];

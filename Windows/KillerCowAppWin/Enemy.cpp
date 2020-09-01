@@ -227,7 +227,7 @@ EnemyFactory::~EnemyFactory()
 	enemies.clear();
 }
 
-EnemyOrb::EnemyOrb(IrrlichtDevice* d, ISceneNode* parent, vector3df offset)
+EnemyOrb::EnemyOrb(IrrlichtDevice* d)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
@@ -235,11 +235,10 @@ EnemyOrb::EnemyOrb(IrrlichtDevice* d, ISceneNode* parent, vector3df offset)
 	if (mesh)
 	{
 		node = smgr->addMeshSceneNode(mesh);
-		node->setParent(parent);
-		node->setPosition(offset);
 		if (node)
 		{
-			node->setScale(vector3df(0.6f));
+			node->setPosition(vector3df(999.0f));
+			node->setScale(vector3df(1.6f));
 			node->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
 			node->setMaterialFlag(EMF_LIGHTING, false);
 			node->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
@@ -270,6 +269,7 @@ EnemyOrb::EnemyOrb(IrrlichtDevice* d, ISceneNode* parent, vector3df offset)
 
 void EnemyOrb::Update(const float dt)
 {
+	node->setRotation(node->getRotation() + vector3df(80.0f * dt));
 	QUAD_SEGMENT_INCREMENT = -3.0f;
 	for (int i = 0; i < NUM_LIGHTNING_SPLIT_AXIS; i++) {
 		bolts[i]->ArkUpdate(dt);

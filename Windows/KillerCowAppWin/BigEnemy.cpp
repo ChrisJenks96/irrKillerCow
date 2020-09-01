@@ -16,6 +16,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node->setMD2Animation("attack_main");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+			node->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 			//way to find out which enemy/bigenemy we killed
 			node->setID(667);
 			node->setScale(vector3df(1.2f));
@@ -61,7 +62,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		{
 			node_drill->setMaterialFlag(EMF_LIGHTING, true);
 			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
+			node_drill->setPosition(vector3df(999.0f));
 			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
