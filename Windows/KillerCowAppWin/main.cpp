@@ -85,10 +85,10 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			SMaterial& s = groundSceneNode->getMaterial(i);
 			printf("");
 		}*/
-		groundSceneNode->getMaterial(1).getTextureMatrix(0).setScale(18.0f);
+		groundSceneNode->getMaterial(GROUNDSCENENODE_BASE_ID).getTextureMatrix(0).setScale(18.0f);
 		if (groundSceneNode)
 		{
-			groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
+			//groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			groundSceneNode->setVisible(false);
@@ -174,8 +174,8 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 void CutsceneInit(IrrlichtDevice* device)
 {
 	//main ligth for the game
-	dirLight = device->getSceneManager()->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 0.0f, 0.0f), SColorf(0.0f, 0.1f, 0.1f, 1.0f), 0.0f);
-	dirLight->getLightData().Type = video::ELT_DIRECTIONAL;
+	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.15f, 0.15f, 1.0f), 0.0f);
+	dirLight->getLightData().Type = ELT_DIRECTIONAL;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 	
 	//load the non important static meshes for the scene with no behaviour
@@ -316,8 +316,13 @@ void GameInit(IrrlichtDevice* device)
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
 
-	ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
-	dirLight->getLightData().DiffuseColor = SColorf(0.15f, 0.15f, 0.15f, 1.0f);
+	dirLight->remove();
+	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 15.0f, 0.0f), SColorf(0.0f, 0.2f, 0.2f, 1.0f), 80.0f);
+	dirLight->getLightData().Type = video::ELT_SPOT;
+	dirLight->getLightData().InnerCone = 30.0f;
+	dirLight->getLightData().OuterCone = 100.0f;
+	dirLight->getLightData().Falloff = 20.0f;
+	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
@@ -674,7 +679,7 @@ int main()
 			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
 				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
-			driver->beginScene(true, true, SColor(255, 0, 0, 15));
+			driver->beginScene(true, true, SColor(255, 0, 0, 0));
 			smgr->drawAll();
 			if (state == STATE_MENU){
 				driver->draw2DImage(menuBkg, recti(0, 0, driver->getScreenSize().Width, driver->getScreenSize().Height),

@@ -21,6 +21,8 @@ using namespace gui;
 static vector3df defaultCamPos = { 3.0f, 10.0f, -9.0f };
 static vector3df bossFightCamPos = { 8.0f, 15.0f, -14.0f };
 
+#define GROUNDSCENENODE_BASE_ID 1
+
 static vector3df SceneNodeDir(ISceneNode* node)
 {
 	matrix4 mat = node->getAbsoluteTransformation();
@@ -73,7 +75,7 @@ typedef struct LIGHTNING_TYPE
 {
 	stringw texture;
 	stringw shield_texture;
-	SColor col;
+	SColorf col;
 	int damage;
 	float energyDepleteRate;
 	float energyRestoreRate;
@@ -83,9 +85,9 @@ static int currentLightningType = 0;
 
 static LIGHTNING_TYPE lightning_types[] =
 {
-	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", "media/shields/shield_blue.png", SColor(255, 0, 128, 255), 1, 0.1f, 0.25f},
-	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", "media/shields/shield_yellow.png", SColor(255, 255, 255, 0), 1, 0.2f, 0.2f},
-	LIGHTNING_TYPE{"media/lightning/green_bolt.png", "media/shields/shield_green.png", SColor(255, 0, 255, 0), 2, 0.2f, 0.14f},
-	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", "media/shields/shield_purple.png", SColor(255, 255, 0, 255), 3, 0.2f, 0.08f},
-	LIGHTNING_TYPE{"media/lightning/red_bolt.png", "media/shields/shield_red.png", SColor(255, 255, 0, 0), 5, 0.3f, 0.03f},
+	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", "media/shields/shield_blue.png", SColorf(0, 0.2f, 0.2f), 1, 0.1f, 0.25f},
+	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", "media/shields/shield_yellow.png", SColorf(0.2f, 0.2f, 0), 1, 0.2f, 0.2f},
+	LIGHTNING_TYPE{"media/lightning/green_bolt.png", "media/shields/shield_green.png", SColorf(0, 0.2f, 0), 2, 0.2f, 0.14f},
+	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", "media/shields/shield_purple.png", SColorf(0.2f, 0, 0.2f), 3, 0.2f, 0.08f},
+	LIGHTNING_TYPE{"media/lightning/red_bolt.png", "media/shields/shield_red.png", SColorf(0.2f, 0, 0), 5, 0.3f, 0.03f},
 };

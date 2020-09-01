@@ -9,7 +9,7 @@ Player::Player(IrrlichtDevice* d)
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
-		node->setPosition(vector3df(3.0f, 0.0f, -3.0f));
+		node->setPosition(vector3df(3.0f, -1.0f, -3.0f));
 		node->setScale(vector3df(0.7f, 0.7f, 0.7f));
 		if (node)
 		{
@@ -42,12 +42,12 @@ Player::Player(IrrlichtDevice* d)
 	}
 
 	//weapon firing lighting effect
-	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
+	/*weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
 	weaponFiringLight->getLightData().InnerCone = 10.0f;
 	weaponFiringLight->getLightData().OuterCone = 20.0f;
 	weaponFiringLight->getLightData().Falloff = 0.0f;
-	WeaponFiringLightToggle(false);
+	WeaponFiringLightToggle(false);*/
 }
 
 void Player::AddEnergy(const float dt)
@@ -127,7 +127,7 @@ void Player::ShieldUVScroll(const float dt)
 
 ISceneNode* Player::Fire(IrrlichtDevice* device)
 {
-	WeaponFiringLightToggle(true);
+	//WeaponFiringLightToggle(true);
 
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
@@ -145,7 +145,7 @@ ISceneNode* Player::Fire(IrrlichtDevice* device)
 
 void Player::Idle()
 {
-	WeaponFiringLightToggle(false);
+	//WeaponFiringLightToggle(false);
 }
 
 void Player::LookAt(const vector3df p, const float offset)

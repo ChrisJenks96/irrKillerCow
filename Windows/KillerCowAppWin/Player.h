@@ -47,7 +47,7 @@ class Player
 		void SetEnergyDepleteRate(float s) { energyDepleteRate = s; }
 		float GetEnergyRestoreRate() { return energyRestoreRate; }
 		void SetEnergyRestoreRate(float s) { energyRestoreRate = s; }
-		void LightningChangeCol(SColor c){ weaponFiringLight->getLightData().DiffuseColor = c; }
+		void LightningChangeCol(SColorf c){ weaponFiringLight->getLightData().DiffuseColor = c; }
 		void SetAnimationID(int i) { animationID = i; }
 		bool MoveTowards(const vector3df p, const float dt);
 		void ShieldUVScroll(const float dt);
