@@ -42,6 +42,9 @@ ILightSceneNode* ufoSpotlight;
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 EnemyOrb enemyOrb;
+vector3df bigEnemyNewPos;
+bool bigEnemyOnMove = false;
+bool bigEnemyFirstMove = false;
 
 vector3df OldCameraPosition;
 
@@ -599,18 +602,32 @@ int main()
 							be.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, -10.0f, 0.0f));
 							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
 							be.LookAt(p.GetPosition(), 180.0f);
+							bigEnemyNewPos = be.GetPosition();
 							bossScene = true;
 						}
 
 						if (bossScene)
 						{
 							//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
-							if (be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime)) {
+							if (!bigEnemyFirstMove && be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime)) {
 								vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
 								cam->setPosition(cam->getPosition() + p1);
 							}
 							else
 							{
+								bigEnemyFirstMove = true;
+								if (!bigEnemyOnMove && be.PollNewPosition(frameDeltaTime)) {
+									bigEnemyNewPos = be.RandomPosition(12.0f, false);
+									be.LookAt(bigEnemyNewPos, 180.0f);
+									bigEnemyOnMove = true;
+								}
+
+								else if (bigEnemyOnMove){
+									bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime);
+									if (!bigEnemyOnMove)
+										be.LookAt(p.GetPosition(), 180.0f);
+								}
+								
 								cam->setPosition(bossFightCamPos);
 								cam->setTarget(p.GetPosition());
 							}

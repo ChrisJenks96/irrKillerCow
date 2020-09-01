@@ -14,6 +14,7 @@ using namespace io;
 using namespace gui;
 
 #define BASE_BOSS_HEALTH 15
+#define BASE_BOSS_HEIGHT -2.0f
 
 class BigEnemy
 {
@@ -30,7 +31,7 @@ public:
 	void SetHealth(int n) { health = n; }
 	void AddHealth(int n) { health += n; }
 	bool isAttackingFlag() { return isAttacking; }
-	void RandomPosition(const float distAway);
+	vector3df RandomPosition(const float distAway, bool setPos);
 	int GetAttackDamage() { return attackDamage; }
 	void SetAttackDamage(int a) { attackDamage = a; }
 	bool GetAttackStrikeDone() { return attackStrikeDone; }
@@ -38,8 +39,11 @@ public:
 	void SetAttackStrikeDone(int a) { attackStrikeDone = a; }
 	bool MoveTowards(const vector3df p, const float dt);
 	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
+	bool PollNewPosition(const float dt);
 	~BigEnemy();
 private:
+	float newPositionTimer{ 0.0f };
+	float newPositionRate{ 4.0f };
 	vector3df cachedSpawnPosition;
 	float healthDepleteTimer{ 0.0f };
 	float healthDepleteRate{ 0.1f };
@@ -51,7 +55,8 @@ private:
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 2.0f };
+	float speed{ 3.0f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
+	IAnimatedMeshSceneNode* node_cap;
 };
