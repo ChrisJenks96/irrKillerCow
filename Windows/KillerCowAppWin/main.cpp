@@ -30,6 +30,8 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 #define STATE_GAME_OVER 4
 #define STATE_POWERUP 5
 
+#define STARTING_ENEMIES 8
+
 IrrlichtDevice* device;
 MyEventReceiver er;
 ICameraSceneNode* cam;
@@ -58,6 +60,10 @@ bool bigEnemyCapOutOfRange = false;
 bool bossScene = false;
 bool bossDead = false;
 
+int perkCount = 0;
+#define NUKE_CHANCE 3
+#define SHIELD_CHANCE 0
+
 float shieldTimer = 0.0f;
 float shieldRate = 5.0f;
 
@@ -73,7 +79,7 @@ bool globalPlayerMunchFlag = false;
 int totalCowsKilled = 0;
 int cowsKilled = 0;
 float cowsXp = 0.0f;
-int cowsXpLvl = 0;
+int cowsXpLvl = 1;
 float xpMod = 4.8f;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
@@ -210,7 +216,7 @@ void CutsceneInit(IrrlichtDevice* device)
 {
 	//main ligth for the game
 	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
-	dirLight->getLightData().Type = ELT_DIRECTIONAL;
+	dirLight->getLightData().Type = ELT_SPOT;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 	
 	//load the non important static meshes for the scene with no behaviour
@@ -232,6 +238,7 @@ void CutsceneUnload(IrrlichtDevice* device)
 
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 {
+	dirLight->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 20.0f, 0.0f));
 	if (currentCutscene == 0)
 	{
 		//scroll the cutscene forward to give the illusion of the craft moving
@@ -323,12 +330,23 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 	}
 }
 
+void LightningUpgrade(IrrlichtDevice* device)
+{
+	cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
+	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
+	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
+	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
+	shieldRate = 5.0f * (currentLightningType + 1);
+	p.LightningChangeCol(lightning_types[currentLightningType].col);
+}
+
 void GameInit(IrrlichtDevice* device)
 {
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 5);
+	ef = EnemyFactory(device, 20, STARTING_ENEMIES);
+	ef.SetEnemyCount(STARTING_ENEMIES);
 	be = BigEnemy(device, 12.0f);
 	enemyOrb = EnemyOrb(device);
 	be.GetNode()->setVisible(false);
@@ -344,22 +362,19 @@ void GameInit(IrrlichtDevice* device)
 	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
 	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
 
-	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
-	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
+	LightningUpgrade(device);
 
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
 
-	/*dirLight->remove();
-	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 15.0f, 0.0f), SColorf(0.0f, 0.2f, 0.2f, 1.0f), 80.0f);
+	dirLight->remove();
+	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 60.0f, 0.0f), SColorf(0.0f, 0.4f, 0.4f, 1.0f), 160.0f);
 	dirLight->getLightData().Type = video::ELT_SPOT;
 	dirLight->getLightData().InnerCone = 30.0f;
 	dirLight->getLightData().OuterCone = 100.0f;
 	dirLight->getLightData().Falloff = 20.0f;
-	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));*/
+	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
-
-
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
@@ -383,7 +398,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					bigEnemyStopShooting = true;
 			}	
 
-			else if (dist < 0.7f && er.GUIShieldToggle) {
+			else if (dist < 2.8f && er.GUIShieldToggle) {
 				enemyOrb.GetNode()->setPosition(be.GetPosition());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
@@ -392,7 +407,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 		else			
 			enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
-
 	}
 
 	//the enemy entrance etc...
@@ -491,7 +505,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-	ef.Update(p, er.GUIShieldToggle, frameDeltaTime);
+	ef.Update(p, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
 
 	if (ef.isPlayerGettingMunched() && !globalPlayerMunchFlag){
 		globalPlayerMunchFlag = true;
@@ -551,22 +565,14 @@ void GameReset()
 	cowsXp = 0;
 	cowsXpLvl = 0;
 	cowsKilled = 0;
+	perkCount = 0;
 	p.SetHealth(100);
 	p.SetEnergy(100);
 	p.SetAnimationName("idle");
 	ef.ForceReset();
 	cam->setPosition(vector3df(defaultCamPos));
 	cam->setTarget(p.GetPosition());
-}
-
-void LightningUpgrade(IrrlichtDevice* device)
-{
-	cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
-	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
-	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
-	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
-	shieldRate = 5.0f * (currentLightningType + 1);
-	p.LightningChangeCol(lightning_types[currentLightningType].col);
+	ef.SetEnemyCount(STARTING_ENEMIES);
 }
 
 int main()
@@ -603,11 +609,11 @@ int main()
 		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
-		shieldBtnToggle = gui->addButton(recti(10, 90, 10 + 32, 90 + 32));
+		shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
 		shieldBtnToggle->setID(234);
 		shieldBtnToggle->setVisible(false);
 
-		nukeBtnToggle = gui->addButton(recti(52, 90, 52 + 32, 90 + 32));
+		nukeBtnToggle = gui->addButton(recti(52, 108, 52 + 32, 108 + 32));
 		nukeBtnToggle->setID(235);
 		nukeBtnToggle->setVisible(false);
 
@@ -620,6 +626,12 @@ int main()
 
 			if (state == STATE_GAME)
 			{
+				//DELET THIS AFTER TESTING
+				p.SetHealth(100);
+
+
+
+
 				//fade back into the game
 				if (cutscene3FadeOut && transition_alpha != 0){
 					cutscene3FadeOut = false;
@@ -792,6 +804,8 @@ int main()
 							if (bossDead){
 								enemyOrb.GetNode()->setPosition(vector3df(999.0f));
 								be.GetNodeDirt()->setPosition(vector3df(-9.99f));
+								//add 2 extra cows after the boss battle
+								ef.SetEnemyCount(ef.GetEnemyCount() + 2);
 								bossDead = false;
 							}
 
@@ -905,9 +919,15 @@ int main()
 					if (cowsXp > 100) 
 					{
 						//change to x amount of buttons
-						int whichButton = rand() % 2;
+						int whichPerk = rand() % 2;
+						if (whichPerk == 1 && (perkCount % NUKE_CHANCE) != 0)
+							whichPerk = 0;
+						perkCount++;
+						//nuke chance is the highest, if it goes above, reset it
+						if (perkCount == NUKE_CHANCE)
+							perkCount = 0;
 						//enable an op power
-						switch (whichButton)
+						switch (whichPerk)
 						{
 							case 0:
 								shieldBtnToggle->setVisible(true);
@@ -917,6 +937,7 @@ int main()
 								break;
 						}
 						
+						shieldTimer = 0.0f;
 						cowsXp = 0;
 						cowsXpLvl += 1;
 					}
@@ -930,6 +951,13 @@ int main()
 						nukeBtnToggle->draw();
 					cow_icon->draw();
 					alien_icon->draw();
+					dimension2du s = device->getVideoDriver()->getScreenSize();
+					stringw str;
+					str += (int)cowsXp;
+					str += L"/100 | LVL ";
+					str += cowsXpLvl;
+					font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0), video::SColor(255, 255, 255, 255));
+
 					HighScoreFontDraw(device, cowsKilled);
 				}
 			}

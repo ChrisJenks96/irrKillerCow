@@ -73,7 +73,7 @@ private:
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 1.3f };
+	float speed{ 3.3f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 };
@@ -83,8 +83,8 @@ class EnemyFactory
 	friend class Enemy;
 	public:
 		EnemyFactory() {}
-		EnemyFactory(IrrlichtDevice* d, const int size);
-		void Update(Player& p, bool& shieldActive, const float dt);
+		EnemyFactory(IrrlichtDevice* d, const int size, const int usable);
+		void Update(Player& p, bool& shieldActive, int& cowsKilled, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
 		void ForceReset();
@@ -94,9 +94,12 @@ class EnemyFactory
 		Enemy* GetNearestEnemy(Player& p);
 		bool isPlayerGettingMunched() { return playerGettingMunched; }
 		void SetPlayerGettingMunched(bool p) { playerGettingMunched = p; }
+		void SetEnemyCount(int c);
+		int GetEnemyCount() { return usable; }
 		~EnemyFactory();
 	private:
 		//how many cows are munching us
 		bool playerGettingMunched{ false };
+		int usable;
 		std::vector<Enemy> enemies;
 };

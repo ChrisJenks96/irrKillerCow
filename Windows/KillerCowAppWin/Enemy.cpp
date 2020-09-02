@@ -138,9 +138,10 @@ Enemy::~Enemy()
 
 }
 
-EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size)
+EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size, const int usable)
 {
 	//20 - 70
+	this->usable = usable;
 	for (int i = 0; i < size; i++) {
 		float distAway = rand() % (50 + 1) + 20;
 		Enemy newEnemy(d, distAway);
@@ -148,67 +149,75 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size)
 		enemyID++;
 		//2.0 units away and for 2 seconds
 		newEnemy.SetAttackAttrib(10.0f, 2.0f);
+		newEnemy.GetNode()->setVisible(false);
 		enemies.push_back(newEnemy);
 	}
 }
 
 void EnemyFactory::ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled)
 {
-	for (auto& x : enemies) {
-		if (!x.isDeathAnimationTrigger()) {
-			cowsXp += ((float)x.GetAttackDamage() / 10) * xpMod;
+	for (int i = 0; i < usable; i++) {
+		if (!enemies[i].isDeathAnimationTrigger()) {
+			cowsXp += ((float)enemies[i].GetAttackDamage() / 10) * xpMod;
 			cowsKilled += 1;
 		}
 
-		x.SetDeathAnimationTrigger(true);
+		enemies[i].SetDeathAnimationTrigger(true);
 	}
 }
 
 Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
 {
-	for (auto& x : enemies) {
-		if (s->getID() == x.GetNode()->getID())
-			return &x;
+	for (int i = 0; i < usable; i++) {
+		if (s->getID() == enemies[i].GetNode()->getID())
+			return &enemies[i];
 	}
 
 	return NULL;
 }
 
-void EnemyFactory::Update(Player& p, bool& shieldActive, const float dt)
+void EnemyFactory::Update(Player& p, bool& shieldActive, int& cowsKilled, const float dt)
 {
-	for (auto& x : enemies) {
-		x.LookAt(p.GetPosition(), -90.0f);
-		if (x.isDeathAnimationTrigger()){
-			if (x.DeathAnimation(dt)){
-				x.GetNode()->setVisible(false);
-				x.Reset();
+	for (int i = 0; i < usable; i++) {
+		enemies[i].LookAt(p.GetPosition(), -90.0f);
+		if (enemies[i].isDeathAnimationTrigger()){
+			if (enemies[i].DeathAnimation(dt)){
+				enemies[i].GetNode()->setVisible(false);
+				enemies[i].Reset();
 			}
 		}
 
 		else
 		{
-			ENEMY_STATE es = x.MoveTowards(p.GetPosition(), dt);
+			ENEMY_STATE es = enemies[i].MoveTowards(p.GetPosition(), dt);
 			switch (es)
 			{
 			case RESET:
-				x.Reset();
+				enemies[i].Reset();
 				break;
 			case ATTACK:
 				playerGettingMunched = true;
-				x.Attack(dt);
+				enemies[i].Attack(dt);
 				break;
 			case NONE:
-				if (x.GetAnimationID() != ENEMY_ANIMATION_WALK){
-					x.SetAnimationID(ENEMY_ANIMATION_WALK);
-					x.SetAnimationName("walk");
+				enemies[i].GetNode()->setVisible(true);
+				if (enemies[i].GetAnimationID() != ENEMY_ANIMATION_WALK){
+					enemies[i].SetAnimationID(ENEMY_ANIMATION_WALK);
+					enemies[i].SetAnimationName("walk");
 				}
 				break;
 			}
 
-			if (x.isAttackingFlag() && !x.GetAttackStrikeDone()) {
-				x.SetAttackStrikeDone(true);
+			if (enemies[i].isAttackingFlag() && !enemies[i].GetAttackStrikeDone()) {
+				enemies[i].SetAttackStrikeDone(true);
 				if (!shieldActive)
-					p.RemoveHealth(x.GetAttackDamage());
+					p.RemoveHealth(enemies[i].GetAttackDamage());
+				else if (shieldActive) {
+					
+					enemies[i].SetDeathAnimationTrigger(true);
+					enemies[i].SetHealth(0);
+					cowsKilled += 1;
+				}
 			}
 		}
 	}
@@ -217,22 +226,32 @@ void EnemyFactory::Update(Player& p, bool& shieldActive, const float dt)
 Enemy* EnemyFactory::GetNearestEnemy(Player& p) {
 	float distance = 999.0f;
 	Enemy* e = nullptr;
-	for (auto& x : enemies) {
-		float thisDist = (p.GetPosition() - x.GetPosition()).getLengthSQ();
+	for (int i = 0; i < usable; i++) {
+		float thisDist = (p.GetPosition() - enemies[i].GetPosition()).getLengthSQ();
 		if (thisDist < distance) {
 			distance = thisDist;
-			e = &x;
+			e = &enemies[i];
 		}
-	};
+	}
 
 	return e;
 }
 
 void EnemyFactory::ForceReset()
 {
-	for (auto& x : enemies) {
-		x.Reset();
-	};
+	for (int i = 0; i < usable; i++) {
+		enemies[i].Reset();
+	}
+}
+
+void EnemyFactory::SetEnemyCount(int c) {
+	if (c >= enemies.size())
+		c = enemies.size();
+	for (int i = 0; i < c; i++) {
+		enemies[i].GetNode()->setVisible(true);
+	}
+
+	usable = c;
 }
 
 EnemyFactory::~EnemyFactory()

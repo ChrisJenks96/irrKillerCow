@@ -81,7 +81,7 @@ typedef struct LIGHTNING_TYPE
 	float energyRestoreRate;
 } LIGHTNING_TYPE;
 
-static int currentLightningType = 0;
+static int currentLightningType = 4;
 
 static LIGHTNING_TYPE lightning_types[] =
 {
