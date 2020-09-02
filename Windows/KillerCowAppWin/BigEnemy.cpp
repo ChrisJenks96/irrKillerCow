@@ -73,6 +73,28 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 	selector->drop(); // We're done with this selector, so drop it now.
 }
 
+void BigEnemy::DeathAnimation(const float dt)
+{
+	animationTimer += 1.0f * dt;
+	//presume we've started on 'attack_start'
+	if (animationID == BIG_BOSS_ANIM_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death_idle");
+		animationID = BIG_BOSS_ANIM_DEATH_END2;
+		animationTimer = 0.0f;
+	}
+
+	else if ((animationID != BIG_BOSS_ANIM_DEATH_END2 && animationID != BIG_BOSS_ANIM_DEATH_END) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death");
+		animationID = BIG_BOSS_ANIM_DEATH_END;
+		animationTimer = 0.0f;
+	}
+
+	else if (animationID == BIG_BOSS_ANIM_DEATH_END2 && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		animationID = BIG_BOSS_ANIM_DEATH_END3;
+		animationTimer = 0.0f;
+	}
+}
+
 vector3df BigEnemy::RandomPosition(const float distAway, bool setPos)
 {
 	bool inv_x = rand() % 2;

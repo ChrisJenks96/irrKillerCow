@@ -18,7 +18,11 @@ using namespace gui;
 
 #define BIG_BOSS_ANIM_IDLE 0
 #define BIG_BOSS_ANIM_ATTACK 1
-#define BIG_BOSS_ANIM_WALK 2
+#define BIG_BOSS_ANIM_DEATH 2
+#define BIG_BOSS_ANIM_DEATH_END 3
+#define BIG_BOSS_ANIM_DEATH_END2 4
+#define BIG_BOSS_ANIM_DEATH_END3 5
+#define BIG_BOSS_ANIM_WALK 6
 
 class BigEnemy
 {
@@ -47,11 +51,14 @@ public:
 	void SetAnimationID(int i) { animationID = i; }
 	int GetAnimationID() { return animationID; }
 	void SetAnimationName(const char* n) { node->setMD2Animation(n); }
+	void DeathAnimation(const float dt);
 	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
 	IAnimatedMeshSceneNode* GetNodeDrill() { return node_drill; }
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
+	float animationTimer{ 0.0f };
+	float animationRate{ 4.0f };
 	float newPositionTimer{ 0.0f };
 	float newPositionRate{ 4.0f };
 	vector3df cachedSpawnPosition;
