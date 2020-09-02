@@ -404,7 +404,9 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
-bool play = false;
+bool lightningEffectStartTrigger = false;
+bool lightningEffectMidTrigger = false;
+bool lightningEffectEndTrigger = false;
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
@@ -416,11 +418,11 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
 		MouseXPrev = MouseX;
 	}
-	
+
 	enemyOrb.Update(frameDeltaTime);
 	if (bigEnemyCapOutOfRange)
 	{
-		if (!bigEnemyStopShooting){
+		if (!bigEnemyStopShooting) {
 			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
@@ -429,7 +431,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				p.RemoveHealth(be.GetAttackDamage());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
-			}	
+			}
 
 			else if (dist < 2.8f && er.GUIShieldToggle) {
 				enemyOrb.GetNode()->setPosition(be.GetPosition());
@@ -438,7 +440,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			}
 		}
 
-		else			
+		else
 			enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 	}
 
@@ -457,25 +459,27 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	}
 
 	//firing state for the player
-	if (er.GetMouseState().LeftButtonDown){
+	bool leftPressedMidEffect = false;
+	if (er.GetMouseState().LeftButtonDown) {
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
-		{	
-			if (!play) {
-				FMODSystem->playSound(lightningEffectStart, 0, false, &channel);
-				channel->setVolume(0.8f);
-				play = true;
+		{
+			if (lightningEffectMidTrigger) {
+				leftPressedMidEffect = true;
+				channel->setMode(FMOD_LOOP_NORMAL);
 			}
 
-			if (play) {
-				channel->isPlaying(&play);
+			else if (!lightningEffectStartTrigger) {
+				channel->setMode(FMOD_LOOP_OFF);
+				FMODSystem->playSound(lightningEffectStart, 0, false, &channel);
+				channel->setVolume(0.8f);
+				channel->setPaused(false);
+				lightningEffectStartTrigger = true;
 			}
-			
-			FMODSystem->update();
 
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
-			if (e != NULL){
+			if (e != NULL) {
 				if (e->getID() == 667)
 				{
 					be.RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
@@ -484,7 +488,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 							cam->setTarget(p.GetPosition());
 							be.SetAnimationID(BIG_BOSS_ANIM_DEATH);
 						}
-						
+
 						bossDead = true;
 					}
 				}
@@ -493,12 +497,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 					Enemy* enemy = ef.FindEnemy(e);
 					enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 					enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-					if (enemy->GetHealth() <= 0){
-						if (!enemy->isDeathAnimationTrigger()){
+					if (enemy->GetHealth() <= 0) {
+						if (!enemy->isDeathAnimationTrigger()) {
 							cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
 							cowsKilled += 1;
 						}
-							
+
 						enemy->SetDeathAnimationTrigger(true);
 					}
 				}
@@ -511,7 +515,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			cutsceneLightning->setVisible(true);
 		}
 	}
-		
+
 	else
 	{
 		p.NotFiringAnimation(frameDeltaTime);
@@ -520,6 +524,28 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		if (p.GetEnergy() <= 100)
 			p.AddEnergy(frameDeltaTime);
 		ef.ResetEmission();
+	}
+
+	if (lightningEffectStartTrigger) {
+		channel->isPlaying(&lightningEffectStartTrigger);
+		if (!lightningEffectStartTrigger) {
+			lightningEffectMidTrigger = true;
+			channel->setMode(FMOD_LOOP_NORMAL);
+			FMODSystem->playSound(lightningEffectMid, 0, false, &channel);
+			channel->setVolume(0.8f);
+		}
+	}
+
+	else if (!leftPressedMidEffect  && lightningEffectMidTrigger) {
+		channel->setMode(FMOD_LOOP_OFF);
+		FMODSystem->playSound(lightningEffectEnd, 0, false, &channel);
+		channel->setVolume(0.8f);
+		lightningEffectMidTrigger = false;
+		lightningEffectEndTrigger = true;
+	}
+
+	else if (lightningEffectEndTrigger) {
+		channel->isPlaying(&lightningEffectEndTrigger);
 	}
 
 	if (playerNukeGoneOff)
@@ -938,7 +964,7 @@ int main()
 				//Common_Update();
 				FMODSystem->playSound(mainMenuMusic, 0, false, &channel);
 				channel->setVolume(0.8f);
-				FMODSystem->update();
+				//FMODSystem->update();
 
 				if (er.GetMouseState().LeftButtonDown) {
 					CutsceneInit(device);
