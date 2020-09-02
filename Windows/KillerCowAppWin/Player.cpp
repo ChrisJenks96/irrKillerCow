@@ -93,6 +93,27 @@ void Player::FiringAnimation(const float dt)
 	}
 }
 
+void Player::DeathAnimation(const float dt)
+{
+	animationTimer += 1.0f * dt;
+	//presume we've started on 'attack_start'
+	if (animationID != PLAYER_ANIMATION_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death");
+		//animation 'death start'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_DEATH_END;
+		animationTimer = 0.0f;
+	}
+
+	else if (animationID == PLAYER_ANIMATION_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death_idle");
+		//animation 'death idle'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_DEATH_END;
+		animationTimer = 0.0f;
+	}
+}
+
 void Player::NotFiringAnimation(const float dt)
 {
 	animationTimer += 1.0f * dt;

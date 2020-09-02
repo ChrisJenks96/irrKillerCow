@@ -19,6 +19,8 @@ using namespace gui;
 #define PLAYER_ANIMATION_ATTACK_END 3
 #define PLAYER_ANIMATION_CRAWL_FROM_SHIP 4
 #define PLAYER_ANIMATION_CRAWL_WALK 5
+#define PLAYER_ANIMATION_DEATH 6
+#define PLAYER_ANIMATION_DEATH_END 7
 
 class Player
 {
@@ -58,6 +60,7 @@ class Player
 
 		//animations
 		void FiringAnimation(const float dt);
+		void DeathAnimation(const float dt);
 		void NotFiringAnimation(const float dt);
 
 		~Player();

@@ -70,6 +70,9 @@ bool bigEnemyCapOutOfRange = false;
 bool bossScene = false;
 bool bossDead = false;
 
+float gameOverResetTimer = 0.0f;
+float gameOverResetRate = 4.0f;
+
 int perkCount = 0;
 #define NUKE_CHANCE 3
 #define SHIELD_CHANCE 0
@@ -158,7 +161,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			}*/
 		}
 
-		cutsceneGroundSceneNode[0]->setVisible(true);
+		cutsceneGroundSceneNode[0]->setVisible(false);
 		cutsceneGroundSceneNode[1]->setVisible(false);	
 	}
 
@@ -172,6 +175,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		if (ufoSceneNode){
 			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			ufoSceneNode->setVisible(false);
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
@@ -189,6 +193,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	{
 		ufoBladesSceneNode = smgr->addMeshSceneNode(mesh);
 		ufoBladesSceneNode->setScale(vector3df(1.25f));
+		ufoBladesSceneNode->setVisible(false);
 
 		if (ufoBladesSceneNode)
 		{
@@ -205,6 +210,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	{
 		cowHeadGameOver = smgr->addMeshSceneNode(mesh);
 		cowHeadGameOver->setScale(vector3df(1.25f));
+		cowHeadGameOver->setVisible(true);
 
 		if (cowHeadGameOver)
 		{
@@ -225,6 +231,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 //MUST ALWAYS LOAD CUTSCENEINIT FIRST... THIS BOOTS ALL OUR ASSETS FOR THE GAME
 void CutsceneInit(IrrlichtDevice* device)
 {
+	earthSceneNode->setVisible(false);
 	//main ligth for the game
 	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = ELT_SPOT;
@@ -233,7 +240,12 @@ void CutsceneInit(IrrlichtDevice* device)
 	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 100, 100, 100);
 	
 	//load the non important static meshes for the scene with no behaviour
-	StaticMeshesLoad(device);
+
+	//ENABLE ALL VISIBILITY HERE....
+	ufoSceneNode->setVisible(true);
+	ufoBladesSceneNode->setVisible(true);
+	cutsceneGroundSceneNode[0]->setVisible(true);
+
 	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 	//ufoBladesSceneNode->setPosition(vector3df(0.0f, 40.0f, 0.0f));
@@ -247,8 +259,7 @@ void CutsceneUnload(IrrlichtDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
 	groundSceneNode->setVisible(true);
-	introCutsceneLight->drop();
-	introCutsceneLight = 0;
+	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 10, 10, 10);
 }
 
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
@@ -383,7 +394,7 @@ void GameInit(IrrlichtDevice* device)
 	cam->setTarget(p.GetPosition());
 
 	dirLight->remove();
-	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 60.0f, 0.0f), SColorf(0.0f, 0.4f, 0.4f, 1.0f), 160.0f);
+	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 80.0f, 0.0f), SColorf(0.0f, 0.4f, 0.4f, 1.0f), 160.0f);
 	dirLight->getLightData().Type = video::ELT_SPOT;
 	dirLight->getLightData().InnerCone = 30.0f;
 	dirLight->getLightData().OuterCone = 100.0f;
@@ -578,6 +589,8 @@ int Sys_Init()
 	FMODSystem->init(2, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
 
+	StaticMeshesLoad(device);
+
 	IMesh* mesh = smgr->getMesh("media/gui/earth.obj");
 	if (mesh)
 	{
@@ -729,15 +742,20 @@ int main()
 
 						if (p.GetHealth() <= 0) {
 							//play death animation
-							p.SetAnimationName("crdeth");
-							cam->setPosition(vector3df(999.0f));
-							cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
-							cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
-							cam->setTarget(cowHeadGameOver->getPosition());
-							totalCowsKilled += cowsKilled;
-							//reset boss shite
-							bossScene = false;
-							state = STATE_GAME_OVER;
+							p.DeathAnimation(frameDeltaTime);
+							gameOverResetTimer += 1.0f * frameDeltaTime;
+							if (gameOverResetTimer > gameOverResetRate) {
+								cam->setPosition(vector3df(999.0f));
+								cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
+								cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
+								cam->setTarget(cowHeadGameOver->getPosition());
+								totalCowsKilled += cowsKilled;
+								//reset boss shite
+								bossScene = false;
+								gameOverResetTimer = 0.0f;
+								state = STATE_GAME_OVER;
+							}
+							
 						}
 
 						//lightning upgrade states
