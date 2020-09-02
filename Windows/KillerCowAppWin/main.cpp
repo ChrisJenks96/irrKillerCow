@@ -12,6 +12,8 @@ using namespace gui;
 #include <time.h>
 #include "ER.h"
 #include "LightningSceneNode.h"
+#include "fmod.hpp"
+
 int QUAD_SEGMENT_INCREMENT = -10.0f;
 
 #include "EnemyOrb.h"
@@ -30,8 +32,14 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 #define STATE_GAME_OVER 4
 #define STATE_POWERUP 5
 
-#define STARTING_ENEMIES 8
+#define STARTING_ENEMIES 4
 
+//MUSIC RELATED STUFF
+FMOD::System* FMODSystem;
+FMOD::Channel* channel = 0;
+FMOD::Sound* mainMenuMusic;
+
+//system stuff
 IrrlichtDevice* device;
 MyEventReceiver er;
 ICameraSceneNode* cam;
@@ -74,6 +82,7 @@ Player p;
 EnemyFactory ef;
 BigEnemy be;
 
+bool gameOverToReset = false;
 bool playerNukeGoneOff = false;
 bool globalPlayerMunchFlag = false;
 int totalCowsKilled = 0;
@@ -90,7 +99,7 @@ IGUIFont* font;
 int currentCutscene = 0;
 float gameOverTimer = 0.0f;
 #define GAME_OVER_FADE_OUT_TIME 3.0f
-#define GAME_OVER_FINISH_TIME 10.0f
+#define GAME_OVER_FINISH_TIME 1.0f
 
 static void StaticMeshesLoad(IrrlichtDevice* device)
 {
@@ -345,7 +354,7 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 20, STARTING_ENEMIES);
+	ef = EnemyFactory(device, 30, STARTING_ENEMIES);
 	ef.SetEnemyCount(STARTING_ENEMIES);
 	be = BigEnemy(device, 12.0f);
 	enemyOrb = EnemyOrb(device);
@@ -537,7 +546,7 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 	stringw str = L"X ";
 	str += cowsMuggedOff;
 	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<s32>(s.Width - 60, 32, 0, 0), video::SColor(255, 255, 255, 255));
+	font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
 bool Sys_Init()
@@ -556,6 +565,12 @@ bool Sys_Init()
 	ISceneManager* smgr = device->getSceneManager();
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
+
+	//void* extradriverdata = 0;
+	//Common_Init(&extradriverdata);
+	FMOD::System_Create(&FMODSystem);
+	FMODSystem->init(2, FMOD_INIT_NORMAL, 0);
+	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
 	return 0;
 }
 
@@ -598,7 +613,7 @@ int main()
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(85, 33));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
-		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 130, 10));
+		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 170, 10));
 		cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* alien_icon = gui->addImage(driver->getTexture("media/gui/alien_icon.png"), vector2di(14, 10));
 		cow_icon->setMaxSize(dimension2du(64, 64));
@@ -627,7 +642,7 @@ int main()
 			if (state == STATE_GAME)
 			{
 				//DELET THIS AFTER TESTING
-				p.SetHealth(100);
+				//p.SetHealth(100);
 
 
 
@@ -831,8 +846,14 @@ int main()
 			}
 
 			else if (state == STATE_MENU) {
+				//Common_Update();
+				FMODSystem->playSound(mainMenuMusic, 0, false, &channel);
+				channel->setVolume(0.8f);
+				FMODSystem->update();
+
 				if (er.GetMouseState().LeftButtonDown) {
 					CutsceneInit(device);
+					mainMenuMusic->release();
 					state = STATE_INTRO_CUTSCENE;
 				}
 			}
@@ -840,13 +861,19 @@ int main()
 			else if (state == STATE_GAME_OVER)
 			{
 				//cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
-				gameOverTimer += 1.0f * frameDeltaTime;
-
-				if (gameOverTimer > GAME_OVER_FINISH_TIME) {
-					gameOverTimer = 0.0f;
-					GameReset();
-					state = STATE_GAME;
+				if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
+					gameOverToReset = true;
+				
+				if (gameOverToReset){
+					gameOverTimer += 1.0f * frameDeltaTime;
+					if (gameOverTimer > GAME_OVER_FINISH_TIME) {
+						gameOverTimer = 0.0f;
+						GameReset();
+						gameOverToReset = false;
+						state = STATE_GAME;
+					}
 				}
+				
 			}
 
 			else if (state == STATE_POWERUP)
@@ -968,6 +995,8 @@ int main()
 
 	//cutsceneLightning->drop();
 	//cutsceneLightning = 0;
+	FMODSystem->close();
+	FMODSystem->release();
 	device->drop();
 	return 0;
 }
