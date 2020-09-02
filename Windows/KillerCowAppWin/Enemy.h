@@ -67,13 +67,13 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_COW_HEALTH };
 	bool attackStrikeDone{ false };
-	int attackDamage{ 6 };
+	int attackDamage{ 43 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 2.0f };
+	float speed{ 1.3f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 };
@@ -84,7 +84,7 @@ class EnemyFactory
 	public:
 		EnemyFactory() {}
 		EnemyFactory(IrrlichtDevice* d, const int size);
-		void Update(Player& p, const float dt);
+		void Update(Player& p, bool& shieldActive, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
 		void ForceReset();

@@ -33,10 +33,9 @@ Player::Player(IrrlichtDevice* d)
 		if (nodeShield)
 		{
 			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
-			nodeShield->setMaterialFlag(EMF_LIGHTING, true);
+			nodeShield->setMaterialFlag(EMF_LIGHTING, false);
 			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			nodeShield->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
-			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
 			nodeShield->setVisible(false);
 		}
@@ -47,12 +46,12 @@ Player::Player(IrrlichtDevice* d)
 	orb.GetNode()->setPosition(node->getPosition());
 
 	//weapon firing lighting effect
-	/*weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
+	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
 	weaponFiringLight->getLightData().InnerCone = 10.0f;
 	weaponFiringLight->getLightData().OuterCone = 20.0f;
 	weaponFiringLight->getLightData().Falloff = 0.0f;
-	WeaponFiringLightToggle(false);*/
+	WeaponFiringLightToggle(false);
 }
 
 void Player::AddEnergy(const float dt)
@@ -132,7 +131,7 @@ void Player::ShieldUVScroll(const float dt)
 
 ISceneNode* Player::Fire(IrrlichtDevice* device)
 {
-	//WeaponFiringLightToggle(true);
+	WeaponFiringLightToggle(true);
 
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
@@ -150,7 +149,7 @@ ISceneNode* Player::Fire(IrrlichtDevice* device)
 
 void Player::Idle()
 {
-	//WeaponFiringLightToggle(false);
+	WeaponFiringLightToggle(false);
 }
 
 void Player::LookAt(const vector3df p, const float offset)

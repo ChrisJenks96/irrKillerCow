@@ -174,7 +174,7 @@ Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
 	return NULL;
 }
 
-void EnemyFactory::Update(Player& p, const float dt)
+void EnemyFactory::Update(Player& p, bool& shieldActive, const float dt)
 {
 	for (auto& x : enemies) {
 		x.LookAt(p.GetPosition(), -90.0f);
@@ -207,7 +207,8 @@ void EnemyFactory::Update(Player& p, const float dt)
 
 			if (x.isAttackingFlag() && !x.GetAttackStrikeDone()) {
 				x.SetAttackStrikeDone(true);
-				p.RemoveHealth(x.GetAttackDamage());
+				if (!shieldActive)
+					p.RemoveHealth(x.GetAttackDamage());
 			}
 		}
 	}

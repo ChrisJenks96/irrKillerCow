@@ -9,12 +9,15 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
+IGUIButton* shieldBtnToggle;
+IGUIButton* nukeBtnToggle;
+
 class MyEventReceiver : public IEventReceiver
 {
 public:
     bool Keys[256];
-    bool GUIShieldToggle{ false };
     bool GUINukeToggle{ false };
+    bool GUIShieldToggle{ false };
     // We'll create a struct to record info on the mouse state
     struct SMouseState
     {
@@ -36,10 +39,12 @@ public:
                     switch (id)
                     {
                         case 234:
-                            GUIShieldToggle = !GUIShieldToggle;
+                            shieldBtnToggle->setVisible(false);
+                            GUIShieldToggle = true;
                             break;
                         case 235:
-                            GUINukeToggle = !GUINukeToggle;
+                            nukeBtnToggle->setVisible(false);
+                            GUINukeToggle = true;
                             break;
                     }
             }

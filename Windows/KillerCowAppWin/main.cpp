@@ -58,6 +58,9 @@ bool bigEnemyCapOutOfRange = false;
 bool bossScene = false;
 bool bossDead = false;
 
+float shieldTimer = 0.0f;
+float shieldRate = 5.0f;
+
 vector3df OldCameraPosition;
 
 //game specifics
@@ -206,7 +209,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 void CutsceneInit(IrrlichtDevice* device)
 {
 	//main ligth for the game
-	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.15f, 0.15f, 1.0f), 0.0f);
+	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = ELT_DIRECTIONAL;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 	
@@ -335,7 +338,6 @@ void GameInit(IrrlichtDevice* device)
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
 	groundSceneNode->setPosition(vector3df(0.0f, -1.0f, 0.0f));
 
-	//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 8.0f, 0.0f), SColorf(0.0f, 0.3f, 0.3f, 0.3f), 20.0f);
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning->setParent(p.GetNode());
 	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
@@ -348,13 +350,13 @@ void GameInit(IrrlichtDevice* device)
 	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
 	cam->setTarget(p.GetPosition());
 
-	dirLight->remove();
+	/*dirLight->remove();
 	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 15.0f, 0.0f), SColorf(0.0f, 0.2f, 0.2f, 1.0f), 80.0f);
 	dirLight->getLightData().Type = video::ELT_SPOT;
 	dirLight->getLightData().InnerCone = 30.0f;
 	dirLight->getLightData().OuterCone = 100.0f;
 	dirLight->getLightData().Falloff = 20.0f;
-	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
+	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));*/
 }
 
 
@@ -374,12 +376,18 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
-			if (dist < 0.2f) {
+			if (dist < 0.2f && !er.GUIShieldToggle) {
 				enemyOrb.GetNode()->setPosition(be.GetPosition());
 				p.RemoveHealth(be.GetAttackDamage());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
 			}	
+
+			else if (dist < 0.7f && er.GUIShieldToggle) {
+				enemyOrb.GetNode()->setPosition(be.GetPosition());
+				if (bigEnemyOnMove)
+					bigEnemyStopShooting = true;
+			}
 		}
 
 		else			
@@ -477,12 +485,13 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.ShieldUVScroll(frameDeltaTime);
 	else if (p.GetEnergy() <= 0) {
 		p.SetEnergy(0);
+		shieldBtnToggle->setVisible(false);
 		er.GUIShieldToggle = false;
 	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-	ef.Update(p, frameDeltaTime);
+	ef.Update(p, er.GUIShieldToggle, frameDeltaTime);
 
 	if (ef.isPlayerGettingMunched() && !globalPlayerMunchFlag){
 		globalPlayerMunchFlag = true;
@@ -556,7 +565,8 @@ void LightningUpgrade(IrrlichtDevice* device)
 	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
-	//p.LightningChangeCol(lightning_types[currentLightningType].col);
+	shieldRate = 5.0f * (currentLightningType + 1);
+	p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
 int main()
@@ -593,13 +603,13 @@ int main()
 		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
-		IGUIButton* shieldBtnToggle = gui->addButton(recti(10, 90, 10 + 32, 90 + 32));
+		shieldBtnToggle = gui->addButton(recti(10, 90, 10 + 32, 90 + 32));
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(true);
+		shieldBtnToggle->setVisible(false);
 
-		IGUIButton* nukeBtnToggle = gui->addButton(recti(52, 90, 52 + 32, 90 + 32));
+		nukeBtnToggle = gui->addButton(recti(52, 90, 52 + 32, 90 + 32));
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(true);
+		nukeBtnToggle->setVisible(false);
 
 		while (device->run())
 		{
@@ -620,7 +630,13 @@ int main()
 				{
 					p.ShieldToggle(er.GUIShieldToggle);
 					if (er.GUIShieldToggle){
-						p.RemoveEnergy(frameDeltaTime);
+						shieldTimer += 1.0f * frameDeltaTime;
+						if (shieldTimer > shieldRate){
+							shieldTimer = 0.0f;
+							er.GUIShieldToggle = false;
+							p.ShieldToggle(er.GUIShieldToggle);
+							shieldBtnToggle->setVisible(false);
+						}
 					}
 
 					cutscene3FadeOut = false;
@@ -667,9 +683,9 @@ int main()
 						}
 
 						//lightning upgrade states
-						else if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 4)
-							|| (currentLightningType == 2 && cowsXpLvl == 6) || (currentLightningType == 3 && cowsXpLvl == 8)
-							|| (currentLightningType == 4 && cowsXpLvl == 10))
+						else if ((currentLightningType == 0 && cowsXpLvl == 4) || (currentLightningType == 1 && cowsXpLvl == 8)
+							|| (currentLightningType == 2 && cowsXpLvl == 12) || (currentLightningType == 3 && cowsXpLvl == 16)
+							|| (currentLightningType == 4 && cowsXpLvl == 20))
 						{
 							currentLightningType++;
 							if (currentLightningType == LIGHTNING_TYPES)
@@ -694,8 +710,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 20) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -886,8 +902,21 @@ int main()
 					heat_outside->draw();
 					if (p.GetEnergy() > 0)
 						heat_inside->draw();
-					if (cowsXp > 100) {
-						shieldBtnToggle->setVisible(true);
+					if (cowsXp > 100) 
+					{
+						//change to x amount of buttons
+						int whichButton = rand() % 2;
+						//enable an op power
+						switch (whichButton)
+						{
+							case 0:
+								shieldBtnToggle->setVisible(true);
+								break;
+							case 1:
+								nukeBtnToggle->setVisible(true);
+								break;
+						}
+						
 						cowsXp = 0;
 						cowsXpLvl += 1;
 					}
@@ -895,8 +924,10 @@ int main()
 					unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
 					unlock_outside->draw();
 					unlock_inside->draw();
-					shieldBtnToggle->draw();
-					nukeBtnToggle->draw();
+					if (shieldBtnToggle->isVisible())
+						shieldBtnToggle->draw();
+					if (nukeBtnToggle->isVisible())
+						nukeBtnToggle->draw();
 					cow_icon->draw();
 					alien_icon->draw();
 					HighScoreFontDraw(device, cowsKilled);
