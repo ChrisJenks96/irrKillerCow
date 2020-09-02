@@ -50,6 +50,8 @@ IMeshSceneNode* ufoBladesSceneNode;
 IMeshSceneNode* cowHeadGameOver;
 ILightSceneNode* dirLight;
 ILightSceneNode* ufoSpotlight;
+IMeshSceneNode* earthSceneNode;
+ILightSceneNode* introCutsceneLight;
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 EnemyOrb enemyOrb;
@@ -227,6 +229,8 @@ void CutsceneInit(IrrlichtDevice* device)
 	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = ELT_SPOT;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
+
+	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 100, 100, 100);
 	
 	//load the non important static meshes for the scene with no behaviour
 	StaticMeshesLoad(device);
@@ -243,6 +247,8 @@ void CutsceneUnload(IrrlichtDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
 	groundSceneNode->setVisible(true);
+	introCutsceneLight->drop();
+	introCutsceneLight = 0;
 }
 
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
@@ -549,7 +555,7 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 	font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
-bool Sys_Init()
+int Sys_Init()
 {
 	/* initialize random seed: */
 	srand(time(NULL));
@@ -571,6 +577,28 @@ bool Sys_Init()
 	FMOD::System_Create(&FMODSystem);
 	FMODSystem->init(2, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
+
+	IMesh* mesh = smgr->getMesh("media/gui/earth.obj");
+	if (mesh)
+	{
+		earthSceneNode = smgr->addMeshSceneNode(mesh);
+		earthSceneNode->setScale(vector3df(5.0f));
+
+		if (earthSceneNode)
+		{
+			earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
+			/*earthSceneNode->getMaterial(0).EmissiveColor = SColor(255, 10, 10, 10);
+			earthSceneNode->getMaterial(0).DiffuseColor = SColor(255, 10, 10, 10);
+			earthSceneNode->getMaterial(0).AmbientColor = SColor(255, 10, 10, 10);
+			earthSceneNode->getMaterial(0).SpecularColor = SColor(255, 10, 10, 10);*/
+		}
+	}
+
+	introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160), 2000.0f);
+	introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
+	introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
 	return 0;
 }
 
@@ -606,6 +634,9 @@ int main()
 		IVideoDriver* driver = device->getVideoDriver();
 		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
+
+		//LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
+		ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
 
 		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
@@ -845,7 +876,9 @@ int main()
 					CutsceneUpdate(device, frameDeltaTime);
 			}
 
-			else if (state == STATE_MENU) {
+			else if (state == STATE_MENU) 
+			{
+				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
 				//Common_Update();
 				FMODSystem->playSound(mainMenuMusic, 0, false, &channel);
 				channel->setVolume(0.8f);
@@ -899,9 +932,10 @@ int main()
 			driver->beginScene(true, true, SColor(255, 0, 0, 0));
 			smgr->drawAll();
 			if (state == STATE_MENU){
-				driver->draw2DImage(menuBkg, recti(0, 0, driver->getScreenSize().Width, driver->getScreenSize().Height),
-					recti(0, 0, menuBkg->getSize().Width, menuBkg->getSize().Height));
+				//driver->draw2DImage(menuBkg, recti(0, 0, driver->getScreenSize().Width, driver->getScreenSize().Height),
+					//recti(0, 0, menuBkg->getSize().Width, menuBkg->getSize().Height));
 				MenuFontDraw(device);
+				driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
