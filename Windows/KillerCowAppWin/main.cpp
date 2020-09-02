@@ -786,8 +786,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							be.GetNode()->setVisible(true);
@@ -840,10 +840,19 @@ int main()
 								}
 
 								else if (bigEnemyOnMove){
+									if (be.GetAnimationID() != BIG_BOSS_ANIM_WALK) {
+										be.SetAnimationName("walk");
+										be.SetAnimationID(BIG_BOSS_ANIM_WALK);
+									}
+									
 									bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
 									if (!bigEnemyOnMove) {
 										bigEnemyStopShooting = false;
 										be.LookAt(p.GetPosition(), 180.0f);
+										if (be.GetAnimationID() != BIG_BOSS_ANIM_ATTACK) {
+											be.SetAnimationName("attack_main");
+											be.SetAnimationID(BIG_BOSS_ANIM_ATTACK);
+										}
 									}
 								}
 								

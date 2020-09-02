@@ -16,6 +16,10 @@ using namespace gui;
 #define BASE_BOSS_HEALTH 15
 #define BASE_BOSS_HEIGHT -2.0f
 
+#define BIG_BOSS_ANIM_IDLE 0
+#define BIG_BOSS_ANIM_ATTACK 1
+#define BIG_BOSS_ANIM_WALK 2
+
 class BigEnemy
 {
 public:
@@ -40,6 +44,9 @@ public:
 	bool MoveTowards(const vector3df p, const float dt, bool includeCap);
 	vector3df GetCachedSpawnPosition() { return cachedSpawnPosition; }
 	bool PollNewPosition(const float dt);
+	void SetAnimationID(int i) { animationID = i; }
+	int GetAnimationID() { return animationID; }
+	void SetAnimationName(const char* n) { node->setMD2Animation(n); }
 	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
 	IAnimatedMeshSceneNode* GetNodeDrill() { return node_drill; }
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
@@ -52,13 +59,14 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_BOSS_HEALTH };
 	bool attackStrikeDone{ false };
+	int animationID{ BIG_BOSS_ANIM_IDLE };
 	int attackDamage{ 4 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 2.0f };
+	float speed{ 3.0f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;
