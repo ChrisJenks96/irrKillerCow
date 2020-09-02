@@ -38,6 +38,9 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 FMOD::System* FMODSystem;
 FMOD::Channel* channel = 0;
 FMOD::Sound* mainMenuMusic;
+FMOD::Sound* lightningEffectStart;
+FMOD::Sound* lightningEffectMid;
+FMOD::Sound* lightningEffectEnd;
 
 //system stuff
 IrrlichtDevice* device;
@@ -401,6 +404,8 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
+bool play = false;
+
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
@@ -456,6 +461,18 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
 		{	
+			if (!play) {
+				FMODSystem->playSound(lightningEffectStart, 0, false, &channel);
+				channel->setVolume(0.8f);
+				play = true;
+			}
+
+			if (play) {
+				channel->isPlaying(&play);
+			}
+			
+			FMODSystem->update();
+
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device);
 			if (e != NULL){
@@ -589,6 +606,9 @@ int Sys_Init()
 	FMOD::System_Create(&FMODSystem);
 	FMODSystem->init(2, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
+	FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
+	FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
+	FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
 
 	StaticMeshesLoad(device);
 
