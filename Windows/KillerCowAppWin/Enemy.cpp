@@ -54,7 +54,12 @@ void Enemy::Attack(const float dt)
 {
 	currAttackLength += 1.0f * dt;
 	//do some attacky stuff here...
-	if (currAttackLength > attackLength) {
+	if (animationID != ENEMY_ANIMATION_ATTACK) {
+		animationID = ENEMY_ANIMATION_ATTACK;
+		node->setMD2Animation("attack");
+	}
+	
+	if (currAttackLength > ANIMATION_FRAME_TO_TIME(9)) {
 		isAttacking = false;
 		currAttackLength = 0.0f;
 		node->setMD2Animation("walk");

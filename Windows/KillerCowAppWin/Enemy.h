@@ -26,6 +26,7 @@ enum ENEMY_STATE
 #define ENEMY_ANIMATION_WALK 1
 #define ENEMY_ANIMATION_DEATH 2
 #define ENEMY_ANIMATION_DEATH_IDLE 3
+#define ENEMY_ANIMATION_ATTACK 4
 
 //enemy id ranges from 300+
 static int enemyID = 300;

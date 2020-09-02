@@ -787,8 +787,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
