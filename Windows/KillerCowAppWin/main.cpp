@@ -37,10 +37,15 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 //MUSIC RELATED STUFF
 FMOD::System* FMODSystem;
 FMOD::Channel* channel = 0;
+FMOD_MODE currMode;
 FMOD::Sound* mainMenuMusic;
 FMOD::Sound* lightningEffectStart;
 FMOD::Sound* lightningEffectMid;
 FMOD::Sound* lightningEffectEnd;
+
+bool lightningEffectStartTrigger = false;
+bool lightningEffectMidTrigger = false;
+bool lightningEffectEndTrigger = false;
 
 //system stuff
 IrrlichtDevice* device;
@@ -261,7 +266,6 @@ void CutsceneUnload(IrrlichtDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
 	groundSceneNode->setVisible(true);
-	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 10, 10, 10);
 }
 
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
@@ -343,6 +347,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 2)
 	{
+		introCutsceneLight->getLightData().DiffuseColor = SColor(255, 10, 10, 10);
 		ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 		//attach and move the camera onto the ufo for crashing landing cam
 		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
@@ -404,10 +409,6 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
-bool lightningEffectStartTrigger = false;
-bool lightningEffectMidTrigger = false;
-bool lightningEffectEndTrigger = false;
-
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
@@ -466,7 +467,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		{
 			if (lightningEffectMidTrigger) {
 				leftPressedMidEffect = true;
-				channel->setMode(FMOD_LOOP_NORMAL);
+				channel->getMode(&currMode);
+				if (currMode != FMOD_LOOP_NORMAL) {
+					channel->setMode(FMOD_LOOP_NORMAL);
+					channel->setLoopPoints(20, FMOD_TIMEUNIT_MS, 750, FMOD_TIMEUNIT_MS);
+				}
+					
 			}
 
 			else if (!lightningEffectStartTrigger) {
