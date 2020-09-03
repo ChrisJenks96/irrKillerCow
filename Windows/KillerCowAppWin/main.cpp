@@ -812,9 +812,9 @@ int main()
 						}
 
 						//lightning upgrade states
-						else if ((currentLightningType == 0 && cowsXpLvl == 4) || (currentLightningType == 1 && cowsXpLvl == 8)
-							|| (currentLightningType == 2 && cowsXpLvl == 12) || (currentLightningType == 3 && cowsXpLvl == 16)
-							|| (currentLightningType == 4 && cowsXpLvl == 20))
+						else if ((currentLightningType == 0 && cowsXpLvl == 3) || (currentLightningType == 1 && cowsXpLvl == 6)
+							|| (currentLightningType == 2 && cowsXpLvl == 9) || (currentLightningType == 3 && cowsXpLvl == 12)
+							|| (currentLightningType == 4 && cowsXpLvl == 15))
 						{
 							currentLightningType++;
 							if (currentLightningType == LIGHTNING_TYPES)
@@ -833,6 +833,8 @@ int main()
 								groundSceneNode->setVisible(false);
 								ufoBladesSceneNode->setVisible(false);
 								ufoSceneNode->setVisible(false);
+								ef.SetHealthAll(0);
+								ef.ForceDeath(xpMod, cowsXp, cowsKilled);
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
@@ -938,8 +940,11 @@ int main()
 									be.GetNode()->setVisible(false);
 									//add 2 extra cows after the boss battle
 									ef.SetEnemyCount(ef.GetEnemyCount() + 2);
+									ef.AddSpeed(0.3f);
 									bossDead = false;
+									cowsXp += ((float)be.GetAttackDamage() / 10) * xpMod;
 									cowsKilled += 1;
+									xpMod += 2.4f;
 									vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 									cam->setPosition(cam->getPosition() + p1);
 									cam->setTarget(p.GetPosition());

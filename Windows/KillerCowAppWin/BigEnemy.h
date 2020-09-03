@@ -13,7 +13,7 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-#define BASE_BOSS_HEALTH 15
+#define BASE_BOSS_HEALTH 55
 #define BASE_BOSS_HEIGHT -2.0f
 
 #define BIG_BOSS_ANIM_IDLE 0
@@ -67,13 +67,13 @@ private:
 	int health{ BASE_BOSS_HEALTH };
 	bool attackStrikeDone{ false };
 	int animationID{ BIG_BOSS_ANIM_IDLE };
-	int attackDamage{ 4 };
+	int attackDamage{ 6 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 3.0f };
+	float speed{ 4.0f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;

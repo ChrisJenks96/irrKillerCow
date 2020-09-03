@@ -214,9 +214,11 @@ void EnemyFactory::Update(Player& p, bool& shieldActive, int& cowsKilled, const 
 			}
 
 			if (enemies[i].isAttackingFlag() && !enemies[i].GetAttackStrikeDone()) {
-				enemies[i].SetAttackStrikeDone(true);
-				if (!shieldActive)
+				if (!shieldActive && enemies[i].GetAnimationID() == ENEMY_ANIMATION_ATTACK && enemies[i].GetCurrentAttackLength() > ANIMATION_FRAME_TO_TIME(6)) {
+					enemies[i].SetAttackStrikeDone(true);
 					p.RemoveHealth(enemies[i].GetAttackDamage());
+				}
+					
 				else if (shieldActive) {
 					
 					enemies[i].SetDeathAnimationTrigger(true);

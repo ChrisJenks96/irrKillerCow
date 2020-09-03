@@ -34,7 +34,7 @@ static int enemyID = 300;
 class Enemy
 {
 public:
-	Enemy(){}
+	Enemy() {}
 	Enemy(IrrlichtDevice* d, const float distAway);
 	const vector3df& GetPosition() { return node->getPosition(); }
 	void LookAt(const vector3df p, const float offset);
@@ -59,6 +59,9 @@ public:
 	int GetAnimationID() { return animationID; }
 	bool DeathAnimation(const float dt);
 	ENEMY_STATE MoveTowards(const vector3df p, const float dt);
+	void SetSpeed(float s) { speed = s; }
+	float GetSpeed() { return speed; }
+	float GetCurrentAttackLength() { return currAttackLength; }
 	~Enemy();
 private:
 	int animationID{ ENEMY_ANIMATION_IDLE };
@@ -68,13 +71,13 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_COW_HEALTH };
 	bool attackStrikeDone{ false };
-	int attackDamage{ 43 };
+	int attackDamage{ 12 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 3.3f };
+	float speed{ 2.1f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 };
@@ -88,6 +91,7 @@ class EnemyFactory
 		void Update(Player& p, bool& shieldActive, int& cowsKilled, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
+		void AddSpeed(float s) { for (auto& x : enemies) { x.SetSpeed(x.GetSpeed() + s); } }
 		void ForceReset();
 		void SetHealthAll(int health) { for (auto& x : enemies) { x.SetHealth(health); } }
 		void ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled);

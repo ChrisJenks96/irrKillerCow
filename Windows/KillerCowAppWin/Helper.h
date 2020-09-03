@@ -81,13 +81,13 @@ typedef struct LIGHTNING_TYPE
 	float energyRestoreRate;
 } LIGHTNING_TYPE;
 
-static int currentLightningType = 4;
+static int currentLightningType = 0;
 
 static LIGHTNING_TYPE lightning_types[] =
 {
-	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", "media/shields/shield_blue.png", SColorf(0, 0.2f, 0.2f), 1, 0.1f, 0.25f},
-	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", "media/shields/shield_yellow.png", SColorf(0.2f, 0.2f, 0), 1, 0.2f, 0.2f},
-	LIGHTNING_TYPE{"media/lightning/green_bolt.png", "media/shields/shield_green.png", SColorf(0, 0.2f, 0), 2, 0.2f, 0.14f},
+	LIGHTNING_TYPE{"media/lightning/blue_bolt.png", "media/shields/shield_blue.png", SColorf(0, 0.2f, 0.2f), 2, 0.1f, 0.25f},
+	LIGHTNING_TYPE{"media/lightning/yellow_bolt.png", "media/shields/shield_yellow.png", SColorf(0.2f, 0.2f, 0), 2, 0.2f, 0.2f},
+	LIGHTNING_TYPE{"media/lightning/green_bolt.png", "media/shields/shield_green.png", SColorf(0, 0.2f, 0), 3, 0.2f, 0.14f},
 	LIGHTNING_TYPE{"media/lightning/purple_bolt.png", "media/shields/shield_purple.png", SColorf(0.2f, 0, 0.2f), 3, 0.2f, 0.08f},
 	LIGHTNING_TYPE{"media/lightning/red_bolt.png", "media/shields/shield_red.png", SColorf(0.2f, 0, 0), 5, 0.3f, 0.03f},
 };
