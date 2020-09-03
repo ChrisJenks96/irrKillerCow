@@ -27,10 +27,12 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 
 void Enemy::RandomPosition(const float distAway)
 {
-	float x = rand() % 721 + (-360);
-	float z = rand() % 721 + (-360);
+	float x = rand() % 100 + (-49);
+	float z = rand() % 100 + (-49);
 	vector3df target = vector3df(x, 0.0f, z);
 	vector3df p = (target - node->getPosition()).normalize() * distAway;
+	if (p.X >= -distAway && p.X <= 0 && p.Z >= 0 && p.Z <= distAway)
+		p.Z = -p.Z;
 	node->setPosition(p);
 }
 
