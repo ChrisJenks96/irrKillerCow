@@ -703,6 +703,7 @@ int main()
 
 		//LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
 		ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
+		ITexture* title_logo = driver->getTexture("media/gui/title.png");
 
 		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
@@ -1027,6 +1028,7 @@ int main()
 			if (state == STATE_MENU){
 				MenuFontDraw(device);
 				driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
+				driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
