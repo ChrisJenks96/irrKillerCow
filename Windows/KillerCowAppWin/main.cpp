@@ -943,13 +943,13 @@ int main()
 
 							else if (bossDead) {
 								be.DeathAnimation(frameDeltaTime);
+								vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
+								cam->setPosition(cam->getPosition() + p1);
+								cam->setTarget(p.GetPosition());
 								if (be.GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
 									enemyOrb.GetNode()->setVisible(false);
 									be.GetNodeDirt()->setPosition(vector3df(-9.99f));
 									be.GetNode()->setVisible(false);
-									vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
-									cam->setPosition(cam->getPosition() + p1);
-									cam->setTarget(p.GetPosition());
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
 									{
