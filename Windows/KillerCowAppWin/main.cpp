@@ -12,7 +12,7 @@ using namespace gui;
 #include <time.h>
 #include "ER.h"
 #include "LightningSceneNode.h"
-#include "fmod.hpp"
+#include <fmod.hpp>
 
 int QUAD_SEGMENT_INCREMENT = -10.0f;
 
@@ -37,11 +37,16 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 //MUSIC RELATED STUFF
 FMOD::System* FMODSystem;
 FMOD::Channel* channel = 0;
+FMOD::Channel* channel_moo = 0;
+FMOD::Channel* channel_bkg = 0;
 FMOD_MODE currMode;
 FMOD::Sound* mainMenuMusic;
+FMOD::Sound* backgroundMusic;
+FMOD::Sound* cowMooEffect;
 FMOD::Sound* lightningEffectStart;
 FMOD::Sound* lightningEffectMid;
 FMOD::Sound* lightningEffectEnd;
+FMOD::Sound* lightningCutsceneOnce;
 
 bool lightningEffectStartTrigger = false;
 bool lightningEffectMidTrigger = false;
@@ -266,6 +271,8 @@ void CutsceneInit(IrrlichtDevice* device)
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 	cam->setPosition(cutscene1CamPosition);
 	cam->setTarget(ufoSceneNode->getPosition());
+
+	FMODSystem->createSound("media/music/Lightning_Once.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningCutsceneOnce);
 }
 
 void CutsceneUnload(IrrlichtDevice* device)
@@ -273,6 +280,8 @@ void CutsceneUnload(IrrlichtDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
 	groundSceneNode->setVisible(true);
+	lightningCutsceneOnce->release();
+	lightningCutsceneOnce = 0;
 }
 
 void CutsceneUpdate(IrrlichtDevice* device, const float dt)
@@ -341,6 +350,14 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			cutsceneLightning->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, QUAD_SEGMENT_INCREMENT * (QUAD_SEGMENTS-2), 0.0f));
 			//TESTING... BLOCK UP THE GAME CHAIN
 			//currentCutscene = 999;
+			//play lightning strike sound effect
+			bool lightningOnceFlag;
+			channel->isPlaying(&lightningOnceFlag);
+			if (!lightningOnceFlag) {
+				channel->setMode(FMOD_LOOP_OFF);
+				FMODSystem->playSound(lightningCutsceneOnce, 0, false, &channel);
+				channel->setVolume(0.8f);
+			}
 		}
 
 		if (cutscenespeedAccum > CUTSCENE2_END)
@@ -349,6 +366,14 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			cutscene3CrashPosition.Y = -10.0f;
 			cutsceneLightning->setVisible(false);
 			currentCutscene = 2;
+
+			bool bkgMusicPlaying;
+			channel_bkg->isPlaying(&bkgMusicPlaying);
+			if (!bkgMusicPlaying) {
+				channel_bkg->setMode(FMOD_LOOP_NORMAL);
+				FMODSystem->playSound(backgroundMusic, 0, false, &channel_bkg);
+				channel_bkg->setVolume(0.1f);
+			}
 		}
 	}
 
@@ -519,6 +544,13 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 						enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 						if (enemy->GetHealth() <= 0) {
 							if (!enemy->isDeathAnimationTrigger()) {
+								//bool cowDeathFlag;
+								//channel->isPlaying(&cowDeathFlag);
+								//if (!cowDeathFlag) {
+									//channel_moo->setMode(FMOD_LOOP_OFF);
+									FMODSystem->playSound(cowMooEffect, 0, false, &channel_moo);
+									channel_moo->setVolume(0.8f);
+									//}
 								cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
 								cowsKilled += 1;
 							}
@@ -651,11 +683,15 @@ int Sys_Init()
 	//void* extradriverdata = 0;
 	//Common_Init(&extradriverdata);
 	FMOD::System_Create(&FMODSystem);
-	FMODSystem->init(2, FMOD_INIT_NORMAL, 0);
+	FMODSystem->init(3, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
 	FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
 	FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
 	FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
+
+	//different versions... add variation
+	FMODSystem->createSound("media/music/Moo_1.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect);
+	FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
 
 	StaticMeshesLoad(device);
 
