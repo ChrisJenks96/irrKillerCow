@@ -78,6 +78,7 @@ bool bigEnemyWalkOutCap = false;
 bool bigEnemyCapOutOfRange = false;
 bool bossScene = false;
 bool bossDead = false;
+int beKilled = 0;
 
 float gameOverResetTimer = 0.0f;
 float gameOverResetRate = 4.0f;
@@ -850,13 +851,13 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef.SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
 							be.SetAnimationID(BIG_BOSS_ANIM_IDLE);
-							be.SetAnimationName("idle");
+							be.SetAnimationName("walk");
 							be.GetNode()->setVisible(true);
 							be.RandomPosition(12.0f, true);
 							bigEnemyNewPos = be.GetPosition();
@@ -865,7 +866,8 @@ int main()
 							be.GetNodeDirt()->setPosition(vector3df(be.GetNode()->getPosition().X, 0.1f, be.GetNode()->getPosition().Z));
 							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
 							be.LookAt(p.GetPosition(), 180.0f);
-							be.SetHealth(BASE_BOSS_HEALTH);
+							be.SetHealth(BASE_BOSS_HEALTH + (10 * beKilled));
+							beKilled += 1;
 							bossScene = true;
 							bigEnemyFirstMove = false;
 							bigEnemyWalkOutCap = false;
@@ -898,6 +900,7 @@ int main()
 										bigEnemyMoveCounter += 1.0f * frameDeltaTime;
 
 										if (bigEnemyMoveCounter > bigEnemyMoveMax) {
+											be.SetAnimationName("idle");
 											bigEnemyMoveCounter = 0.0f;
 											bigEnemyWalkOutCap = true;
 										}
@@ -953,7 +956,6 @@ int main()
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
 									{
-										be.AddHealth(10);
 										bossDead = false;
 										//add 2 extra cows after the boss battle
 										ef.SetEnemyCount(ef.GetEnemyCount() + 2);

@@ -73,7 +73,7 @@ private:
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 4.0f };
+	float speed{ 3.7f };
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
 	IAnimatedMeshSceneNode* node_cap;
