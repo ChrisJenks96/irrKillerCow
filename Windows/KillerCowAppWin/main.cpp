@@ -87,7 +87,7 @@ int perkCount = 0;
 #define SHIELD_CHANCE 0
 
 float shieldTimer = 0.0f;
-float shieldRate = 5.0f;
+float shieldRate = 3.5f;
 
 vector3df OldCameraPosition;
 
@@ -375,7 +375,7 @@ void LightningUpgrade(IrrlichtDevice* device)
 	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
-	shieldRate = 5.0f * (currentLightningType + 1);
+	shieldRate = 3.5f * (currentLightningType + 1);
 	p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
