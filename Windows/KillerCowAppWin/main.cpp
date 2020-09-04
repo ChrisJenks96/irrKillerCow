@@ -52,7 +52,7 @@ IrrlichtDevice* device;
 MyEventReceiver er;
 ICameraSceneNode* cam;
 IMeshSceneNode* cutsceneGroundSceneNode[2];
-IMeshSceneNode* groundSceneNode;
+IAnimatedMeshSceneNode* groundSceneNode;
 IMeshSceneNode* ufoSceneNode;
 IMeshSceneNode* ufoBladesSceneNode;
 IMeshSceneNode* cowHeadGameOver;
@@ -119,10 +119,10 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 	
 	//loading in the ground
-	IMesh* mesh = smgr->getMesh("media/base_plane/base_plane.obj");
+	IAnimatedMesh* mesh = smgr->getMesh("media/base_plane/base_plane.obj");
 	if (mesh)
 	{
-		groundSceneNode = smgr->addMeshSceneNode(mesh);
+		groundSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
 		
 		groundSceneNode->setScale(vector3df(2.0f));
 		//ground texture id (0,0)
@@ -138,6 +138,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			groundSceneNode->setVisible(false);
+
+			scene::ITriangleSelector* selector = 0;
+			selector = smgr->createTriangleSelector(groundSceneNode);
+			groundSceneNode->setTriangleSelector(selector);
+			selector->drop();
 		}
 	}
 
@@ -409,15 +414,23 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
+vector3df intersectPoint = vector3df(0.0f);
+
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
 	if (p.GetHealth() > 0)
 	{
-		MouseX = er.GetMouseState().Position.X;
-		s32 MouseXDiff = MouseX - MouseXPrev;
-		p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
-		MouseXPrev = MouseX;
+		intersectPoint = getSceneNodeFromScreenCoordinatesBB(device->getSceneManager(), device->getVideoDriver(), groundSceneNode->getTriangleSelector(), er.GetMouseState().Position, 0);
+		const vector3df toTarget = intersectPoint - p.GetNode()->getPosition();
+		p.GetNode()->setRotation((toTarget.getHorizontalAngle() - 4.0f) * vector3df(0.0f, 1.0f, 0.0f));
+		
+		//THIS CAN BE JOYSTICK CODE... DO NOT DELETE!!!!!!!!!
+
+		//MouseX = er.GetMouseState().Position.X;
+		//s32 MouseXDiff = MouseX - MouseXPrev;
+		//p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
+		//MouseXPrev = MouseX;
 	}
 
 	enemyOrb.Update(frameDeltaTime);

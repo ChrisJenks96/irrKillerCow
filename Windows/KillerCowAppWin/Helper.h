@@ -70,6 +70,29 @@ static void updateFadeOut(IrrlichtDevice* device, irr::f32 speed, irr::f32 curre
 	}
 }
 
+static vector3df getSceneNodeFromScreenCoordinatesBB(ISceneManager* smgr, IVideoDriver* driver, ITriangleSelector* sel, position2d<s32> pos, s32 idBitMask)
+{
+   const SViewFrustum* f = smgr->getActiveCamera()->getViewFrustum();
+   core::vector3df farLeftUp = f->getFarLeftUp();
+   core::vector3df lefttoright = f->getFarRightUp() - farLeftUp;
+   core::vector3df uptodown = f->getFarLeftDown() - farLeftUp;
+   core::dimension2d<u32> screenSize = driver->getScreenSize();
+   f32 dx = pos.X / (f32)screenSize.Width;
+   f32 dy = pos.Y / (f32)screenSize.Height;
+   core::vector3df end = farLeftUp + (lefttoright * dx) + (uptodown * dy);
+
+   core::line3d<f32> line;
+   line.start = smgr->getActiveCamera()->getPosition();
+   line.end = line.start +(end - line.start).normalize() * 1000.0f;
+
+   ISceneNode* outNode;
+   core::vector3df intersection;
+   core::triangle3df tri;
+   if (smgr->getSceneCollisionManager()->getCollisionPoint(line, sel, intersection, tri, outNode))
+      return intersection;
+   return end;
+};
+
 #define LIGHTNING_TYPES 5
 typedef struct LIGHTNING_TYPE
 {
