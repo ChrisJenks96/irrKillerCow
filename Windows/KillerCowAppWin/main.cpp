@@ -953,6 +953,7 @@ int main()
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
 									{
+										be.AddHealth(10);
 										bossDead = false;
 										//add 2 extra cows after the boss battle
 										ef.SetEnemyCount(ef.GetEnemyCount() + 2);
@@ -1012,7 +1013,6 @@ int main()
 						state = STATE_GAME;
 					}
 				}
-				
 			}
 
 			else if (state == STATE_POWERUP)
