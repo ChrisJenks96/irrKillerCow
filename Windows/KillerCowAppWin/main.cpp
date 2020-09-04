@@ -60,6 +60,7 @@ ILightSceneNode* dirLight;
 ILightSceneNode* ufoSpotlight;
 IMeshSceneNode* earthSceneNode;
 ILightSceneNode* introCutsceneLight;
+vector3df intersectPoint = vector3df(0.0f);
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 EnemyOrb enemyOrb;
@@ -414,8 +415,6 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
-vector3df intersectPoint = vector3df(0.0f);
-
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
@@ -514,15 +513,17 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				else
 				{
 					Enemy* enemy = ef.FindEnemy(e);
-					enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-					enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-					if (enemy->GetHealth() <= 0) {
-						if (!enemy->isDeathAnimationTrigger()) {
-							cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
-							cowsKilled += 1;
-						}
+					if (enemy != NULL) {
+						enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+						enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+						if (enemy->GetHealth() <= 0) {
+							if (!enemy->isDeathAnimationTrigger()) {
+								cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
+								cowsKilled += 1;
+							}
 
-						enemy->SetDeathAnimationTrigger(true);
+							enemy->SetDeathAnimationTrigger(true);
+						}
 					}
 				}
 			}
@@ -752,12 +753,6 @@ int main()
 
 			if (state == STATE_GAME)
 			{
-				//DELET THIS AFTER TESTING
-				//p.SetHealth(100);
-
-
-
-
 				//fade back into the game
 				if (cutscene3FadeOut && transition_alpha != 0){
 					cutscene3FadeOut = false;
@@ -826,9 +821,9 @@ int main()
 						}
 
 						//lightning upgrade states
-						else if ((currentLightningType == 0 && cowsXpLvl == 3) || (currentLightningType == 1 && cowsXpLvl == 6)
-							|| (currentLightningType == 2 && cowsXpLvl == 9) || (currentLightningType == 3 && cowsXpLvl == 12)
-							|| (currentLightningType == 4 && cowsXpLvl == 15))
+						else if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 5)
+							|| (currentLightningType == 2 && cowsXpLvl == 9) || (currentLightningType == 3 && cowsXpLvl == 14)
+							|| (currentLightningType == 4 && cowsXpLvl == 20))
 						{
 							currentLightningType++;
 							if (currentLightningType == LIGHTNING_TYPES)
@@ -952,17 +947,21 @@ int main()
 									enemyOrb.GetNode()->setVisible(false);
 									be.GetNodeDirt()->setPosition(vector3df(-9.99f));
 									be.GetNode()->setVisible(false);
-									//add 2 extra cows after the boss battle
-									ef.SetEnemyCount(ef.GetEnemyCount() + 2);
-									ef.AddSpeed(0.3f);
-									bossDead = false;
-									cowsXp += ((float)be.GetAttackDamage() / 10) * xpMod;
-									cowsKilled += 1;
-									xpMod += 2.4f;
 									vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 									cam->setPosition(cam->getPosition() + p1);
 									cam->setTarget(p.GetPosition());
-									bossScene = false;
+									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
+									if (dist < 0.2f)
+									{
+										bossDead = false;
+										//add 2 extra cows after the boss battle
+										ef.SetEnemyCount(ef.GetEnemyCount() + 2);
+										ef.AddSpeed(0.3f);
+										cowsXp += ((float)be.GetAttackDamage() / 10) * xpMod;
+										cowsKilled += 1;
+										xpMod += 2.4f;
+										bossScene = false;
+									}								
 								}
 							}
 						}
