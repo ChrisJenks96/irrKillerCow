@@ -535,7 +535,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	{
 		if (!playerNukeGoneOff) {
 			p.SetEnergy(p.GetEnergy() - 50);
-			p.GetOrb().GetNode()->setVisible(true);
+			p.GetOrb()->setVisible(true);
 			playerNukeGoneOff = true;
 			er.GUINukeToggle = false;
 		}
@@ -590,6 +590,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 							}
 
 							bossDead = true;
+							be->Reset();
 						}
 					}
 					else
@@ -923,7 +924,6 @@ int main()
 								ufoSceneNode->setVisible(false);
 								ef->SetHealthAll(0);
 								ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-								p.SetAnimationName("twerk");
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
@@ -1058,17 +1058,16 @@ int main()
 				
 				if (playerNukeGoneOff)
 				{
-					p.GetOrb().GetNode()->setScale(p.GetOrb().GetNode()->getScale() + vector3df(15.0f * frameDeltaTime));
-					p.GetOrb().GetNode()->setPosition(p.GetPosition());
-					p.GetOrb().Update(frameDeltaTime, true);
+					p.GetOrb()->setPosition(p.GetPosition());
+					p.GetOrb()->setScale(p.GetOrb()->getScale() + vector3df(10.0f * frameDeltaTime));
 
 					//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
-					if (p.GetOrb().GetNode()->getScale().Y > 20.0f) {
+					if (p.GetOrb()->getScale().Y > 40.0f) {
 						playerNukeGoneOff = false;
 						ef->SetHealthAll(0);
 						ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-						p.GetOrb().GetNode()->setScale(vector3df(1.6f));
-						p.GetOrb().GetNode()->setVisible(false);
+						p.GetOrb()->setScale(vector3df(1.6f));
+						p.GetOrb()->setVisible(false);
 					}
 				}
 			}
@@ -1182,7 +1181,7 @@ int main()
 					heat_outside->draw();
 					if (p.GetEnergy() > 0)
 						heat_inside->draw();
-					if (cowsXp > 100) 
+					if ((cowsXp > 100 && cowsXpLvl < 20) || (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0)))
 					{
 						//change to x amount of buttons
 						int whichPerk = rand() % 2;

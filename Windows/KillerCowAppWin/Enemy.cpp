@@ -165,6 +165,7 @@ void Enemy::Reset()
 	isAttacking = false;
 	attackOnce = false;
 	node->setVisible(true);
+	node->setPosition(vector3df(node->getPosition().X, 0.0f, node->getPosition().Z));
 }
 
 Enemy::~Enemy()

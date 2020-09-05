@@ -41,9 +41,25 @@ Player::Player(IrrlichtDevice* d)
 		}
 	}
 
-	orb = EnemyOrb(d);
-	orb.GetNode()->setVisible(false);
-	orb.GetNode()->setPosition(node->getPosition());
+	mesh = smgr->getMesh("media/player/player_shield.obj");
+
+	if (mesh)
+	{
+		orb = smgr->addAnimatedMeshSceneNode(mesh);
+		orb->setScale(vector3df(4.0f));
+		if (nodeShield)
+		{
+			orb->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
+			orb->setMaterialFlag(EMF_LIGHTING, false);
+			orb->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			orb->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
+			orb->setMaterialTexture(0, driver->getTexture("media/shields/shield_red.png"));
+			orb->setVisible(false);
+		}
+	}
+
+	orb->setVisible(false);
+	orb->setPosition(node->getPosition());
 
 	//weapon firing lighting effect
 	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);

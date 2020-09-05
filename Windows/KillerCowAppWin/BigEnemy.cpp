@@ -185,14 +185,14 @@ bool BigEnemy::PollNewPosition(const float dt)
 void BigEnemy::Reset()
 {
 	firstDeath = true;
-	health = BASE_COW_HEALTH;
+	/*health = BASE_COW_HEALTH;
 	SetAttackStrikeDone(false);
 	float distAway = rand() % (50 + 1) + 20;
 	node->setMD2Animation("idle");
 	RandomPosition(distAway, true);
 	isAttacking = false;
 	attackOnce = false;
-	node->setVisible(true);
+	node->setVisible(true);*/
 }
 
 BigEnemy::~BigEnemy()
