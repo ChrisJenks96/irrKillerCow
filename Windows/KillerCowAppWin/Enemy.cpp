@@ -131,7 +131,7 @@ bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
 					break;
 			}
 			
-			channel->setVolume(0.8f);
+			channel->setVolume(0.1f);
 		}
 		deathAnimationTimer = 0.0f;
 	}

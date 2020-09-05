@@ -23,7 +23,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		}
 	}
 
-	mesh = smgr->getMesh("media/cow/big_cow_cap.obj");
+	mesh = smgr->getMesh("media/cow/big_cow_cap.md2");
 	if (mesh)
 	{
 		node_cap = smgr->addAnimatedMeshSceneNode(mesh);
@@ -31,11 +31,12 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 		{
 			node_cap->setRotation(vector3df(0.0f, 20.0f, 0.0f));
 			node_cap->setPosition(vector3df(999.0f));
-			node_cap->setScale(vector3df(1.5f));
+			node_cap->setScale(vector3df(2.1f));
 			node_cap->setMaterialFlag(EMF_LIGHTING, true);
 			node_cap->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_cap->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+			node_cap->setMD2Animation("close_idle");
+			node_cap->setMaterialTexture(0, driver->getTexture("media/cow/big_cow_cap.png"));
 		}
 	}
 
@@ -63,7 +64,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 			node_drill->setMaterialFlag(EMF_LIGHTING, true);
 			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
-			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+			node_drill->setMaterialTexture(0, driver->getTexture("media/cow/drill.png"));
 		}
 	}
 

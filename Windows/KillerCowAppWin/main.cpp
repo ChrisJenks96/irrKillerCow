@@ -197,6 +197,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			ufoSceneNode->setVisible(false);
+			ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
+			ufoSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
+			ufoSceneNode->getMaterial(2).setTexture(0, driver->getTexture("media/ufo/seat.png"));
+			ufoSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/ufo/pod.png"));
+			ufoSceneNode->getMaterial(4).setTexture(0, driver->getTexture("media/ufo/body.png"));
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
@@ -220,6 +225,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		{
 			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			ufoBladesSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/blades.png"));
 		}
 			
 		ufoBladesSceneNode->setParent(ufoSceneNode);
@@ -331,7 +337,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 		cutsceneGroundSceneNode[cutscene1currentGround]->setPosition(cutsceneGroundSceneNode[cutscene1currentGround]->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
 		//rotate the blades around the craft
-		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 750.0f * dt, 0.0f));
+		ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 2250.0f * dt, 0.0f));
 
 	}
 
@@ -358,7 +364,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			if (!lightningOnceFlag) {
 				channel->setMode(FMOD_LOOP_OFF);
 				FMODSystem->playSound(lightningCutsceneOnce, channelGroupBKGMusic, false, &channel);
-				channel->setVolume(0.8f);
+				channel->setVolume(0.3f);
 			}
 		}
 
@@ -374,7 +380,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			if (!bkgMusicPlaying) {
 				channel_bkg->setMode(FMOD_LOOP_NORMAL);
 				FMODSystem->playSound(backgroundMusic, channelGroupBKGMusic, false, &channel_bkg);
-				channel_bkg->setVolume(0.1f);
+				channel_bkg->setVolume(0.7f);
 			}
 		}
 	}
@@ -521,7 +527,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				if (!playing){
 					channel->setMode(FMOD_LOOP_OFF);
 					FMODSystem->playSound(lightningEffectStart, channelGroupLightning, false, &channel);
-					channel->setVolume(0.8f);
+					channel->setVolume(0.3f);
 					channel->setPaused(false);
 					lightningEffectStartTrigger = true;
 				}
@@ -586,7 +592,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			lightningEffectMidTrigger = true;
 			channel->setMode(FMOD_LOOP_NORMAL);
 			FMODSystem->playSound(lightningEffectMid, channelGroupLightning, false, &channel);
-			channel->setVolume(0.8f);
+			channel->setVolume(0.3f);
 		}
 	}
 
@@ -594,7 +600,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		channel->stop();
 		channel->setMode(FMOD_LOOP_OFF);
 		FMODSystem->playSound(lightningEffectEnd, channelGroupLightning, false, &channel);
-		channel->setVolume(0.8f);
+		channel->setVolume(0.3f);
 		lightningEffectMidTrigger = false;
 		lightningEffectEndTrigger = true;
 	}
@@ -761,6 +767,7 @@ int main()
 		//LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
 		ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
 		ITexture* title_logo = driver->getTexture("media/gui/title.png");
+		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
 
 		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
@@ -780,12 +787,16 @@ int main()
 		health_outside->setMaxSize(dimension2du(170, 15));
 
 		shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
+		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
+		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(false);
+		shieldBtnToggle->setVisible(true);
 
 		nukeBtnToggle = gui->addButton(recti(52, 108, 52 + 32, 108 + 32));
+		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
+		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(false);
+		nukeBtnToggle->setVisible(true);
 
 		while (device->run())
 		{
@@ -893,8 +904,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -939,7 +950,10 @@ int main()
 									//BECAREFUL OF THE Y AXIS!!!!!!!!!
 									if (!bigEnemyWalkOutCap) {
 										bigEnemyWalkOutCap = !be.MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
+										be.GetNodeCap()->setRotation(((be.GetNode()->getPosition() - be.GetNodeCap()->getPosition()).getHorizontalAngle() + 
+											vector3df(0.0f, -90.0f, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 										bigEnemyMoveCounter += 1.0f * frameDeltaTime;
+										be.GetNodeCap()->setMD2Animation("open_idle");
 
 										if (bigEnemyMoveCounter > bigEnemyMoveMax) {
 											be.SetAnimationName("idle");
@@ -973,6 +987,8 @@ int main()
 
 									if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)
 									{
+										be.GetNodeCap()->setMD2Animation("close_idle");
+
 										//shoot the capsule off out of the scene
 										be.GetNodeCap()->setPosition(be.GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
 											(bigEnemyMoveCounter - bigEnemyCapsuleTakeoff)) * frameDeltaTime, 0.0f));
@@ -1086,6 +1102,8 @@ int main()
 				MenuFontDraw(device);
 				driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
 				driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
+				driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
+					(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
