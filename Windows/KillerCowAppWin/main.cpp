@@ -505,11 +505,10 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	{
 		if (!bigEnemyStopShooting) {
 			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * enemyOrbSpeed * frameDeltaTime;
-			enemyOrbSpeed += 15.0f * frameDeltaTime;
+			enemyOrbSpeed += 4.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
 			if (dist < 0.2f && !er.GUIShieldToggle) {
-				enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 				enemyOrb.GetNode()->setPosition(be->GetPosition());
 				p.RemoveHealth(be->GetAttackDamage());
 				if (bigEnemyOnMove)
@@ -1049,6 +1048,7 @@ int main()
 										cowsKilled += 1;
 										xpMod += 2.4f;
 										bossScene = false;
+										enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 									}								
 								}
 							}
