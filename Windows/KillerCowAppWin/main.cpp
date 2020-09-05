@@ -1100,9 +1100,6 @@ int main()
 					state = STATE_GAME;
 				}
 			}
-				
-			//printf("%f, %f, %f, %f, %f, %f\n", cam->getPosition().X, cam->getPosition().Y, cam->getPosition().Z,
-				//cam->getRotation().X, cam->getRotation().Y, cam->getRotation().Z);
 
 			driver->beginScene(true, true, SColor(255, 0, 0, 0));
 			smgr->drawAll();
