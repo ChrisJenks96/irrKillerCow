@@ -301,5 +301,11 @@ EnemyFactory::~EnemyFactory()
 {
 	cowMooEffect->release();
 	cowMooEffect = 0;
+	cowMooEffect1->release();
+	cowMooEffect1 = 0;
+	cowMooEffect2->release();
+	cowMooEffect2 = 0;
+	cowMooEffect3->release();
+	cowMooEffect3 = 0;
 	enemies.clear();
 }
