@@ -759,6 +759,7 @@ int main()
 		ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
 		ITexture* title_logo = driver->getTexture("media/gui/title.png");
 		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
+		ITexture* go_logo = driver->getTexture("media/gui/go.png");
 
 		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
@@ -1120,14 +1121,8 @@ int main()
 					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 			}
 
-			else if (state == STATE_GAME_OVER)
-			{
+			else if (state == STATE_GAME_OVER){
 				cowHeadGameOver->setRotation(cowHeadGameOver->getRotation() + vector3df(8.0f * frameDeltaTime, 0.0f, 0.0f));
-				//if (gameOverTimer > GAME_OVER_FADE_OUT_TIME)
-				//	updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
-
-				//if (gameOverTimer > GAME_OVER_FINISH_TIME)
-				//	updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
 			}
 
 			if (state == STATE_GAME || state == STATE_GAME_OVER)
@@ -1140,6 +1135,7 @@ int main()
 					str = L"Total Cows Destroyed: ";
 					str += totalCowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0), video::SColor(255, 255, 255, 255));
+					driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
 				}
 
 				else
