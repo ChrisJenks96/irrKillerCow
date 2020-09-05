@@ -111,6 +111,7 @@ bool gameOverToReset = false;
 bool playerNukeGoneOff = false;
 bool globalPlayerMunchFlag = false;
 int totalCowsKilled = 0;
+int savedCowsKilled = 0;
 int cowsKilled = 0;
 float cowsXp = 0.0f;
 int cowsXpLvl = 1;
@@ -124,6 +125,28 @@ int currentCutscene = 0;
 float gameOverTimer = 0.0f;
 #define GAME_OVER_FADE_OUT_TIME 3.0f
 #define GAME_OVER_FINISH_TIME 1.0f
+
+static void SaveLoadGame(bool s)
+{
+	FILE* f;
+	if (s)
+	{
+		fopen_s(&f, "media/HS.DAT", "wb");
+		if (savedCowsKilled < cowsKilled) {
+			savedCowsKilled = cowsKilled;
+			fwrite(&cowsKilled, 4, 1, f);
+		}
+
+		fclose(f);
+	}
+
+	else
+	{
+		fopen_s(&f, "media/HS.DAT", "rb");
+		fread(&savedCowsKilled, 4, 1, f);
+		fclose(f);
+	}
+}
 
 static void StaticMeshesLoad(IrrlichtDevice* device)
 {
@@ -421,6 +444,7 @@ void LightningUpgrade(IrrlichtDevice* device)
 
 void GameInit(IrrlichtDevice* device)
 {
+	SaveLoadGame(false);
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
@@ -543,7 +567,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			}
 
 			p.FiringAnimation(frameDeltaTime);
-			ISceneNode* e = p.Fire(device);
+			ISceneNode* e = p.Fire(device, 15.0f * (p.GetEnergy() / 100.0f));
 			if (e != NULL) {
 				if (e->getID() == 667)
 				{
@@ -853,6 +877,7 @@ int main()
 							p.DeathAnimation(frameDeltaTime);
 							gameOverResetTimer += 1.0f * frameDeltaTime;
 							if (gameOverResetTimer > gameOverResetRate) {
+								SaveLoadGame(true);
 								cam->setPosition(vector3df(999.0f));
 								cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
 								cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
@@ -1129,9 +1154,13 @@ int main()
 					stringw str = L"Cows Destroyed: ";
 					str += cowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0), video::SColor(255, 255, 255, 255));
-					str = L"Total Cows Destroyed: ";
+					str = L"Total Cows Record: ";
 					str += totalCowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0), video::SColor(255, 255, 255, 255));
+					str = L"Total Cows Destroyed: ";
+					str += totalCowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0), video::SColor(255, 255, 255, 255));
+					
 					driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
 				}
 

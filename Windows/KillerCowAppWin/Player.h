@@ -29,7 +29,7 @@ class Player
 		Player(IrrlichtDevice* d);
 		const vector3df& GetPosition() { return node->getPosition(); }
 		void LookAt(const vector3df p, const float offset);
-		ISceneNode* Fire(IrrlichtDevice* device);
+		ISceneNode* Fire(IrrlichtDevice* device, const float length);
 		void WeaponFiringLightToggle(bool t) { weaponFiringLight->setVisible(t); }
 		void ResetEmission() { node->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); }
 		void Idle();
