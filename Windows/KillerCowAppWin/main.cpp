@@ -54,6 +54,9 @@ bool lightningEffectStartTrigger = false;
 bool lightningEffectMidTrigger = false;
 bool lightningEffectEndTrigger = false;
 
+float lightningWait = 0.0f;
+#define LIGHTNING_WAIT_MAX 0.7f
+
 //system stuff
 IrrlichtDevice* device;
 MyEventReceiver er;
@@ -462,7 +465,7 @@ void GameInit(IrrlichtDevice* device)
 
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning->setParent(p.GetNode());
-	cutsceneLightning->setPosition(vector3df(0.0f, 1.0f, 0.0f));
+	cutsceneLightning->setPosition(vector3df(-0.65f, 0.8f, 1.3f));
 	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
 	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
 
@@ -541,7 +544,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	//firing state for the player
 	bool leftPressedMidEffect = false;
 	if (er.GetMouseState().LeftButtonDown) {
-		p.RemoveEnergy(frameDeltaTime);
 		if (p.GetEnergy() > 0)
 		{
 			if (lightningEffectMidTrigger) {
@@ -569,47 +571,51 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 			p.FiringAnimation(frameDeltaTime);
 			ISceneNode* e = p.Fire(device, 25.0f * (p.GetEnergy() / 100.0f));
-			if (e != NULL) {
-				if (e->getID() == 667)
-				{
-					be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-					if (be->GetHealth() <= 0) {
-						if (!bossDead) {
-							cam->setTarget(p.GetPosition());
-							be->SetAnimationID(BIG_BOSS_ANIM_DEATH);
-						}
-
-						bossDead = true;
-					}
-				}
-				else
-				{
-					Enemy* enemy = ef->FindEnemy(e);
-					if (enemy != NULL) {
-						enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-						enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-						if (enemy->GetHealth() <= 0) {
-							if (!enemy->isDeathAnimationTrigger()) {
-								cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
-								cowsKilled += 1;
+			lightningWait += 1.0f * frameDeltaTime;
+			if (lightningWait > 0.7f) {
+				p.RemoveEnergy(frameDeltaTime);
+				QUAD_SEGMENT_INCREMENT = -10.0f;
+				cutsceneLightning->ArkUpdate(frameDeltaTime);
+				float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
+				cutsceneLightning->setScale(vector3df(lightningLength));
+				cutsceneLightning->setVisible(true);
+				if (e != NULL) {
+					if (e->getID() == 667)
+					{
+						be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+						if (be->GetHealth() <= 0) {
+							if (!bossDead) {
+								cam->setTarget(p.GetPosition());
+								be->SetAnimationID(BIG_BOSS_ANIM_DEATH);
 							}
 
-							enemy->SetDeathAnimationTrigger(true);
+							bossDead = true;
+						}
+					}
+					else
+					{
+						Enemy* enemy = ef->FindEnemy(e);
+						if (enemy != NULL) {
+							enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+							enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+							if (enemy->GetHealth() <= 0) {
+								if (!enemy->isDeathAnimationTrigger()) {
+									cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
+									cowsKilled += 1;
+								}
+
+								enemy->SetDeathAnimationTrigger(true);
+							}
 						}
 					}
 				}
 			}
-
-			QUAD_SEGMENT_INCREMENT = -10.0f;
-			cutsceneLightning->ArkUpdate(frameDeltaTime);
-			float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
-			cutsceneLightning->setScale(vector3df(lightningLength));
-			cutsceneLightning->setVisible(true);
 		}
 	}
 
 	else
 	{
+		lightningWait = 0.0f;
 		p.NotFiringAnimation(frameDeltaTime);
 		p.Idle();
 		cutsceneLightning->setVisible(false);
@@ -1191,13 +1197,13 @@ int main()
 						{
 							case 0:
 								shieldBtnToggle->setVisible(true);
+								shieldTimer = 0.0f;
 								break;
 							case 1:
 								nukeBtnToggle->setVisible(true);
 								break;
 						}
 						
-						shieldTimer = 0.0f;
 						cowsXp = 0;
 						cowsXpLvl += 1;
 					}

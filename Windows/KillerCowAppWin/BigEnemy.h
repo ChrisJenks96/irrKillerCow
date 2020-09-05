@@ -60,6 +60,7 @@ public:
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
+	bool firstDeath{ true };
 	FMOD::Channel* channel;
 	float animationTimer{ 0.0f };
 	float animationRate{ 4.0f };

@@ -91,12 +91,16 @@ void BigEnemy::DeathAnimation(const float dt, FMOD::System* FMODSystem)
 		SetAnimationName("death");
 		animationID = BIG_BOSS_ANIM_DEATH_END;
 		animationTimer = 0.0f;
-		bool cowDeathFlag;
-		channel->isPlaying(&cowDeathFlag);
-		if (!cowDeathFlag) {
-			channel->setMode(FMOD_LOOP_OFF);
-			FMODSystem->playSound(bigMooEffect, channelGroupBigMoo, false, &channel);
-			channel->setVolume(0.4f);
+		if (firstDeath) {
+			bool cowDeathFlag;
+			channel->isPlaying(&cowDeathFlag);
+			if (!cowDeathFlag) {
+				channel->setMode(FMOD_LOOP_OFF);
+				FMODSystem->playSound(bigMooEffect, channelGroupBigMoo, false, &channel);
+				channel->setVolume(0.4f);
+			}
+
+			firstDeath = false;
 		}
 	}
 
@@ -180,6 +184,7 @@ bool BigEnemy::PollNewPosition(const float dt)
 
 void BigEnemy::Reset()
 {
+	firstDeath = true;
 	health = BASE_COW_HEALTH;
 	SetAttackStrikeDone(false);
 	float distAway = rand() % (50 + 1) + 20;
