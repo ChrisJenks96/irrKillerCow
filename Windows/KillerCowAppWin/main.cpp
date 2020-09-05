@@ -32,17 +32,19 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 #define STATE_GAME_OVER 4
 #define STATE_POWERUP 5
 
+#define MAX_COWS 15
 #define STARTING_ENEMIES 4
 
 //MUSIC RELATED STUFF
 FMOD::System* FMODSystem;
 FMOD::Channel* channel = 0;
-FMOD::Channel* channel_moo = 0;
 FMOD::Channel* channel_bkg = 0;
+FMOD::ChannelGroup* channelGroupLightning;
+FMOD::ChannelGroup* channelGroupBKGMusic;
+
 FMOD_MODE currMode;
 FMOD::Sound* mainMenuMusic;
 FMOD::Sound* backgroundMusic;
-FMOD::Sound* cowMooEffect;
 FMOD::Sound* lightningEffectStart;
 FMOD::Sound* lightningEffectMid;
 FMOD::Sound* lightningEffectEnd;
@@ -99,7 +101,7 @@ vector3df OldCameraPosition;
 
 //game specifics
 Player p;
-EnemyFactory ef;
+EnemyFactory* ef;
 BigEnemy be;
 
 bool gameOverToReset = false;
@@ -355,7 +357,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			channel->isPlaying(&lightningOnceFlag);
 			if (!lightningOnceFlag) {
 				channel->setMode(FMOD_LOOP_OFF);
-				FMODSystem->playSound(lightningCutsceneOnce, 0, false, &channel);
+				FMODSystem->playSound(lightningCutsceneOnce, channelGroupBKGMusic, false, &channel);
 				channel->setVolume(0.8f);
 			}
 		}
@@ -371,7 +373,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			channel_bkg->isPlaying(&bkgMusicPlaying);
 			if (!bkgMusicPlaying) {
 				channel_bkg->setMode(FMOD_LOOP_NORMAL);
-				FMODSystem->playSound(backgroundMusic, 0, false, &channel_bkg);
+				FMODSystem->playSound(backgroundMusic, channelGroupBKGMusic, false, &channel_bkg);
 				channel_bkg->setVolume(0.1f);
 			}
 		}
@@ -410,8 +412,8 @@ void GameInit(IrrlichtDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	ef = EnemyFactory(device, 30, STARTING_ENEMIES);
-	ef.SetEnemyCount(STARTING_ENEMIES);
+	ef = new EnemyFactory(device, FMODSystem, MAX_COWS, STARTING_ENEMIES);
+	ef->SetEnemyCount(STARTING_ENEMIES);
 	be = BigEnemy(device, 12.0f);
 	enemyOrb = EnemyOrb(device);
 	be.GetNode()->setVisible(false);
@@ -514,11 +516,16 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			}
 
 			else if (!lightningEffectStartTrigger) {
-				channel->setMode(FMOD_LOOP_OFF);
-				FMODSystem->playSound(lightningEffectStart, 0, false, &channel);
-				channel->setVolume(0.8f);
-				channel->setPaused(false);
-				lightningEffectStartTrigger = true;
+				bool playing;
+				channel->isPlaying(&playing);
+				if (!playing){
+					channel->setMode(FMOD_LOOP_OFF);
+					FMODSystem->playSound(lightningEffectStart, channelGroupLightning, false, &channel);
+					channel->setVolume(0.8f);
+					channel->setPaused(false);
+					lightningEffectStartTrigger = true;
+				}
+				
 			}
 
 			p.FiringAnimation(frameDeltaTime);
@@ -538,19 +545,12 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 				}
 				else
 				{
-					Enemy* enemy = ef.FindEnemy(e);
+					Enemy* enemy = ef->FindEnemy(e);
 					if (enemy != NULL) {
 						enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 						enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 						if (enemy->GetHealth() <= 0) {
 							if (!enemy->isDeathAnimationTrigger()) {
-								//bool cowDeathFlag;
-								//channel->isPlaying(&cowDeathFlag);
-								//if (!cowDeathFlag) {
-									//channel_moo->setMode(FMOD_LOOP_OFF);
-									FMODSystem->playSound(cowMooEffect, 0, false, &channel_moo);
-									channel_moo->setVolume(0.8f);
-									//}
 								cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
 								cowsKilled += 1;
 							}
@@ -576,22 +576,24 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		cutsceneLightning->setVisible(false);
 		if (p.GetEnergy() <= 100)
 			p.AddEnergy(frameDeltaTime);
-		ef.ResetEmission();
+		ef->ResetEmission();
 	}
 
 	if (lightningEffectStartTrigger) {
 		channel->isPlaying(&lightningEffectStartTrigger);
 		if (!lightningEffectStartTrigger) {
+			channel->stop();
 			lightningEffectMidTrigger = true;
 			channel->setMode(FMOD_LOOP_NORMAL);
-			FMODSystem->playSound(lightningEffectMid, 0, false, &channel);
+			FMODSystem->playSound(lightningEffectMid, channelGroupLightning, false, &channel);
 			channel->setVolume(0.8f);
 		}
 	}
 
 	else if (!leftPressedMidEffect  && lightningEffectMidTrigger) {
+		channel->stop();
 		channel->setMode(FMOD_LOOP_OFF);
-		FMODSystem->playSound(lightningEffectEnd, 0, false, &channel);
+		FMODSystem->playSound(lightningEffectEnd, channelGroupLightning, false, &channel);
 		channel->setVolume(0.8f);
 		lightningEffectMidTrigger = false;
 		lightningEffectEndTrigger = true;
@@ -599,6 +601,9 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 	else if (lightningEffectEndTrigger) {
 		channel->isPlaying(&lightningEffectEndTrigger);
+		if (!lightningEffectEndTrigger) {
+			channel->stop();
+		}
 	}
 
 	if (playerNukeGoneOff)
@@ -610,8 +615,8 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
 		if (p.GetOrb().GetNode()->getScale().Y > 50.0f) {
 			playerNukeGoneOff = false;
-			ef.SetHealthAll(0);
-			ef.ForceDeath(xpMod, cowsXp, cowsKilled);
+			ef->SetHealthAll(0);
+			ef->ForceDeath(xpMod, cowsXp, cowsKilled);
 			p.GetOrb().GetNode()->setScale(vector3df(1.6f));
 			p.GetOrb().GetNode()->setVisible(false);
 		}
@@ -629,16 +634,16 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-	ef.Update(p, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
+	ef->Update(p, FMODSystem, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
 
-	if (ef.isPlayerGettingMunched() && !globalPlayerMunchFlag){
+	if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
 		globalPlayerMunchFlag = true;
 		p.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 	}
 
 	else if (globalPlayerMunchFlag){
 		globalPlayerMunchFlag = false;
-		ef.SetPlayerGettingMunched(false);
+		ef->SetPlayerGettingMunched(false);
 		p.ResetEmission();
 	}
 }
@@ -683,15 +688,16 @@ int Sys_Init()
 	//void* extradriverdata = 0;
 	//Common_Init(&extradriverdata);
 	FMOD::System_Create(&FMODSystem);
-	FMODSystem->init(3, FMOD_INIT_NORMAL, 0);
+	FMODSystem->init(3 + MAX_COWS, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
 	FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
 	FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
 	FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
-
-	//different versions... add variation
-	FMODSystem->createSound("media/music/Moo_1.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect);
 	FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
+	FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
+	FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
+	channel->setChannelGroup(channelGroupLightning);
+	channel_bkg->setChannelGroup(channelGroupBKGMusic);
 
 	StaticMeshesLoad(device);
 
@@ -729,10 +735,10 @@ void GameReset()
 	p.SetHealth(100);
 	p.SetEnergy(100);
 	p.SetAnimationName("idle");
-	ef.ForceReset();
+	ef->ForceReset();
 	cam->setPosition(vector3df(defaultCamPos));
 	cam->setTarget(p.GetPosition());
-	ef.SetEnemyCount(STARTING_ENEMIES);
+	ef->SetEnemyCount(STARTING_ENEMIES);
 }
 
 int main()
@@ -874,23 +880,23 @@ int main()
 								OldCameraPosition = cam->getPosition();
 								cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
 								cam->setTarget(p.GetPosition());
-								ef.SetVisible(false);
+								ef->SetVisible(false);
 								p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
 								groundSceneNode->setVisible(false);
 								ufoBladesSceneNode->setVisible(false);
 								ufoSceneNode->setVisible(false);
-								ef.SetHealthAll(0);
-								ef.ForceDeath(xpMod, cowsXp, cowsKilled);
+								ef->SetHealthAll(0);
+								ef->ForceDeath(xpMod, cowsXp, cowsKilled);
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
-							ef.SetVisible(false);
+							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
 							be.SetAnimationID(BIG_BOSS_ANIM_IDLE);
 							be.SetAnimationName("walk");
@@ -995,8 +1001,8 @@ int main()
 									{
 										bossDead = false;
 										//add 2 extra cows after the boss battle
-										ef.SetEnemyCount(ef.GetEnemyCount() + 2);
-										ef.AddSpeed(0.3f);
+										ef->SetEnemyCount(ef->GetEnemyCount() + 2);
+										ef->AddSpeed(0.3f);
 										cowsXp += ((float)be.GetAttackDamage() / 10) * xpMod;
 										cowsKilled += 1;
 										xpMod += 2.4f;
@@ -1026,7 +1032,7 @@ int main()
 			{
 				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
 				//Common_Update();
-				FMODSystem->playSound(mainMenuMusic, 0, false, &channel);
+				FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
 				channel->setVolume(0.8f);
 				//FMODSystem->update();
 
@@ -1039,7 +1045,7 @@ int main()
 
 			else if (state == STATE_GAME_OVER)
 			{
-				//cam->setTarget(ef.GetNearestEnemy(p)->GetPosition());
+				//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
 				if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
 					gameOverToReset = true;
 				
@@ -1063,7 +1069,7 @@ int main()
 					lightningUpgradeTimer = 0.0f;
 					cam->setPosition(OldCameraPosition);
 					cam->setTarget(p.GetPosition());
-					ef.SetVisible(true);
+					ef->SetVisible(true);
 					groundSceneNode->setVisible(true);
 					ufoBladesSceneNode->setVisible(true);
 					ufoSceneNode->setVisible(true);
@@ -1173,6 +1179,7 @@ int main()
 
 	//cutsceneLightning->drop();
 	//cutsceneLightning = 0;
+	delete ef;
 	FMODSystem->close();
 	FMODSystem->release();
 	device->drop();

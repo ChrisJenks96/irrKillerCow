@@ -100,12 +100,19 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 	return ENEMY_STATE::NONE;
 }
 
-bool Enemy::DeathAnimation(const float dt)
+bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
 {
 	deathAnimationTimer += 1.0f * dt;
 	if ((animationID != ENEMY_ANIMATION_DEATH && animationID != ENEMY_ANIMATION_DEATH_IDLE) && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4)){
 		SetAnimationName("death");
 		animationID = ENEMY_ANIMATION_DEATH;
+		bool cowDeathFlag;
+		channel->isPlaying(&cowDeathFlag);
+		if (!cowDeathFlag) {
+			channel->setMode(FMOD_LOOP_OFF);
+			FMODSystem->playSound(cowMooEffect, channelGroupMoo, false, &channel);
+			channel->setVolume(0.8f);
+		}
 		deathAnimationTimer = 0.0f;
 	}
 
@@ -145,7 +152,7 @@ Enemy::~Enemy()
 
 }
 
-EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size, const int usable)
+EnemyFactory::EnemyFactory(IrrlichtDevice* d, FMOD::System* FMODSystem, const int size, const int usable)
 {
 	//20 - 70
 	this->usable = usable;
@@ -159,6 +166,10 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, const int size, const int usable)
 		newEnemy.GetNode()->setVisible(false);
 		enemies.push_back(newEnemy);
 	}
+
+	//different versions... add variation
+	FMODSystem->createSound("media/music/Moo_1.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect);
+	FMODSystem->createChannelGroup("Moo", &channelGroupMoo);
 }
 
 void EnemyFactory::ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled)
@@ -183,12 +194,12 @@ Enemy* EnemyFactory::FindEnemy(ISceneNode* s)
 	return NULL;
 }
 
-void EnemyFactory::Update(Player& p, bool& shieldActive, int& cowsKilled, const float dt)
+void EnemyFactory::Update(Player& p, FMOD::System* FMODSystem, bool& shieldActive, int& cowsKilled, const float dt)
 {
 	for (int i = 0; i < usable; i++) {
 		enemies[i].LookAt(p.GetPosition(), -90.0f);
 		if (enemies[i].isDeathAnimationTrigger()){
-			if (enemies[i].DeathAnimation(dt)){
+			if (enemies[i].DeathAnimation(FMODSystem, dt)){
 				enemies[i].GetNode()->setVisible(false);
 				enemies[i].Reset();
 			}
@@ -265,5 +276,7 @@ void EnemyFactory::SetEnemyCount(int c) {
 
 EnemyFactory::~EnemyFactory()
 {
+	cowMooEffect->release();
+	cowMooEffect = 0;
 	enemies.clear();
 }

@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "LightningSceneNode.h"
 
+#include <fmod.hpp>
+
 using namespace irr;
 using namespace core;
 using namespace scene;
@@ -30,6 +32,9 @@ enum ENEMY_STATE
 
 //enemy id ranges from 300+
 static int enemyID = 300;
+
+static FMOD::Sound* cowMooEffect;
+static FMOD::ChannelGroup* channelGroupMoo;
 
 class Enemy
 {
@@ -57,13 +62,14 @@ public:
 	void SetAnimationName(const char* name) { node->setMD2Animation(name); }
 	void SetAnimationID(int i) { animationID = i; }
 	int GetAnimationID() { return animationID; }
-	bool DeathAnimation(const float dt);
+	bool DeathAnimation(FMOD::System* FMODSystem, const float dt);
 	ENEMY_STATE MoveTowards(const vector3df p, const float dt);
 	void SetSpeed(float s) { speed = s; }
 	float GetSpeed() { return speed; }
 	float GetCurrentAttackLength() { return currAttackLength; }
 	~Enemy();
 private:
+	FMOD::Channel* channel;
 	int animationID{ ENEMY_ANIMATION_IDLE };
 	float deathAnimationTimer{ 0.0f };
 	bool deathAnimationTrigger{ false };
@@ -87,8 +93,8 @@ class EnemyFactory
 	friend class Enemy;
 	public:
 		EnemyFactory() {}
-		EnemyFactory(IrrlichtDevice* d, const int size, const int usable);
-		void Update(Player& p, bool& shieldActive, int& cowsKilled, const float dt);
+		EnemyFactory(IrrlichtDevice* d, FMOD::System* FMODSystem, const int size, const int usable);
+		void Update(Player& p, FMOD::System* FMODSystem, bool& shieldActive, int& cowsKilled, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (auto& x : enemies) { x.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
 		void AddSpeed(float s) { for (auto& x : enemies) { x.SetSpeed(x.GetSpeed() + s); } }
