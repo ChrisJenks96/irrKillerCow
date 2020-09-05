@@ -134,6 +134,7 @@ static void SaveLoadGame(bool s)
 		if (savedCowsKilled < cowsKilled) {
 			fopen_s(&f, "media/HS.DAT", "wb");
 			fwrite(&cowsKilled, 4, 1, f);
+			savedCowsKilled = cowsKilled;
 			fclose(f);
 		}
 	}
@@ -567,7 +568,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			}
 
 			p.FiringAnimation(frameDeltaTime);
-			ISceneNode* e = p.Fire(device, 22.5f * (p.GetEnergy() / 100.0f));
+			ISceneNode* e = p.Fire(device, 25.0f * (p.GetEnergy() / 100.0f));
 			if (e != NULL) {
 				if (e->getID() == 667)
 				{
@@ -885,6 +886,7 @@ int main()
 								totalCowsKilled += cowsKilled;
 								//reset boss shite
 								bossScene = false;
+								bossDead = true;
 								gameOverResetTimer = 0.0f;
 								state = STATE_GAME_OVER;
 							}
