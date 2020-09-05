@@ -1,6 +1,6 @@
 #include "BigEnemy.h"
 
-BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
+BigEnemy::BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float distAway)
 {
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();
@@ -72,9 +72,12 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, const float distAway)
 	selector = smgr->createTriangleSelector(node);
 	node->setTriangleSelector(selector);
 	selector->drop(); // We're done with this selector, so drop it now.
+
+	FMODSystem->createSound("media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
+	FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);
 }
 
-void BigEnemy::DeathAnimation(const float dt)
+void BigEnemy::DeathAnimation(const float dt, FMOD::System* FMODSystem)
 {
 	animationTimer += 1.0f * dt;
 	//presume we've started on 'attack_start'
@@ -88,6 +91,13 @@ void BigEnemy::DeathAnimation(const float dt)
 		SetAnimationName("death");
 		animationID = BIG_BOSS_ANIM_DEATH_END;
 		animationTimer = 0.0f;
+		bool cowDeathFlag;
+		channel->isPlaying(&cowDeathFlag);
+		if (!cowDeathFlag) {
+			channel->setMode(FMOD_LOOP_OFF);
+			FMODSystem->playSound(bigMooEffect, channelGroupBigMoo, false, &channel);
+			channel->setVolume(0.4f);
+		}
 	}
 
 	else if (animationID == BIG_BOSS_ANIM_DEATH_END2 && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
@@ -182,5 +192,6 @@ void BigEnemy::Reset()
 
 BigEnemy::~BigEnemy()
 {
-
+	bigMooEffect->release();
+	bigMooEffect = 0;
 }

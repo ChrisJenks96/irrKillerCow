@@ -37,7 +37,7 @@ static f32 transition_time_start = -1;  //when the transition start...
   //Call this function when you want to start the effect
 static void startTransitionFadeOut(IrrlichtDevice* device)
 {
-	transition_time_start = device->getTimer()->getTime();
+	transition_time_start = (f32)device->getTimer()->getTime();
 }
 
 //this function do the real work and must be placed between "smgr->drawAll();" and "driver->endScene();"

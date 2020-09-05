@@ -105,7 +105,7 @@ vector3df OldCameraPosition;
 //game specifics
 Player p;
 EnemyFactory* ef;
-BigEnemy be;
+BigEnemy* be;
 
 bool gameOverToReset = false;
 bool playerNukeGoneOff = false;
@@ -128,23 +128,23 @@ float gameOverTimer = 0.0f;
 
 static void SaveLoadGame(bool s)
 {
-	FILE* f;
+	FILE* f = NULL;
 	if (s)
 	{
-		fopen_s(&f, "media/HS.DAT", "wb");
 		if (savedCowsKilled < cowsKilled) {
-			savedCowsKilled = cowsKilled;
+			fopen_s(&f, "media/HS.DAT", "wb");
 			fwrite(&cowsKilled, 4, 1, f);
+			fclose(f);
 		}
-
-		fclose(f);
 	}
 
 	else
 	{
 		fopen_s(&f, "media/HS.DAT", "rb");
-		fread(&savedCowsKilled, 4, 1, f);
-		fclose(f);
+		if (f) {
+			fread(&savedCowsKilled, 4, 1, f);
+			fclose(f);
+		}
 	}
 }
 
@@ -450,9 +450,9 @@ void GameInit(IrrlichtDevice* device)
 	p = Player(device);
 	ef = new EnemyFactory(device, FMODSystem, MAX_COWS, STARTING_ENEMIES);
 	ef->SetEnemyCount(STARTING_ENEMIES);
-	be = BigEnemy(device, 12.0f);
+	be = new BigEnemy(device, FMODSystem, 12.0f);
 	enemyOrb = EnemyOrb(device);
-	be.GetNode()->setVisible(false);
+	be->GetNode()->setVisible(false);
 
 	ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, 180.0f, 15.0f));
@@ -506,26 +506,26 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
 			if (dist < 0.2f && !er.GUIShieldToggle) {
 				enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
-				enemyOrb.GetNode()->setPosition(be.GetPosition());
-				p.RemoveHealth(be.GetAttackDamage());
+				enemyOrb.GetNode()->setPosition(be->GetPosition());
+				p.RemoveHealth(be->GetAttackDamage());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
 			}
 
 			else if (dist < 2.8f && er.GUIShieldToggle) {
-				enemyOrb.GetNode()->setPosition(be.GetPosition());
+				enemyOrb.GetNode()->setPosition(be->GetPosition());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
 			}
 		}
 
 		else
-			enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
+			enemyOrb.GetNode()->setPosition(be->GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 	}
 
 	//the enemy entrance etc...
 	else
-		enemyOrb.GetNode()->setPosition(be.GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
+		enemyOrb.GetNode()->setPosition(be->GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 
 	if (er.GUINukeToggle)
 	{
@@ -567,15 +567,15 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			}
 
 			p.FiringAnimation(frameDeltaTime);
-			ISceneNode* e = p.Fire(device, 15.0f * (p.GetEnergy() / 100.0f));
+			ISceneNode* e = p.Fire(device, 22.5f * (p.GetEnergy() / 100.0f));
 			if (e != NULL) {
 				if (e->getID() == 667)
 				{
-					be.RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-					if (be.GetHealth() <= 0) {
+					be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+					if (be->GetHealth() <= 0) {
 						if (!bossDead) {
 							cam->setTarget(p.GetPosition());
-							be.SetAnimationID(BIG_BOSS_ANIM_DEATH);
+							be->SetAnimationID(BIG_BOSS_ANIM_DEATH);
 						}
 
 						bossDead = true;
@@ -709,7 +709,7 @@ int Sys_Init()
 	//void* extradriverdata = 0;
 	//Common_Init(&extradriverdata);
 	FMOD::System_Create(&FMODSystem);
-	FMODSystem->init(3 + MAX_COWS, FMOD_INIT_NORMAL, 0);
+	FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
 	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
 	FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
 	FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
@@ -870,7 +870,7 @@ int main()
 					else
 					{
 						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
-						be.GetNodeDrill()->setRotation(be.GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
+						be->GetNodeDrill()->setRotation(be->GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
 
 						if (p.GetHealth() <= 0) {
 							//play death animation
@@ -927,17 +927,17 @@ int main()
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
-							be.SetAnimationID(BIG_BOSS_ANIM_IDLE);
-							be.SetAnimationName("walk");
-							be.GetNode()->setVisible(true);
-							be.RandomPosition(12.0f, true);
-							bigEnemyNewPos = be.GetPosition();
-							be.GetNode()->setPosition(vector3df(be.GetNode()->getPosition().X, -10.0f, be.GetNode()->getPosition().Z));
-							be.GetNodeCap()->setPosition(be.GetNode()->getPosition() + vector3df(-0.2f, 3.5f, -0.2f));
-							be.GetNodeDirt()->setPosition(vector3df(be.GetNode()->getPosition().X, 0.1f, be.GetNode()->getPosition().Z));
-							cam->setTarget(be.GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
-							be.LookAt(p.GetPosition(), 180.0f);
-							be.SetHealth(BASE_BOSS_HEALTH + (10 * beKilled));
+							be->SetAnimationID(BIG_BOSS_ANIM_IDLE);
+							be->SetAnimationName("walk");
+							be->GetNode()->setVisible(true);
+							be->RandomPosition(12.0f, true);
+							bigEnemyNewPos = be->GetPosition();
+							be->GetNode()->setPosition(vector3df(be->GetNode()->getPosition().X, -10.0f, be->GetNode()->getPosition().Z));
+							be->GetNodeCap()->setPosition(be->GetNode()->getPosition() + vector3df(-0.2f, 3.5f, -0.2f));
+							be->GetNodeDirt()->setPosition(vector3df(be->GetNode()->getPosition().X, 0.1f, be->GetNode()->getPosition().Z));
+							cam->setTarget(be->GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
+							be->LookAt(p.GetPosition(), 180.0f);
+							be->SetHealth(BASE_BOSS_HEALTH + (10 * beKilled));
 							beKilled += 1;
 							bossScene = true;
 							bigEnemyFirstMove = false;
@@ -953,11 +953,11 @@ int main()
 							if (!bossDead)
 							{
 								//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
-								if (!bigEnemyFirstMove && be.MoveTowards(be.GetCachedSpawnPosition(), frameDeltaTime, true)) {
+								if (!bigEnemyFirstMove && be->MoveTowards(be->GetCachedSpawnPosition(), frameDeltaTime, true)) {
 									vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
 									cam->setPosition(cam->getPosition() + p1);
 									//log the current pos (which will be the final on the next step)
-									bigEnemyOldPos = be.GetPosition();
+									bigEnemyOldPos = be->GetPosition();
 								}
 
 								else
@@ -967,51 +967,51 @@ int main()
 									//heads towards the centre (the ufo is the middle)
 									//BECAREFUL OF THE Y AXIS!!!!!!!!!
 									if (!bigEnemyWalkOutCap) {
-										bigEnemyWalkOutCap = !be.MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
-										be.GetNodeCap()->setRotation(((be.GetNode()->getPosition() - be.GetNodeCap()->getPosition()).getHorizontalAngle() + 
+										bigEnemyWalkOutCap = !be->MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
+										be->GetNodeCap()->setRotation(((be->GetNode()->getPosition() - be->GetNodeCap()->getPosition()).getHorizontalAngle() + 
 											vector3df(0.0f, -90.0f, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 										bigEnemyMoveCounter += 1.0f * frameDeltaTime;
-										be.GetNodeCap()->setMD2Animation("open_idle");
+										be->GetNodeCap()->setMD2Animation("open_idle");
 
 										if (bigEnemyMoveCounter > bigEnemyMoveMax) {
-											be.SetAnimationName("idle");
+											be->SetAnimationName("idle");
 											bigEnemyMoveCounter = 0.0f;
 											bigEnemyWalkOutCap = true;
 										}
 									}
 
-									else if (bigEnemyWalkOutCap && !bigEnemyOnMove && be.PollNewPosition(frameDeltaTime)) {
-										bigEnemyNewPos = be.RandomPosition(12.0f, false);
-										be.LookAt(bigEnemyNewPos, 180.0f);
+									else if (bigEnemyWalkOutCap && !bigEnemyOnMove && be->PollNewPosition(frameDeltaTime)) {
+										bigEnemyNewPos = be->RandomPosition(12.0f, false);
+										be->LookAt(bigEnemyNewPos, 180.0f);
 										bigEnemyOnMove = true;
 									}
 
 									else if (bigEnemyOnMove) {
-										if (be.GetAnimationID() != BIG_BOSS_ANIM_WALK) {
-											be.SetAnimationName("walk");
-											be.SetAnimationID(BIG_BOSS_ANIM_WALK);
+										if (be->GetAnimationID() != BIG_BOSS_ANIM_WALK) {
+											be->SetAnimationName("walk");
+											be->SetAnimationID(BIG_BOSS_ANIM_WALK);
 										}
 
-										bigEnemyOnMove = be.MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
+										bigEnemyOnMove = be->MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
 										if (!bigEnemyOnMove) {
 											bigEnemyStopShooting = false;
-											be.LookAt(p.GetPosition(), 180.0f);
-											if (be.GetAnimationID() != BIG_BOSS_ANIM_ATTACK) {
-												be.SetAnimationName("attack_main");
-												be.SetAnimationID(BIG_BOSS_ANIM_ATTACK);
+											be->LookAt(p.GetPosition(), 180.0f);
+											if (be->GetAnimationID() != BIG_BOSS_ANIM_ATTACK) {
+												be->SetAnimationName("attack_main");
+												be->SetAnimationID(BIG_BOSS_ANIM_ATTACK);
 											}
 										}
 									}
 
 									if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)
 									{
-										be.GetNodeCap()->setMD2Animation("close_idle");
+										be->GetNodeCap()->setMD2Animation("close_idle");
 
 										//shoot the capsule off out of the scene
-										be.GetNodeCap()->setPosition(be.GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
+										be->GetNodeCap()->setPosition(be->GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
 											(bigEnemyMoveCounter - bigEnemyCapsuleTakeoff)) * frameDeltaTime, 0.0f));
 										bigEnemyCapVelocity -= 50.0f * frameDeltaTime;
-										if (be.GetNodeCap()->getPosition().Y > 100.0f)
+										if (be->GetNodeCap()->getPosition().Y > 100.0f)
 											bigEnemyCapOutOfRange = true;
 									}
 
@@ -1021,15 +1021,15 @@ int main()
 							}
 
 							else if (bossDead) {
-								be.DeathAnimation(frameDeltaTime);
+								be->DeathAnimation(frameDeltaTime, FMODSystem);
 								vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 								cam->setPosition(cam->getPosition() + p1);
 								cam->setTarget(p.GetPosition());
-								if (be.GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
+								if (be->GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
 									bigEnemyStopShooting = true;
 									enemyOrb.GetNode()->setVisible(false);
-									be.GetNodeDirt()->setPosition(vector3df(-9.99f));
-									be.GetNode()->setVisible(false);
+									be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+									be->GetNode()->setVisible(false);
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
 									{
@@ -1037,7 +1037,7 @@ int main()
 										//add 2 extra cows after the boss battle
 										ef->SetEnemyCount(ef->GetEnemyCount() + 2);
 										ef->AddSpeed(0.3f);
-										cowsXp += ((float)be.GetAttackDamage() / 10) * xpMod;
+										cowsXp += ((float)be->GetAttackDamage() / 10) * xpMod;
 										cowsKilled += 1;
 										xpMod += 2.4f;
 										bossScene = false;
@@ -1155,7 +1155,7 @@ int main()
 					str += cowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0), video::SColor(255, 255, 255, 255));
 					str = L"Total Cows Record: ";
-					str += totalCowsKilled;
+					str += savedCowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0), video::SColor(255, 255, 255, 255));
 					str = L"Total Cows Destroyed: ";
 					str += totalCowsKilled;
@@ -1227,6 +1227,7 @@ int main()
 	//cutsceneLightning->drop();
 	//cutsceneLightning = 0;
 	delete ef;
+	delete be;
 	FMODSystem->close();
 	FMODSystem->release();
 	device->drop();

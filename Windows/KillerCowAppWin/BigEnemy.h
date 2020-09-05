@@ -24,11 +24,14 @@ using namespace gui;
 #define BIG_BOSS_ANIM_DEATH_END3 5
 #define BIG_BOSS_ANIM_WALK 6
 
+static FMOD::Sound* bigMooEffect;
+static FMOD::ChannelGroup* channelGroupBigMoo;
+
 class BigEnemy
 {
 public:
 	BigEnemy(){}
-	BigEnemy(IrrlichtDevice* d, const float distAway);
+	BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float distAway);
 	const vector3df& GetPosition() { return node->getPosition(); }
 	void LookAt(const vector3df p, const float offset);
 	void Reset();
@@ -51,12 +54,13 @@ public:
 	void SetAnimationID(int i) { animationID = i; }
 	int GetAnimationID() { return animationID; }
 	void SetAnimationName(const char* n) { node->setMD2Animation(n); }
-	void DeathAnimation(const float dt);
+	void DeathAnimation(const float dt, FMOD::System* FMODSystem);
 	IAnimatedMeshSceneNode* GetNodeDirt() { return node_dirt; }
 	IAnimatedMeshSceneNode* GetNodeDrill() { return node_drill; }
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
+	FMOD::Channel* channel;
 	float animationTimer{ 0.0f };
 	float animationRate{ 4.0f };
 	float newPositionTimer{ 0.0f };
