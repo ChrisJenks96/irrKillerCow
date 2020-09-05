@@ -986,6 +986,7 @@ int main()
 								cam->setPosition(cam->getPosition() + p1);
 								cam->setTarget(p.GetPosition());
 								if (be.GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
+									bigEnemyStopShooting = true;
 									enemyOrb.GetNode()->setVisible(false);
 									be.GetNodeDirt()->setPosition(vector3df(-9.99f));
 									be.GetNode()->setVisible(false);
