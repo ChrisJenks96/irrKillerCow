@@ -20,7 +20,7 @@ class EnemyOrb
 public:
 	EnemyOrb() {}
 	EnemyOrb(IrrlichtDevice* d);
-	void Update(const float dt);
+	void Update(const float dt, bool resetQSI);
 	ISceneNode* GetNode() { return node; }
 	~EnemyOrb() {}
 private:

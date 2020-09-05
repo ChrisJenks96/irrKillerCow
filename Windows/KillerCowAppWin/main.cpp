@@ -87,6 +87,9 @@ bool bossScene = false;
 bool bossDead = false;
 int beKilled = 0;
 
+#define ENEMY_ORB_DEFAULT_SPEED 10
+float enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
+
 float gameOverResetTimer = 0.0f;
 float gameOverResetRate = 4.0f;
 
@@ -198,10 +201,13 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			ufoSceneNode->setVisible(false);
 			ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
+			ufoSceneNode->getMaterial(0).Shininess = 60;
 			ufoSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
+			ufoSceneNode->getMaterial(1).Shininess = 60;
 			ufoSceneNode->getMaterial(2).setTexture(0, driver->getTexture("media/ufo/seat.png"));
 			ufoSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/ufo/pod.png"));
 			ufoSceneNode->getMaterial(4).setTexture(0, driver->getTexture("media/ufo/body.png"));
+			ufoSceneNode->getMaterial(4).Shininess = 45;
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
 			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
@@ -380,7 +386,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 			if (!bkgMusicPlaying) {
 				channel_bkg->setMode(FMOD_LOOP_NORMAL);
 				FMODSystem->playSound(backgroundMusic, channelGroupBKGMusic, false, &channel_bkg);
-				channel_bkg->setVolume(0.7f);
+				channel_bkg->setVolume(0.4f);
 			}
 		}
 	}
@@ -466,14 +472,16 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		//MouseXPrev = MouseX;
 	}
 
-	enemyOrb.Update(frameDeltaTime);
+	enemyOrb.Update(frameDeltaTime, true);
 	if (bigEnemyCapOutOfRange)
 	{
 		if (!bigEnemyStopShooting) {
-			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * 10.0f * frameDeltaTime;
+			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * enemyOrbSpeed * frameDeltaTime;
+			enemyOrbSpeed += 15.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
 			if (dist < 0.2f && !er.GUIShieldToggle) {
+				enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 				enemyOrb.GetNode()->setPosition(be.GetPosition());
 				p.RemoveHealth(be.GetAttackDamage());
 				if (bigEnemyOnMove)
@@ -610,23 +618,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		if (!lightningEffectEndTrigger) {
 			channel->stop();
 		}
-	}
-
-	if (playerNukeGoneOff)
-	{
-		p.GetOrb().GetNode()->setScale(p.GetOrb().GetNode()->getScale() + vector3df(10.0f * frameDeltaTime));
-		p.GetOrb().GetNode()->setPosition(p.GetPosition());
-		p.GetOrb().Update(frameDeltaTime);
-
-		//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
-		if (p.GetOrb().GetNode()->getScale().Y > 50.0f) {
-			playerNukeGoneOff = false;
-			ef->SetHealthAll(0);
-			ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-			p.GetOrb().GetNode()->setScale(vector3df(1.6f));
-			p.GetOrb().GetNode()->setVisible(false);
-		}
-			
 	}
 
 	//if we have no energy, shut it off
@@ -790,13 +781,13 @@ int main()
 		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
 		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(true);
+		shieldBtnToggle->setVisible(false);
 
 		nukeBtnToggle = gui->addButton(recti(52, 108, 52 + 32, 108 + 32));
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(true);
+		nukeBtnToggle->setVisible(false);
 
 		while (device->run())
 		{
@@ -889,7 +880,7 @@ int main()
 								p.SetEnergy(100);
 
 								OldCameraPosition = cam->getPosition();
-								cam->setPosition(vector3df(-7.0f, 0.0f, 4.0f));
+								cam->setPosition(vector3df(-5.0f, 0.0f, 3.0f));
 								cam->setTarget(p.GetPosition());
 								ef->SetVisible(false);
 								p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
@@ -898,14 +889,15 @@ int main()
 								ufoSceneNode->setVisible(false);
 								ef->SetHealthAll(0);
 								ef->ForceDeath(xpMod, cowsXp, cowsKilled);
+								p.SetAnimationName("twerk");
 								LightningUpgrade(device);
 								state = STATE_POWERUP;
 							}
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -1030,6 +1022,21 @@ int main()
 					}
 				}
 				
+				if (playerNukeGoneOff)
+				{
+					p.GetOrb().GetNode()->setScale(p.GetOrb().GetNode()->getScale() + vector3df(15.0f * frameDeltaTime));
+					p.GetOrb().GetNode()->setPosition(p.GetPosition());
+					p.GetOrb().Update(frameDeltaTime, true);
+
+					//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
+					if (p.GetOrb().GetNode()->getScale().Y > 20.0f) {
+						playerNukeGoneOff = false;
+						ef->SetHealthAll(0);
+						ef->ForceDeath(xpMod, cowsXp, cowsKilled);
+						p.GetOrb().GetNode()->setScale(vector3df(1.6f));
+						p.GetOrb().GetNode()->setVisible(false);
+					}
+				}
 			}
 				
 			else if (state == STATE_INTRO_CUTSCENE)

@@ -40,10 +40,12 @@ EnemyOrb::EnemyOrb(IrrlichtDevice* d)
 	}
 }
 
-void EnemyOrb::Update(const float dt)
+void EnemyOrb::Update(const float dt, bool resetQSI)
 {
 	node->setRotation(node->getRotation() + vector3df(80.0f * dt));
-	QUAD_SEGMENT_INCREMENT = -3.0f;
+	if (resetQSI)
+		QUAD_SEGMENT_INCREMENT = -3.0f;
+
 	for (int i = 0; i < NUM_LIGHTNING_SPLIT_AXIS; i++) {
 		bolts[i]->ArkUpdate(dt);
 	}
