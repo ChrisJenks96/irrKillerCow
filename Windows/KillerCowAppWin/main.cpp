@@ -710,17 +710,24 @@ int Sys_Init()
 
 	//void* extradriverdata = 0;
 	//Common_Init(&extradriverdata);
-	FMOD::System_Create(&FMODSystem);
-	FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
-	FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
-	FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
-	FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
-	FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
-	FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
-	FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
-	FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
-	channel->setChannelGroup(channelGroupLightning);
-	channel_bkg->setChannelGroup(channelGroupBKGMusic);
+	FMOD_RESULT r;
+	r = FMOD::System_Create(&FMODSystem);
+	if (r == FMOD_OK)
+	{
+		r = FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
+		if (r == FMOD_OK)
+		{
+			FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
+			FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
+			FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
+			FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
+			FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
+			FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
+			FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
+			channel->setChannelGroup(channelGroupLightning);
+			channel_bkg->setChannelGroup(channelGroupBKGMusic);
+		}
+	}
 
 	StaticMeshesLoad(device);
 

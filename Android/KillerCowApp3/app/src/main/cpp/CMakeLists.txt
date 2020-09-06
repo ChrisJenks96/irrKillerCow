@@ -17,13 +17,13 @@ set_target_properties( fmod
         PROPERTIES IMPORTED_LOCATION
         C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmod.so)
 
-add_library( fmodL
+add_library( fmodstudio
         SHARED
         IMPORTED )
 
-set_target_properties( fmodL
+set_target_properties( fmodstudio
         PROPERTIES IMPORTED_LOCATION
-        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmodL.so )
+        C:/sdk/fmodstudioapi20011android/api/studio/lib/${ANDROID_ABI}/libfmodstudio.so)
 
 add_library( # Sets the name of the library.
         app-glue
@@ -57,6 +57,7 @@ add_library( # Sets the name of the library.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${ANDROID_NDK}/sources/android/native_app_glue/)
 include_directories(C:/sdk/fmodstudioapi20011android/api/core/inc/)
+include_directories(C:/sdk/fmodstudioapi20011android/api/studio/inc)
 include_directories(C:/sdk/irrlicht-ogl-es/include/)
 
 find_library( # Sets the name of the path variable.
@@ -74,6 +75,7 @@ target_link_libraries( native-lib
                        GLESv1_CM
                        GLESv2
                        fmod
+                        fmodstudio
                        z
                        m
                        ${log-lib}
