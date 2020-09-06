@@ -616,7 +616,7 @@ void GameInit(IrrlichtDevice* device)
 
     LightningUpgrade(device);
 
-    cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
+    cam->setPosition(defaultCamPos);
     cam->setTarget(p.GetPosition());
 
     dirLight->remove();
@@ -855,7 +855,7 @@ void GameReset()
     p.SetEnergy(100);
     p.SetAnimationName("idle");
     ef->ForceReset();
-    cam->setPosition(vector3df(defaultCamPos));
+    cam->setPosition(defaultCamPos);
     cam->setTarget(p.GetPosition());
     ef->SetEnemyCount(STARTING_ENEMIES);
 }
@@ -974,6 +974,7 @@ void android_main(android_app* app)
     //channel_bkg->setChannelGroup(channelGroupBKGMusic);
 
     cam = smgr->addCameraSceneNode();
+
     StaticMeshesLoad(device);
 
     IMesh *mesh = smgr->getMesh("media/gui/earth.obj");

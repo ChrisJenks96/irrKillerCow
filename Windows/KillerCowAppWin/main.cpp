@@ -466,7 +466,7 @@ void GameInit(IrrlichtDevice* device)
 
 	LightningUpgrade(device);
 
-	cam->setPosition(vector3df(3.0f, 10.0f, -9.0f));
+	cam->setPosition(defaultCamPos);
 	cam->setTarget(p.GetPosition());
 
 	dirLight->remove();
