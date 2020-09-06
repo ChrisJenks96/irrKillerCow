@@ -96,7 +96,7 @@ void BigEnemy::DeathAnimation(const float dt, FMOD::System* FMODSystem)
 			channel->isPlaying(&cowDeathFlag);
 			if (!cowDeathFlag) {
 				channel->setMode(FMOD_LOOP_OFF);
-				FMODSystem->playSound(bigMooEffect, channelGroupBigMoo, false, &channel);
+				FMODSystem->playSound(bigMooEffect, 0, false, &channel);
 				channel->setVolume(0.4f);
 			}
 

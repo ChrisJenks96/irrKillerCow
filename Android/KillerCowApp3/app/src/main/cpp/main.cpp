@@ -191,8 +191,6 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 FMOD::System* FMODSystem;
 FMOD::Channel* channel = 0;
 FMOD::Channel* channel_bkg = 0;
-FMOD::ChannelGroup* channelGroupLightning;
-FMOD::ChannelGroup* channelGroupBKGMusic;
 
 FMOD_MODE currMode;
 FMOD::Sound* mainMenuMusic;
@@ -541,7 +539,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
             channel->isPlaying(&lightningOnceFlag);
             if (!lightningOnceFlag) {
                 channel->setMode(FMOD_LOOP_OFF);
-                FMODSystem->playSound(lightningCutsceneOnce, channelGroupBKGMusic, false, &channel);
+                FMODSystem->playSound(lightningCutsceneOnce, 0, false, &channel);
                 channel->setVolume(0.3f);
             }
         }
@@ -557,7 +555,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
             channel_bkg->isPlaying(&bkgMusicPlaying);
             if (!bkgMusicPlaying) {
                 channel_bkg->setMode(FMOD_LOOP_NORMAL);
-                FMODSystem->playSound(backgroundMusic, channelGroupBKGMusic, false, &channel_bkg);
+                FMODSystem->playSound(backgroundMusic, 0, false, &channel_bkg);
                 channel_bkg->setVolume(0.4f);
             }
         }
@@ -706,7 +704,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
                 channel->isPlaying(&playing);
                 if (!playing){
                     channel->setMode(FMOD_LOOP_OFF);
-                    FMODSystem->playSound(lightningEffectStart, channelGroupLightning, false, &channel);
+                    FMODSystem->playSound(lightningEffectStart, 0, false, &channel);
                     channel->setVolume(0.3f);
                     channel->setPaused(false);
                     lightningEffectStartTrigger = true;
@@ -776,7 +774,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
             channel->stop();
             lightningEffectMidTrigger = true;
             channel->setMode(FMOD_LOOP_NORMAL);
-            FMODSystem->playSound(lightningEffectMid, channelGroupLightning, false, &channel);
+            FMODSystem->playSound(lightningEffectMid, 0, false, &channel);
             channel->setVolume(0.3f);
         }
     }
@@ -784,7 +782,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
     else if (!leftPressedMidEffect  && lightningEffectMidTrigger) {
         channel->stop();
         channel->setMode(FMOD_LOOP_OFF);
-        FMODSystem->playSound(lightningEffectEnd, channelGroupLightning, false, &channel);
+        FMODSystem->playSound(lightningEffectEnd, 0, false, &channel);
         channel->setVolume(0.3f);
         lightningEffectMidTrigger = false;
         lightningEffectEndTrigger = true;
@@ -1294,7 +1292,7 @@ void android_main(android_app* app)
             earthSceneNode->setRotation(
                     earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
             //Common_Update();
-            FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
+            FMODSystem->playSound(mainMenuMusic, 0, false, &channel);
             channel->setVolume(0.8f);
             //FMODSystem->update();
 

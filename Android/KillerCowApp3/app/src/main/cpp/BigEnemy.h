@@ -25,7 +25,6 @@ using namespace gui;
 #define BIG_BOSS_ANIM_WALK 6
 
 static FMOD::Sound* bigMooEffect;
-static FMOD::ChannelGroup* channelGroupBigMoo;
 
 class BigEnemy
 {

@@ -115,19 +115,19 @@ bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
 			switch (soundEffectID)
 			{
 				case 0:
-					FMODSystem->playSound(cowMooEffect, channelGroupMoo, false, &channel);
+					FMODSystem->playSound(cowMooEffect, 0, false, &channel);
 					break;
 				case 1:
-					FMODSystem->playSound(cowMooEffect1, channelGroupMoo, false, &channel);
+					FMODSystem->playSound(cowMooEffect1, 0, false, &channel);
 					break;
 				case 2:
-					FMODSystem->playSound(cowMooEffect2, channelGroupMoo, false, &channel);
+					FMODSystem->playSound(cowMooEffect2, 0, false, &channel);
 					break;
 				case 3:
-					FMODSystem->playSound(cowMooEffect3, channelGroupMoo, false, &channel);
+					FMODSystem->playSound(cowMooEffect3, 0, false, &channel);
 					break;
 				default:
-					FMODSystem->playSound(cowMooEffect, channelGroupMoo, false, &channel);
+					FMODSystem->playSound(cowMooEffect, 0, false, &channel);
 					break;
 			}
 			
