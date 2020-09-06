@@ -160,13 +160,6 @@ private:
 	s32 TouchID;
 };
 
-/* Mainloop.
-*/
-void mainloop( IrrlichtDevice *device)
-{
-
-}
-
 #define STATE_GAME 0
 #define STATE_INTRO_CUTSCENE 1
 #define STATE_MENU 2

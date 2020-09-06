@@ -14,7 +14,8 @@ using namespace gui;
 //how big is each quad
 #define QUAD_SIZE 0.35f
 //how far per quad do we go
-#define QUAD_SEGMENT_INCREMENT -10.0f
+extern int QUAD_SEGMENT_INCREMENT;
+//#define QUAD_SEGMENT_INCREMENT -10.0f
 
 constexpr int TOTAL_VERTS = (QUAD_SEGMENTS * 4);
 constexpr int TOTAL_EXTRA_IND = (QUAD_SEGMENTS / 2) * 6;
@@ -29,6 +30,7 @@ public:
         Material.Wireframe = false;
         Material.Lighting = false;
         Material.BackfaceCulling = false;
+        Material.NormalizeNormals = true;
 
         int quadCounter = 0;
         //start from 4 because there is a nasty bug somewhere?!?!? (possible overflow from indices calc)

@@ -11,10 +11,10 @@ using namespace gui;
 
 #define NUM_CUTSCENE_PHASES 2
 //how many passes of ground terrain before the next cutscene
-#define NUM_CUTSCENE1_PASSES 3
+#define NUM_CUTSCENE1_PASSES 2
 //when the lightning strikes
-#define CUTSCENE2_LIGHTNING_PASS 170.0f
-#define CUTSCENE2_END 350.0f
+#define CUTSCENE2_LIGHTNING_PASS 140.0f
+#define CUTSCENE2_END 280.0f
 
 #define CUTSCENE3_CRASH_AHEAD_DISTANCE 400.0f
 #define CUTSCENE3_ROTATE_SPEED 25.0f
@@ -27,7 +27,7 @@ static float cutscenespeedAccum = 0.0f;
 //individual cutscene vars
 static int cutscene1EndPass = 0;
 static int cutscene1currentGround = 0;
-static int cutscene1GroundDistance = 200.0f;
+static int cutscene1GroundDistance = 360.0f;
 static vector3df cutscene1CamPosition = { 10.0f, 60.0f, 7.0f };
 static vector3df cutscene2CamPosition = { -7.55f, 0.46f, 24.6f };
 static vector3df cutscene3CamPosition = { 3.0f, 5.0f, -1.0f };

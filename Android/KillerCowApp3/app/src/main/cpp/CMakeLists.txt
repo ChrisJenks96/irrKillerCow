@@ -32,6 +32,9 @@ add_library( # Sets the name of the library.
              main.cpp
              Enemy.cpp
              Player.cpp
+            BigEnemy.cpp
+            EnemyOrb.cpp
+            ER.h
              android_tools.cpp
         )
 

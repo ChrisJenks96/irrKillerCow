@@ -9,7 +9,7 @@ Player::Player(IrrlichtDevice* d)
 	if (mesh)
 	{
 		node = smgr->addAnimatedMeshSceneNode(mesh);
-		node->setPosition(vector3df(3.0f, 0.0f, -3.0f));
+		node->setPosition(vector3df(3.0f, -1.0f, -3.0f));
 		node->setScale(vector3df(0.7f, 0.7f, 0.7f));
 		if (node)
 		{
@@ -22,6 +22,44 @@ Player::Player(IrrlichtDevice* d)
 			SetAnimationName("idle");
 		}
 	}
+
+	mesh = smgr->getMesh("media/player/player_shield.obj");
+
+	if (mesh)
+	{
+		nodeShield = smgr->addAnimatedMeshSceneNode(mesh);
+		nodeShield->setParent(node);
+		nodeShield->setScale(vector3df(4.0f));
+		if (nodeShield)
+		{
+			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
+			nodeShield->setMaterialFlag(EMF_LIGHTING, false);
+			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			nodeShield->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
+			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
+			nodeShield->setVisible(false);
+		}
+	}
+
+	mesh = smgr->getMesh("media/player/player_shield.obj");
+
+	if (mesh)
+	{
+		orb = smgr->addAnimatedMeshSceneNode(mesh);
+		orb->setScale(vector3df(4.0f));
+		if (nodeShield)
+		{
+			orb->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
+			orb->setMaterialFlag(EMF_LIGHTING, false);
+			orb->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			orb->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
+			orb->setMaterialTexture(0, driver->getTexture("media/shields/shield_red.png"));
+			orb->setVisible(false);
+		}
+	}
+
+	orb->setVisible(false);
+	orb->setPosition(node->getPosition());
 
 	//weapon firing lighting effect
 	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
@@ -71,6 +109,27 @@ void Player::FiringAnimation(const float dt)
 	}
 }
 
+void Player::DeathAnimation(const float dt)
+{
+	animationTimer += 1.0f * dt;
+	//presume we've started on 'attack_start'
+	if (animationID != PLAYER_ANIMATION_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death");
+		//animation 'death start'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_DEATH_END;
+		animationTimer = 0.0f;
+	}
+
+	else if (animationID == PLAYER_ANIMATION_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+		SetAnimationName("death_idle");
+		//animation 'death idle'
+		oldAnimationID = animationID;
+		animationID = PLAYER_ANIMATION_DEATH_END;
+		animationTimer = 0.0f;
+	}
+}
+
 void Player::NotFiringAnimation(const float dt)
 {
 	animationTimer += 1.0f * dt;
@@ -99,13 +158,21 @@ void Player::NotFiringAnimation(const float dt)
 	}
 }
 
-ISceneNode* Player::Fire(IrrlichtDevice* device)
+void Player::ShieldUVScroll(const float dt)
+{
+	nodeShield->getMaterial(0).getTextureMatrix(0).setTextureTranslate(0, nodeShieldY);
+	nodeShieldY -= 1.2f * dt;
+	if (nodeShieldY >= 1.0f)
+		nodeShieldY = 0.0f;
+}
+
+ISceneNode* Player::Fire(IrrlichtDevice* device, const float length)
 {
 	WeaponFiringLightToggle(true);
-	
+
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
-	ray.end = ray.start + SceneNodeDir(node) * 1000.0f;
+	ray.end = ray.start + SceneNodeDir(node) * length;
 	// Tracks the current intersection point with the level or a mesh
 	core::vector3df intersection;
 	// Used to show with triangle has been hit
