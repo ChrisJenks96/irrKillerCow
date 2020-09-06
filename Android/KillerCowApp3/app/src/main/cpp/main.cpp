@@ -24,6 +24,11 @@ using namespace io;
 using namespace gui;
 
 SEvent fakeMouseEvent;
+bool HoldingLeftDown = false;
+IGUIButton* shieldBtnToggle;
+IGUIButton* nukeBtnToggle;
+bool GUINukeToggle{ false };
+bool GUIShieldToggle{ false };
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -31,6 +36,7 @@ public:
 	MyEventReceiver(android_app* app )
 	: Device(0), AndroidApp(app), SpriteToMove(0), TouchID(-1)
 	{
+        fakeMouseEvent.MouseInput.Event = EMIE_COUNT;
 	}
 
 	void Init(IrrlichtDevice *device)
@@ -68,24 +74,18 @@ public:
 					break;
 				}
 				case ETIE_MOVED:
+                    HoldingLeftDown = true;
 					if ( TouchID == event.TouchInput.ID )
 					{
 						fakeMouseEvent.MouseInput.Event = EMIE_MOUSE_MOVED;
 						fakeMouseEvent.MouseInput.ButtonStates = EMBSM_LEFT;
-
-						if ( SpriteToMove && TouchID == event.TouchInput.ID )
-						{
-
-							position2d<s32> touchPoint(event.TouchInput.X, event.TouchInput.Y);
-							MoveSprite(touchPoint);
-						}
 					}
 					break;
 				case ETIE_LEFT_UP:
+                    HoldingLeftDown = false;
 					if ( TouchID == event.TouchInput.ID )
-					{
+                    {
 						fakeMouseEvent.MouseInput.Event = EMIE_LMOUSE_LEFT_UP;
-
 						if ( SpriteToMove )
 						{
 							TouchID = -1;
@@ -95,7 +95,7 @@ public:
 						}
 					}
 					break;
-				default:
+			    default:
 					break;
 			}
 
@@ -653,14 +653,14 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
             enemyOrbSpeed += 4.0f * frameDeltaTime;
             float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
             enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
-            if (dist < 0.2f){// && !er.GUIShieldToggle) {
+            if (dist < 0.2f && !GUIShieldToggle) {
                 enemyOrb.GetNode()->setPosition(be->GetPosition());
                 p.RemoveHealth(be->GetAttackDamage());
                 if (bigEnemyOnMove)
                     bigEnemyStopShooting = true;
             }
 
-            else if (dist < 2.8f){// && er.GUIShieldToggle) {
+            else if (dist < 2.8f && GUIShieldToggle) {
                 enemyOrb.GetNode()->setPosition(be->GetPosition());
                 if (bigEnemyOnMove)
                     bigEnemyStopShooting = true;
@@ -675,20 +675,20 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
     else
         enemyOrb.GetNode()->setPosition(be->GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 
-    //if (er.GUINukeToggle)
-    //{
+    if (GUINukeToggle)
+    {
         if (!playerNukeGoneOff) {
             p.SetEnergy(p.GetEnergy() - 50);
             p.GetOrb()->setVisible(true);
             playerNukeGoneOff = true;
-            //er.GUINukeToggle = false;
+            GUINukeToggle = false;
         }
-   // }
+    }
 
     //firing state for the player
     bool leftPressedMidEffect = false;
     //if (er.GetMouseState().LeftButtonDown) {
-      if (fakeMouseEvent.MouseInput.isLeftPressed()){
+      if (HoldingLeftDown){
         if (p.GetEnergy() > 0)
         {
             if (lightningEffectMidTrigger) {
@@ -802,8 +802,8 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
         p.ShieldUVScroll(frameDeltaTime);
     else if (p.GetEnergy() <= 0) {
         p.SetEnergy(0);
-        //shieldBtnToggle->setVisible(false);
-        //er.GUIShieldToggle = false;
+        shieldBtnToggle->setVisible(false);
+        GUIShieldToggle = false;
     }
 
     //rotate the blades around the craft
@@ -901,7 +901,7 @@ void android_main(android_app* app)
 #endif
 
     /* initialize random seed: */
-    //srand(time(NULL));
+    srand(time(NULL));
 
     IrrlichtDevice *device = createDeviceEx(param);
     if (device == 0)
@@ -1030,7 +1030,7 @@ void android_main(android_app* app)
                                             vector2di(80, 30));
     health_outside->setMaxSize(dimension2du(170, 15));
 
-    /*shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
+    shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
     shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
     shieldBtnToggle->setScaleImage(true);
     shieldBtnToggle->setID(234);
@@ -1040,7 +1040,7 @@ void android_main(android_app* app)
     nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
     nukeBtnToggle->setScaleImage(true);
     nukeBtnToggle->setID(235);
-    nukeBtnToggle->setVisible(false);*/
+    nukeBtnToggle->setVisible(false);
 
     while (device->run()) {
         //time
@@ -1054,16 +1054,16 @@ void android_main(android_app* app)
                 cutscene3FadeOut = false;
                 updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
             } else {
-                //p.ShieldToggle(er.GUIShieldToggle);
-                //if (er.GUIShieldToggle) {
+                p.ShieldToggle(GUIShieldToggle);
+                if (GUIShieldToggle) {
                     shieldTimer += 1.0f * frameDeltaTime;
                     if (shieldTimer > shieldRate) {
                         shieldTimer = 0.0f;
-                        //er.GUIShieldToggle = false;
-                        //p.ShieldToggle(er.GUIShieldToggle);
-                        //shieldBtnToggle->setVisible(false);
+                        GUIShieldToggle = false;
+                        p.ShieldToggle(GUIShieldToggle);
+                        shieldBtnToggle->setVisible(false);
                     }
-                //}
+                }
 
                 cutscene3FadeOut = false;
                 if (!cutscene4AlienOutOfShip) {
@@ -1293,20 +1293,20 @@ void android_main(android_app* app)
             earthSceneNode->setRotation(
                     earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
             //Common_Update();
-            //FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
-            //channel->setVolume(0.8f);
+            FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
+            channel->setVolume(0.8f);
             //FMODSystem->update();
 
             //if (er.GetMouseState().LeftButtonDown) {
-              /*if (fakeMouseEvent.MouseInput.isLeftPressed()){
+            if (fakeMouseEvent.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN){
                 CutsceneInit(device);
                 mainMenuMusic->release();
                 state = STATE_INTRO_CUTSCENE;
-            }*/
+            }
         } else if (state == STATE_GAME_OVER) {
             //cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
             //if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
-            if (!gameOverToReset && fakeMouseEvent.MouseInput.isLeftPressed())
+            if (!gameOverToReset && fakeMouseEvent.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
                 gameOverToReset = true;
 
             if (gameOverToReset) {
@@ -1336,7 +1336,7 @@ void android_main(android_app* app)
         driver->beginScene(true, true, SColor(255, 0, 0, 0));
         smgr->drawAll();
         if (state == STATE_MENU) {
-            //MenuFontDraw(device);
+            MenuFontDraw(device);
             driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height -
                                                          fmod_logo->getSize().Height - 20));
             driver->draw2DImage(title_logo, vector2di(
@@ -1359,28 +1359,28 @@ void android_main(android_app* app)
                 dimension2du s = device->getVideoDriver()->getScreenSize();
                 stringw str = L"Cows Destroyed: ";
                 str += cowsKilled;
-                font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0),
-                           video::SColor(255, 255, 255, 255));
+                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0),
+                  //         video::SColor(255, 255, 255, 255));
                 str = L"Total Cows Record: ";
                 str += savedCowsKilled;
-                font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0),
-                           video::SColor(255, 255, 255, 255));
+                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0),
+                  //         video::SColor(255, 255, 255, 255));
                 str = L"Total Cows Destroyed: ";
                 str += totalCowsKilled;
-                font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0),
-                           video::SColor(255, 255, 255, 255));
+                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0),
+                  //         video::SColor(255, 255, 255, 255));
 
-                //driver->draw2DImage(go_logo,
-                                    //vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
+                driver->draw2DImage(go_logo,
+                                    vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
             } else {
-                /* health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+                 health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
                  heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
                  health_outside->draw();
                  if (p.GetHealth() > 0)
                      health_inside->draw();
                  heat_outside->draw();
                  if (p.GetEnergy() > 0)
-                     heat_inside->draw();*/
+                     heat_inside->draw();
                 if ((cowsXp > 100 && cowsXpLvl < 20) ||
                     (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0))) {
                     //change to x amount of buttons
@@ -1394,11 +1394,11 @@ void android_main(android_app* app)
                     //enable an op power
                     switch (whichPerk) {
                         case 0:
-                            //shieldBtnToggle->setVisible(true);
+                            shieldBtnToggle->setVisible(true);
                             shieldTimer = 0.0f;
                             break;
                         case 1:
-                            //nukeBtnToggle->setVisible(true);
+                            nukeBtnToggle->setVisible(true);
                             break;
                     }
 
@@ -1406,15 +1406,15 @@ void android_main(android_app* app)
                     cowsXpLvl += 1;
                 }
 
-                /*unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+                unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
                 unlock_outside->draw();
                 unlock_inside->draw();
-                //if (shieldBtnToggle->isVisible())
-                    //shieldBtnToggle->draw();
-                //if (nukeBtnToggle->isVisible())
-                    //nukeBtnToggle->draw();
+                if (shieldBtnToggle->isVisible())
+                    shieldBtnToggle->draw();
+                if (nukeBtnToggle->isVisible())
+                    nukeBtnToggle->draw();
                 cow_icon->draw();
-                alien_icon->draw();*/
+                alien_icon->draw();
                 dimension2du s = device->getVideoDriver()->getScreenSize();
                 stringw str;
                 str += (int) cowsXp;
@@ -1423,7 +1423,7 @@ void android_main(android_app* app)
                 //font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0),
                 //video::SColor(255, 255, 255, 255));
 
-                //HighScoreFontDraw(device, cowsKilled);
+                HighScoreFontDraw(device, cowsKilled);
             }
         }
 

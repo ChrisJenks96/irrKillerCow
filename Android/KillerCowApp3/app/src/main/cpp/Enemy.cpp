@@ -193,7 +193,7 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, FMOD::System* FMODSystem, const in
 	FMODSystem->createSound("media/music/Moo_2.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect1);
 	FMODSystem->createSound("media/music/Moo_3.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect2);
 	FMODSystem->createSound("media/music/Moo_4.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect3);
-	FMODSystem->createChannelGroup("Moo", &channelGroupMoo);
+	//FMODSystem->createChannelGroup("Moo", &channelGroupMoo);
 }
 
 void EnemyFactory::ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled)
