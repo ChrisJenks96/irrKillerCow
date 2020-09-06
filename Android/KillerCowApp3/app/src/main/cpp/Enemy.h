@@ -33,11 +33,11 @@ enum ENEMY_STATE
 //enemy id ranges from 300+
 static int enemyID = 300;
 
-//static FMOD::Sound* cowMooEffect;
-//static FMOD::Sound* cowMooEffect1;
-//static FMOD::Sound* cowMooEffect2;
-//static FMOD::Sound* cowMooEffect3;
-//static FMOD::ChannelGroup* channelGroupMoo;
+static FMOD::Sound* cowMooEffect;
+static FMOD::Sound* cowMooEffect1;
+static FMOD::Sound* cowMooEffect2;
+static FMOD::Sound* cowMooEffect3;
+static FMOD::ChannelGroup* channelGroupMoo;
 
 class Enemy
 {
