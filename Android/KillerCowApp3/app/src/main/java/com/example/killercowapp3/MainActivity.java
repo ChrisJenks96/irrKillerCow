@@ -2,7 +2,6 @@ package com.example.killercowapp3;
 
 import android.app.NativeActivity;
 import android.os.Bundle;
-import org.fmod.FMOD;
 
 public class MainActivity extends NativeActivity
 {

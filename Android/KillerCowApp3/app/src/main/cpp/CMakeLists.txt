@@ -10,20 +10,20 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( fmod
-        SHARED
+        STATIC
         IMPORTED )
 
 set_target_properties( fmod
         PROPERTIES IMPORTED_LOCATION
-        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmod.a)
+        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmod.so)
 
 add_library( fmodL
-        SHARED
+        STATIC
         IMPORTED )
 
 set_target_properties( fmodL
         PROPERTIES IMPORTED_LOCATION
-        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmodL.a )
+        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmodL.so )
 
 add_library( # Sets the name of the library.
         app-glue
@@ -50,7 +50,6 @@ add_library( # Sets the name of the library.
              Player.cpp
              BigEnemy.cpp
              EnemyOrb.cpp
-             ER.h
              android_tools.cpp
         )
 
@@ -74,6 +73,7 @@ target_link_libraries( native-lib
                        log
                        GLESv1_CM
                        GLESv2
+                       fmod
                        z
                        m
                        ${log-lib}

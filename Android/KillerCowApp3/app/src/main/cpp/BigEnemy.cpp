@@ -74,7 +74,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float dist
 	selector->drop(); // We're done with this selector, so drop it now.
 
 	FMODSystem->createSound("media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
-	FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);
+	//FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);
 }
 
 void BigEnemy::DeathAnimation(const float dt, FMOD::System* FMODSystem)
@@ -197,6 +197,6 @@ void BigEnemy::Reset()
 
 BigEnemy::~BigEnemy()
 {
-	bigMooEffect->release();
-	bigMooEffect = 0;
+	//bigMooEffect->release();
+	//bigMooEffect = 0;
 }
