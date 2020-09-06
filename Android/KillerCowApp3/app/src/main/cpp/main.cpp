@@ -871,8 +871,6 @@ void android_main(android_app* app)
         The receiver can already receive system events while createDeviceEx is called.
         So we create it first.
     */
-    /* initialize random seed: */
-    srand(time(NULL));
 
     MyEventReceiver receiver(app);
 
@@ -919,6 +917,8 @@ void android_main(android_app* app)
     IGUIEnvironment *guienv = device->getGUIEnvironment();
     ILogger *logger = device->getLogger();
     IFileSystem *fs = device->getFileSystem();
+
+    cam = smgr->addCameraSceneNode();
 
     /* Access to the Android native window. You often need this when accessing NDK functions like we are doing here.
        Note that windowWidth/windowHeight have already subtracted things like the taskbar which your device might have,
@@ -981,8 +981,8 @@ void android_main(android_app* app)
                             &lightningEffectEnd);
     FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
                             &backgroundMusic);
-    FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
-    FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
+    //FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
+    //FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
     channel->setChannelGroup(channelGroupLightning);
     channel_bkg->setChannelGroup(channelGroupBKGMusic);
 
@@ -994,7 +994,8 @@ void android_main(android_app* app)
         earthSceneNode->setScale(vector3df(5.0f));
 
         if (earthSceneNode) {
-            earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+            //earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+            earthSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/gui/earth.png"));
             earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
             earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
             /*earthSceneNode->getMaterial(0).EmissiveColor = SColor(255, 10, 10, 10);
@@ -1013,8 +1014,7 @@ void android_main(android_app* app)
     MenuInit(device);
 
     u32 then = device->getTimer()->getTime();
-    ICursorControl *cursor = device->getCursorControl();
-    s32 MouseX = cursor->getPosition().X;
+    s32 MouseX = fakeMouseEvent.MouseInput.X;
     s32 MouseXPrev = MouseX;
 
     driver = device->getVideoDriver();
@@ -1358,7 +1358,7 @@ void android_main(android_app* app)
         driver->beginScene(true, true, SColor(255, 0, 0, 0));
         smgr->drawAll();
         if (state == STATE_MENU) {
-            MenuFontDraw(device);
+            //MenuFontDraw(device);
             driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height -
                                                          fmod_logo->getSize().Height - 20));
             driver->draw2DImage(title_logo, vector2di(
@@ -1442,10 +1442,10 @@ void android_main(android_app* app)
                 str += (int) cowsXp;
                 str += L"/100 | LVL ";
                 str += cowsXpLvl;
-                font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0),
-                           video::SColor(255, 255, 255, 255));
+                //font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0),
+                           //video::SColor(255, 255, 255, 255));
 
-                HighScoreFontDraw(device, cowsKilled);
+                //HighScoreFontDraw(device, cowsKilled);
             }
 
             driver->endScene();
