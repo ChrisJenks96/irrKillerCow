@@ -2,9 +2,15 @@ package com.example.killercowapp3;
 
 import android.app.NativeActivity;
 import android.os.Bundle;
+import org.fmod.FMOD;
 
 public class MainActivity extends NativeActivity
 {
+    static
+    {
+        System.loadLibrary("fmod");
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -12,13 +18,9 @@ public class MainActivity extends NativeActivity
     }
 
     @Override
-    protected void onDestroy()
+    public void onDestroy()
     {
+        super.onDestroy();
         org.fmod.FMOD.close();
     }
-}
-
-static
-{
-    System.loadLibrary("fmod");
 }

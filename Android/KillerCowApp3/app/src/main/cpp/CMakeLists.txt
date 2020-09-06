@@ -9,16 +9,32 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds it for you.
 # Gradle automatically packages shared libraries with your APK.
 
+add_library( fmod
+        SHARED
+        IMPORTED )
+
+set_target_properties( fmod
+        PROPERTIES IMPORTED_LOCATION
+        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmod.a)
+
+add_library( fmodL
+        SHARED
+        IMPORTED )
+
+set_target_properties( fmodL
+        PROPERTIES IMPORTED_LOCATION
+        C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmodL.a )
+
 add_library( # Sets the name of the library.
-             app-glue
+        app-glue
 
-             # Sets the library as a shared library.
-             STATIC
+        # Sets the library as a shared library.
+        STATIC
 
-             # Provides a relative path to your source file(s).
-             # Associated headers in the same location as their source
-             # file are automatically included.
-             ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c )
+        # Provides a relative path to your source file(s).
+        # Associated headers in the same location as their source
+        # file are automatically included.
+        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c )
 
 add_library( # Sets the name of the library.
              native-lib
@@ -32,25 +48,17 @@ add_library( # Sets the name of the library.
              main.cpp
              Enemy.cpp
              Player.cpp
-            BigEnemy.cpp
-            EnemyOrb.cpp
-            ER.h
+             BigEnemy.cpp
+             EnemyOrb.cpp
+             ER.h
              android_tools.cpp
         )
 
 # Specifies a path to native header files.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${ANDROID_NDK}/sources/android/native_app_glue/)
-#include_directories(libs/Irrlicht/include/)
+include_directories(C:/sdk/fmodstudioapi20011android/api/core/inc/)
 include_directories(C:/sdk/irrlicht-ogl-es/include/)
-#>>>    NOTE: The above should be YOUR Irrlicht include directory. This is ine.
-#>>>          The path starts in the "app" directory of your project.
-
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because system libraries are included in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
 
 find_library( # Sets the name of the path variable.
               log-lib
@@ -58,10 +66,6 @@ find_library( # Sets the name of the path variable.
               # Specifies the name of the NDK library that
               # you want CMake to locate.
               log )
-
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in the
-# build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( native-lib
                        app-glue
