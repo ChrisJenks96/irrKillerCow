@@ -210,7 +210,6 @@ float lightningWait = 0.0f;
 #define LIGHTNING_WAIT_MAX 0.7f
 
 //system stuff
-IrrlichtDevice* device;
 ICameraSceneNode* cam;
 IMeshSceneNode* cutsceneGroundSceneNode[2];
 IAnimatedMeshSceneNode* groundSceneNode;
@@ -827,22 +826,22 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 void MenuInit(IrrlichtDevice* device)
 {
-    font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
+    //font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
 }
 
 void MenuFontDraw(IrrlichtDevice* device)
 {
-    stringw str = L"Click to Start Game";
+    /*stringw str = L"Click to Start Game";
     dimension2du s = device->getVideoDriver()->getScreenSize();
-    font->draw(str.c_str(), core::rect<s32>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
+    font->draw(str.c_str(), core::rect<s32>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));*/
 }
 
 void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 {
-    stringw str = L"X ";
+    /*stringw str = L"X ";
     str += cowsMuggedOff;
     dimension2du s = device->getVideoDriver()->getScreenSize();
-    font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));
+    font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));*/
 }
 
 void GameReset()
@@ -902,7 +901,7 @@ void android_main(android_app* app)
 #endif
 
     /* initialize random seed: */
-    srand(time(NULL));
+    //srand(time(NULL));
 
     IrrlichtDevice *device = createDeviceEx(param);
     if (device == 0)
@@ -914,11 +913,9 @@ void android_main(android_app* app)
 
     IVideoDriver *driver = device->getVideoDriver();
     ISceneManager *smgr = device->getSceneManager();
-    IGUIEnvironment *guienv = device->getGUIEnvironment();
+    IGUIEnvironment *gui = device->getGUIEnvironment();
     ILogger *logger = device->getLogger();
     IFileSystem *fs = device->getFileSystem();
-
-    cam = smgr->addCameraSceneNode();
 
     /* Access to the Android native window. You often need this when accessing NDK functions like we are doing here.
        Note that windowWidth/windowHeight have already subtracted things like the taskbar which your device might have,
@@ -934,23 +931,13 @@ void android_main(android_app* app)
     memset(&displayMetrics, 0, sizeof displayMetrics);
     irr::android::getDisplayMetrics(app, displayMetrics);
 
-    /* For troubleshooting you can use the Irrlicht logger.
-       The Irrlicht logging messages are send to the Android logging system using the tag "Irrlicht".
-       They stay in a file there, so you can check them even after running your app.
-       You can watch them with the command: "adb logcat Irrlicht:V DEBUG:V *:S"
-       This means Irrlicht _V_erbose, debug messages verbose (p.E callstack on crashes) and all other messages _S_ilent.
-       Clean the logging file with: "adb logcat -c".
-       See http://developer.android.com/tools/debugging/debugging-log.html for more advanced log options.
-    */
     char strDisplay[1000];
-    sprintf(strDisplay, "Window size:(%d/%d)\nDisplay size:(%d/%d)", windowWidth, windowHeight,
-            displayMetrics.widthPixels, displayMetrics.heightPixels);
+    sprintf(strDisplay, "Window size:(%d/%d)\nDisplay size:(%d/%d)", windowWidth, windowHeight, displayMetrics.widthPixels, displayMetrics.heightPixels);
     logger->log(strDisplay);
 
     core::dimension2d<s32> dim(driver->getScreenSize());
     sprintf(strDisplay, "getScreenSize:(%d/%d)", dim.Width, dim.Height);
     logger->log(strDisplay);
-
 
     /* Your media must be somewhere inside the assets folder. The assets folder is the root for the file system.
        This example copies the media in the Android.mk makefile. */
@@ -983,30 +970,25 @@ void android_main(android_app* app)
                             &backgroundMusic);
     //FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
     //FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
-    channel->setChannelGroup(channelGroupLightning);
-    channel_bkg->setChannelGroup(channelGroupBKGMusic);
+    //channel->setChannelGroup(channelGroupLightning);
+    //channel_bkg->setChannelGroup(channelGroupBKGMusic);
 
+    cam = smgr->addCameraSceneNode();
     StaticMeshesLoad(device);
 
     IMesh *mesh = smgr->getMesh("media/gui/earth.obj");
     if (mesh) {
         earthSceneNode = smgr->addMeshSceneNode(mesh);
-        earthSceneNode->setScale(vector3df(5.0f));
-
         if (earthSceneNode) {
-            //earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
             earthSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/gui/earth.png"));
             earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+            earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+            earthSceneNode->setScale(vector3df(5.0f));
             earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
-            /*earthSceneNode->getMaterial(0).EmissiveColor = SColor(255, 10, 10, 10);
-            earthSceneNode->getMaterial(0).DiffuseColor = SColor(255, 10, 10, 10);
-            earthSceneNode->getMaterial(0).AmbientColor = SColor(255, 10, 10, 10);
-            earthSceneNode->getMaterial(0).SpecularColor = SColor(255, 10, 10, 10);*/
         }
     }
 
-    introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160),
-                                                 2000.0f);
+    introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160),2000.0f);
     introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
     introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
 
@@ -1016,10 +998,6 @@ void android_main(android_app* app)
     u32 then = device->getTimer()->getTime();
     s32 MouseX = fakeMouseEvent.MouseInput.X;
     s32 MouseXPrev = MouseX;
-
-    driver = device->getVideoDriver();
-    IGUIEnvironment *gui = device->getGUIEnvironment();
-    smgr = device->getSceneManager();
 
     //LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
     ITexture *fmod_logo = driver->getTexture("media/gui/fmod.png");
@@ -1315,16 +1293,16 @@ void android_main(android_app* app)
             earthSceneNode->setRotation(
                     earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
             //Common_Update();
-            FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
-            channel->setVolume(0.8f);
+            //FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
+            //channel->setVolume(0.8f);
             //FMODSystem->update();
 
             //if (er.GetMouseState().LeftButtonDown) {
-              if (fakeMouseEvent.MouseInput.isLeftPressed()){
+              /*if (fakeMouseEvent.MouseInput.isLeftPressed()){
                 CutsceneInit(device);
                 mainMenuMusic->release();
                 state = STATE_INTRO_CUTSCENE;
-            }
+            }*/
         } else if (state == STATE_GAME_OVER) {
             //cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
             //if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
@@ -1392,17 +1370,17 @@ void android_main(android_app* app)
                 font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0),
                            video::SColor(255, 255, 255, 255));
 
-                driver->draw2DImage(go_logo,
-                                    vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
+                //driver->draw2DImage(go_logo,
+                                    //vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
             } else {
-                health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
-                heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
-                health_outside->draw();
-                if (p.GetHealth() > 0)
-                    health_inside->draw();
-                heat_outside->draw();
-                if (p.GetEnergy() > 0)
-                    heat_inside->draw();
+                /* health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+                 heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
+                 health_outside->draw();
+                 if (p.GetHealth() > 0)
+                     health_inside->draw();
+                 heat_outside->draw();
+                 if (p.GetEnergy() > 0)
+                     heat_inside->draw();*/
                 if ((cowsXp > 100 && cowsXpLvl < 20) ||
                     (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0))) {
                     //change to x amount of buttons
@@ -1428,7 +1406,7 @@ void android_main(android_app* app)
                     cowsXpLvl += 1;
                 }
 
-                unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+                /*unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
                 unlock_outside->draw();
                 unlock_inside->draw();
                 //if (shieldBtnToggle->isVisible())
@@ -1436,20 +1414,20 @@ void android_main(android_app* app)
                 //if (nukeBtnToggle->isVisible())
                     //nukeBtnToggle->draw();
                 cow_icon->draw();
-                alien_icon->draw();
+                alien_icon->draw();*/
                 dimension2du s = device->getVideoDriver()->getScreenSize();
                 stringw str;
                 str += (int) cowsXp;
                 str += L"/100 | LVL ";
                 str += cowsXpLvl;
                 //font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0),
-                           //video::SColor(255, 255, 255, 255));
+                //video::SColor(255, 255, 255, 255));
 
                 //HighScoreFontDraw(device, cowsKilled);
             }
-
-            driver->endScene();
         }
+
+        driver->endScene();
     }
 
     /* Cleanup */

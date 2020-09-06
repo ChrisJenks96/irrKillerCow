@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( fmod
-        STATIC
+        SHARED
         IMPORTED )
 
 set_target_properties( fmod
@@ -18,7 +18,7 @@ set_target_properties( fmod
         C:/sdk/fmodstudioapi20011android/api/core/lib/${ANDROID_ABI}/libfmod.so)
 
 add_library( fmodL
-        STATIC
+        SHARED
         IMPORTED )
 
 set_target_properties( fmodL
