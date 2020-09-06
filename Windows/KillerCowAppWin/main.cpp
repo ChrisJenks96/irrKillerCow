@@ -162,21 +162,20 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		groundSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
-		
 		groundSceneNode->setScale(vector3df(2.0f));
-		//ground texture id (0,0)
-		/*for (int i = 0; i < groundSceneNode->getMaterialCount(); i++)
-		{
-			SMaterial& s = groundSceneNode->getMaterial(i);
-			printf("");
-		}*/
-		groundSceneNode->getMaterial(GROUNDSCENENODE_BASE_ID).getTextureMatrix(0).setScale(18.0f);
+
 		if (groundSceneNode)
 		{
 			//groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			groundSceneNode->setVisible(false);
+
+			groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
+			groundSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
+			groundSceneNode->getMaterial(0).getTextureMatrix(0).setScale(18.0f);
+			groundSceneNode->getMaterial(2).setTexture(0, driver->getTexture("media/base_plane/hay.png"));
+			groundSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
 
 			scene::ITriangleSelector* selector = 0;
 			selector = smgr->createTriangleSelector(groundSceneNode);
@@ -191,7 +190,6 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			
 			cutsceneGroundSceneNode[i] = smgr->addMeshSceneNode(mesh);
 			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f));
 			if (groundSceneNode)
@@ -201,15 +199,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
 				//ground texture id (0,0)
-				//cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.jpg"));
+				cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
+				cutsceneGroundSceneNode[i]->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/hay.png"));
+				cutsceneGroundSceneNode[i]->getMaterial(2).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 				cutsceneGroundSceneNode[i]->getMaterial(2).getTextureMatrix(0).setScale(vector3df(12.0f, 24.0f, 0.0f));
 			}
-
-			/*for (int c = 0; c < cutsceneGroundSceneNode[i]->getMaterialCount(); c++)
-			{
-				SMaterial& s = cutsceneGroundSceneNode[i]->getMaterial(c);
-				printf("");
-			}*/
 		}
 
 		cutsceneGroundSceneNode[0]->setVisible(false);
@@ -275,6 +269,7 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 		if (cowHeadGameOver)
 		{
 			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
+			cowHeadGameOver->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
 			cowHeadGameOver->setPosition(vector3df(999.0f));
 			cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
 			cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));

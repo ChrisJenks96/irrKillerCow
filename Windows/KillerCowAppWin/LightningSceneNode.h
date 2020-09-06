@@ -30,6 +30,7 @@ public:
         Material.Wireframe = false;
         Material.Lighting = false;
         Material.BackfaceCulling = false;
+        Material.NormalizeNormals = true;
 
         int quadCounter = 0;
         //start from 4 because there is a nasty bug somewhere?!?!? (possible overflow from indices calc)
