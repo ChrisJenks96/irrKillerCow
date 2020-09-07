@@ -688,7 +688,7 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 	stringw str = L"X ";
 	str += cowsMuggedOff;
 	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));
+	font->draw(str.c_str(), core::rect<s32>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 int Sys_Init()
@@ -1142,6 +1142,7 @@ int main()
 				smgr->drawAll();
 				if (state == STATE_MENU) {
 					MenuFontDraw(device);
+					
 					driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
 					driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
 					driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
@@ -1165,13 +1166,13 @@ int main()
 						dimension2du s = device->getVideoDriver()->getScreenSize();
 						stringw str = L"Cows Destroyed: ";
 						str += cowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0), video::SColor(255, 255, 255, 255));
+						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
 						str = L"Total Cows Record: ";
 						str += savedCowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0), video::SColor(255, 255, 255, 255));
+						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
 						str = L"Total Cows Destroyed: ";
 						str += totalCowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0), video::SColor(255, 255, 255, 255));
+						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
 
 						driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
 					}
@@ -1226,7 +1227,7 @@ int main()
 						str += (int)cowsXp;
 						str += L"/100 | LVL ";
 						str += cowsXpLvl;
-						font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0), video::SColor(255, 255, 255, 255));
+						font->draw(str.c_str(), core::rect<s32>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
 
 						HighScoreFontDraw(device, cowsKilled);
 					}

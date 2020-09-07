@@ -71,7 +71,7 @@ private:
 	int health{ BASE_BOSS_HEALTH };
 	bool attackStrikeDone{ false };
 	int animationID{ BIG_BOSS_ANIM_IDLE };
-	int attackDamage{ 6 };
+	int attackDamage{ 20 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };

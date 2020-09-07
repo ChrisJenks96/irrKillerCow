@@ -30,6 +30,8 @@ IGUIButton* nukeBtnToggle;
 bool GUINukeToggle{ false };
 bool GUIShieldToggle{ false };
 
+irr::android::SDisplayMetrics displayMetrics;
+
 class MyEventReceiver : public IEventReceiver
 {
 public:
@@ -137,6 +139,17 @@ public:
 						android::setSoftInputVisibility(AndroidApp, true);
 					}
                 break;
+                case EGET_BUTTON_CLICKED: {
+                    s32 id = event.GUIEvent.Caller->getID();
+                    if (id == 234) {
+                        shieldBtnToggle->setVisible(false);
+                        GUIShieldToggle = true;
+                    } else if (id == 235) {
+                        nukeBtnToggle->setVisible(false);
+                        GUINukeToggle = true;
+                    }
+                }
+                    break;
 				default:
 					break;
 			}
@@ -270,6 +283,7 @@ float xpMod = 4.8f;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
 IGUIFont* font;
+IGUISkin* skin;
 
 //cutscene specifics
 int currentCutscene = 0;
@@ -283,16 +297,18 @@ static void SaveLoadGame(bool s)
     if (s)
     {
         if (savedCowsKilled < cowsKilled) {
-            f = fopen("media/HS.DAT", "wb");
-            fwrite(&cowsKilled, 4, 1, f);
-            savedCowsKilled = cowsKilled;
-            fclose(f);
+            f = fopen("/sdcard/HS.DAT", "wb");
+            if (f){
+                fwrite(&cowsKilled, 4, 1, f);
+                savedCowsKilled = cowsKilled;
+                fclose(f);
+            }
         }
     }
 
     else
     {
-        f = fopen("media/HS.DAT", "rb");
+        f = fopen("/sdcard/HS.DAT", "rb");
         if (f) {
             fread(&savedCowsKilled, 4, 1, f);
             fclose(f);
@@ -824,22 +840,35 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
 void MenuInit(IrrlichtDevice* device)
 {
-    //font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
+    /*skin = device->getGUIEnvironment()->getSkin();
+    font = device->getGUIEnvironment()->getFont("media/gui/myfont0.bmp");
+    if (font)
+        skin->setFont(font);*/
+    IGUIEnvironment* guienv = device->getGUIEnvironment();
+    skin = guienv->getSkin();
+    font = 0;
+    //if ( displayMetrics.xdpi < 100 )	// just guessing some value where fontsize might start to get too small
+        font = guienv->getFont("fonthaettenschweiler.bmp");
+    //else
+       // font = guienv->getFont("bigfont.png");
+    if (font) {
+        skin->setFont(font);
+    }
 }
 
 void MenuFontDraw(IrrlichtDevice* device)
 {
-    /*stringw str = L"Click to Start Game";
+    stringw str = L"Click to Start Game";
     dimension2du s = device->getVideoDriver()->getScreenSize();
-    font->draw(str.c_str(), core::rect<s32>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));*/
+    font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 40, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 {
-    /*stringw str = L"X ";
+    stringw str = L"X ";
     str += cowsMuggedOff;
     dimension2du s = device->getVideoDriver()->getScreenSize();
-    font->draw(str.c_str(), core::rect<s32>(s.Width - 100, 32, 0, 0), video::SColor(255, 255, 255, 255));*/
+    font->draw(str.c_str(), core::rect<s32>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 void GameReset()
@@ -882,7 +911,7 @@ void android_main(android_app* app)
     */
     SIrrlichtCreationParameters param;
     param.DriverType = EDT_OGLES1;                // android:glEsVersion in AndroidManifest.xml should be "0x00010000" (requesting 0x00020000 will also guarantee that ES1 works)
-//	param.DriverType = EDT_OGLES2;				// android:glEsVersion in AndroidManifest.xml should be "0x00020000"
+	//param.DriverType = EDT_OGLES2;				// android:glEsVersion in AndroidManifest.xml should be "0x00020000"
     param.WindowSize = dimension2d<u32>(0,
                                         0);    // using 0,0 it will automatically set it to the maximal size
     param.PrivateData = app;
@@ -925,7 +954,6 @@ void android_main(android_app* app)
 
     /* Get display metrics. We are accessing the Java functions of the JVM directly in this case as there is no NDK function for that yet.
        Checkout android_tools.cpp if you want to know how that is done. */
-    irr::android::SDisplayMetrics displayMetrics;
     memset(&displayMetrics, 0, sizeof displayMetrics);
     irr::android::getDisplayMetrics(app, displayMetrics);
 
@@ -959,19 +987,16 @@ void android_main(android_app* app)
     if (r == FMOD_OK)
     {
         r = FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
-        if (r == FMOD_OK)
-        {
-            FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
-                                    &mainMenuMusic);
-            FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF,
-                                    0, &lightningEffectStart);
-            FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL,
-                                    0, &lightningEffectMid);
-            FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0,
-                                    &lightningEffectEnd);
-            FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
-                                    &backgroundMusic);
-        }
+        FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
+                                &mainMenuMusic);
+        FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF,
+                                0, &lightningEffectStart);
+        FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL,
+                                0, &lightningEffectMid);
+        FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0,
+                                &lightningEffectEnd);
+        FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
+                                &backgroundMusic);
     }
     //FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
     //FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
@@ -1347,6 +1372,7 @@ void android_main(android_app* app)
                                                          fmod_logo->getSize().Height - 20));
             driver->draw2DImage(title_logo, vector2di(
                     (driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
+
             driver->draw2DImage(ag_logo, vector2di(
                     (driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
                     (driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
@@ -1365,19 +1391,15 @@ void android_main(android_app* app)
                 dimension2du s = device->getVideoDriver()->getScreenSize();
                 stringw str = L"Cows Destroyed: ";
                 str += cowsKilled;
-                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2, 0, 0),
-                  //         video::SColor(255, 255, 255, 255));
+                font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
                 str = L"Total Cows Record: ";
                 str += savedCowsKilled;
-                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 30, 0, 0),
-                  //         video::SColor(255, 255, 255, 255));
+                font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
                 str = L"Total Cows Destroyed: ";
                 str += totalCowsKilled;
-                //font->draw(str.c_str(), core::rect<s32>(s.Width / 2 + 200, s.Height / 2 + 60, 0, 0),
-                  //         video::SColor(255, 255, 255, 255));
+                font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
 
-                driver->draw2DImage(go_logo,
-                                    vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
+                driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
             } else {
                  health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
                  heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
@@ -1426,8 +1448,7 @@ void android_main(android_app* app)
                 str += (int) cowsXp;
                 str += L"/100 | LVL ";
                 str += cowsXpLvl;
-                //font->draw(str.c_str(), core::rect<s32>(93, 70, 0, 0),
-                //video::SColor(255, 255, 255, 255));
+                font->draw(str.c_str(), core::rect<s32>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
 
                 HighScoreFontDraw(device, cowsKilled);
             }

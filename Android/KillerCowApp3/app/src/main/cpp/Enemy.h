@@ -79,13 +79,13 @@ private:
 	float healthDepleteRate{ 0.1f };
 	int health{ BASE_COW_HEALTH };
 	bool attackStrikeDone{ false };
-	int attackDamage{ 23 };
+	int attackDamage{ 13 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
 	float attackLength{ 0.0f };
 	float currAttackLength{ 0.0f };
-	float speed{ 2.1f };
+	float speed{ 1.5f };
 	int soundEffectID;
 	IAnimatedMesh* mesh;
 	IAnimatedMeshSceneNode* node;
