@@ -72,6 +72,17 @@ public:
 					if ( TouchID == -1 )
 					{
 						fakeMouseEvent.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
+                        if (shieldBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 10 && fakeMouseEvent.MouseInput.X < 10 + 64 &&
+                                fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 64) {
+                            shieldBtnToggle->setVisible(false);
+                            GUIShieldToggle = true;
+                        }
+                        if (nukeBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 85 && fakeMouseEvent.MouseInput.X < 85 + 64 &&
+                            fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 64)
+                        {
+                            nukeBtnToggle->setVisible(false);
+                            GUINukeToggle = true;
+                        }
 					}
 					break;
 				}
@@ -113,43 +124,6 @@ public:
 			*/
 			switch(event.GUIEvent.EventType)
 			{
-				case EGET_EDITBOX_ENTER:
-					if ( event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX )
-					{
-						if( Device->getGUIEnvironment() )
-							Device->getGUIEnvironment()->setFocus(NULL);
-						android::setSoftInputVisibility(AndroidApp, false);
-					}
-				break;
-                case EGET_ELEMENT_FOCUS_LOST:
-					if ( event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX )
-					{
-						/* 	Unfortunatly this only works on some android devices.
-							On other devices Android passes through touch-input events when the virtual keyboard is clicked while blocking those events in areas where the keyboard isn't.
-							Very likely an Android bug as it only happens in certain cases (like Android Lollipop with landscape mode on MotoG, but also some reports from other devices).
-							Or maybe Irrlicht still does something wrong.
-							Can't figure it out so far - so be warned - with landscape mode you might be better off writing your own keyboard.
-						*/
-						android::setSoftInputVisibility(AndroidApp, false);
-					}
-                break;
-                case EGET_ELEMENT_FOCUSED:
-					if ( event.GUIEvent.Caller->getType() == EGUIET_EDIT_BOX )
-					{
-						android::setSoftInputVisibility(AndroidApp, true);
-					}
-                break;
-                case EGET_BUTTON_CLICKED: {
-                    s32 id = event.GUIEvent.Caller->getID();
-                    if (id == 234) {
-                        shieldBtnToggle->setVisible(false);
-                        GUIShieldToggle = true;
-                    } else if (id == 235) {
-                        nukeBtnToggle->setVisible(false);
-                        GUINukeToggle = true;
-                    }
-                }
-                    break;
 				default:
 					break;
 			}
@@ -1061,17 +1035,17 @@ void android_main(android_app* app)
                                             vector2di(80, 30));
     health_outside->setMaxSize(dimension2du(170, 15));
 
-    shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
+    shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 48, 108 + 48));
     shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
     shieldBtnToggle->setScaleImage(true);
     shieldBtnToggle->setID(234);
-    shieldBtnToggle->setVisible(false);
+    shieldBtnToggle->setVisible(true);
 
-    nukeBtnToggle = gui->addButton(recti(52, 108, 52 + 32, 108 + 32));
+    nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
     nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
     nukeBtnToggle->setScaleImage(true);
     nukeBtnToggle->setID(235);
-    nukeBtnToggle->setVisible(false);
+    nukeBtnToggle->setVisible(true);
 
     while (device->run()) {
         //time

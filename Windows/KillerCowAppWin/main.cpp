@@ -812,17 +812,17 @@ int main()
 		IGUIImage* heat_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 30));
 		health_outside->setMaxSize(dimension2du(170, 15));
 
-		shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 32, 108 + 32));
+		shieldBtnToggle = gui->addButton(recti(10, 108, 10 + 48, 108 + 48));
 		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
 		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(false);
+		shieldBtnToggle->setVisible(true);
 
-		nukeBtnToggle = gui->addButton(recti(52, 108, 52 + 32, 108 + 32));
+		nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(false);
+		nukeBtnToggle->setVisible(true);
 
 		while (device->run())
 		{
