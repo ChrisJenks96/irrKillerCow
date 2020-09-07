@@ -816,13 +816,13 @@ int main()
 		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
 		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(false);
+		shieldBtnToggle->setVisible(true);
 
 		nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(false);
+		nukeBtnToggle->setVisible(true);
 
 		while (device->run())
 		{

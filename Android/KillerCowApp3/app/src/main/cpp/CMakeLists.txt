@@ -75,7 +75,7 @@ target_link_libraries( native-lib
                        GLESv1_CM
                        GLESv2
                        fmod
-                        fmodstudio
+                       fmodstudio
                        z
                        m
                        ${log-lib}

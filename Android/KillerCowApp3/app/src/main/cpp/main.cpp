@@ -77,9 +77,8 @@ public:
                             shieldBtnToggle->setVisible(false);
                             GUIShieldToggle = true;
                         }
-                        if (nukeBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 64 && fakeMouseEvent.MouseInput.X < 64 + 48 &&
-                            fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 48)
-                        {
+                        else if (nukeBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 64 && fakeMouseEvent.MouseInput.X < 64 + 48 &&
+                            fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 48){
                             nukeBtnToggle->setVisible(false);
                             GUINukeToggle = true;
                         }
@@ -446,7 +445,7 @@ void CutsceneInit(IrrlichtDevice* device)
     cam->setPosition(cutscene1CamPosition);
     cam->setTarget(ufoSceneNode->getPosition());
 
-    FMODSystem->createSound("media/music/Lightning_Once.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningCutsceneOnce);
+    FMODSystem->createSound("file:///android_asset/media/music/Lightning_Once.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningCutsceneOnce);
 }
 
 void CutsceneUnload(IrrlichtDevice* device)
@@ -797,8 +796,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
     //rotate the blades around the craft
     ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
     //ef->Update(p, FMODSystem, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
-    bool erGUIShieldToggleAndroidTmp = false;
-    ef->Update(p, FMODSystem, erGUIShieldToggleAndroidTmp, cowsKilled, frameDeltaTime);
+    ef->Update(p, FMODSystem, GUIShieldToggle, cowsKilled, frameDeltaTime);
 
     if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
         globalPlayerMunchFlag = true;
@@ -956,20 +954,24 @@ void android_main(android_app* app)
 
     //void* extradriverdata = 0;
     //Common_Init(&extradriverdata);
+
+    JNIEnv* jni = 0;
+    app->activity->vm->AttachCurrentThread(&jni, NULL);
+
     FMOD_RESULT r;
     r = FMOD::System_Create(&FMODSystem);
     if (r == FMOD_OK)
     {
         r = FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
-        FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
+        r = FMODSystem->createSound("file:///android_asset/media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
                                 &mainMenuMusic);
-        FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF,
+        r = FMODSystem->createSound("file:///android_asset/media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF,
                                 0, &lightningEffectStart);
-        FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL,
+        r = FMODSystem->createSound("file:///android_asset/media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL,
                                 0, &lightningEffectMid);
-        FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0,
+        r = FMODSystem->createSound("file:///android_asset/media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0,
                                 &lightningEffectEnd);
-        FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
+        r = FMODSystem->createSound("file:///android_asset/media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0,
                                 &backgroundMusic);
     }
     //FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
@@ -1439,6 +1441,7 @@ void android_main(android_app* app)
     FMODSystem->close();
     FMODSystem->release();
     device->drop();
+    app->activity->vm->DetachCurrentThread();
 }
     //mainloop(device, text);
 

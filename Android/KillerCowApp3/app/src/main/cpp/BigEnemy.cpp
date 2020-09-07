@@ -73,7 +73,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float dist
 	node->setTriangleSelector(selector);
 	selector->drop(); // We're done with this selector, so drop it now.
 
-	FMODSystem->createSound("media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
+	FMODSystem->createSound("file:///android_asset/media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
 	//FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);
 }
 
