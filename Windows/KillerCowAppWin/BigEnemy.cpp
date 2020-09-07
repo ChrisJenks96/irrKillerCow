@@ -51,7 +51,7 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float dist
 			node_dirt->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node_dirt->setPosition(vector3df(999.0f));
-			//node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+			node_dirt->setMaterialTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 		}
 	}
 

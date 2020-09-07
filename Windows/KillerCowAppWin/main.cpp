@@ -288,11 +288,11 @@ void CutsceneInit(IrrlichtDevice* device)
 {
 	earthSceneNode->setVisible(false);
 	//main ligth for the game
-	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
+	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = ELT_SPOT;
 	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 
-	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 100, 100, 100);
+	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
 	
 	//load the non important static meshes for the scene with no behaviour
 
@@ -415,7 +415,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 2)
 	{
-		introCutsceneLight->getLightData().DiffuseColor = SColor(255, 10, 10, 10);
+		introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
 		ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 		//attach and move the camera onto the ufo for crashing landing cam
 		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
@@ -816,425 +816,422 @@ int main()
 		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
 		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(true);
+		shieldBtnToggle->setVisible(false);
 
 		nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(true);
+		nukeBtnToggle->setVisible(false);
 
 		while (device->run())
 		{
-			if (device->isWindowActive())
-			{
-				//time
-				const u32 now = device->getTimer()->getTime();
-				const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
-				then = now;
+			//time
+			const u32 now = device->getTimer()->getTime();
+			const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
+			then = now;
 
-				if (state == STATE_GAME)
+			if (state == STATE_GAME)
+			{
+				//fade back into the game
+				if (cutscene3FadeOut && transition_alpha != 0) {
+					cutscene3FadeOut = false;
+					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				}
+
+				else
 				{
-					//fade back into the game
-					if (cutscene3FadeOut && transition_alpha != 0) {
-						cutscene3FadeOut = false;
-						updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+					p.ShieldToggle(er.GUIShieldToggle);
+					if (er.GUIShieldToggle) {
+						shieldTimer += 1.0f * frameDeltaTime;
+						if (shieldTimer > shieldRate) {
+							shieldTimer = 0.0f;
+							er.GUIShieldToggle = false;
+							p.ShieldToggle(er.GUIShieldToggle);
+							shieldBtnToggle->setVisible(false);
+						}
 					}
 
-					else
+					cutscene3FadeOut = false;
+					if (!cutscene4AlienOutOfShip)
 					{
-						p.ShieldToggle(er.GUIShieldToggle);
-						if (er.GUIShieldToggle) {
-							shieldTimer += 1.0f * frameDeltaTime;
-							if (shieldTimer > shieldRate) {
-								shieldTimer = 0.0f;
-								er.GUIShieldToggle = false;
-								p.ShieldToggle(er.GUIShieldToggle);
-								shieldBtnToggle->setVisible(false);
-							}
-						}
+						cutscene4AlienMovingTowards = true;
+						cutscene4PlayerPosBegin.Y = p.GetPosition().Y;
+						cutscene4PlayerPosEnd.Y = p.GetPosition().Y;
+						p.GetNode()->setPosition(cutscene4PlayerPosBegin);
+						p.SetAnimationName("crawl_s");
+						p.SetAnimationID(PLAYER_ANIMATION_CRAWL_FROM_SHIP);
+						cutscene4AlienOutOfShip = true;
+					}
 
-						cutscene3FadeOut = false;
-						if (!cutscene4AlienOutOfShip)
-						{
-							cutscene4AlienMovingTowards = true;
-							cutscene4PlayerPosBegin.Y = p.GetPosition().Y;
-							cutscene4PlayerPosEnd.Y = p.GetPosition().Y;
-							p.GetNode()->setPosition(cutscene4PlayerPosBegin);
-							p.SetAnimationName("crawl_s");
-							p.SetAnimationID(PLAYER_ANIMATION_CRAWL_FROM_SHIP);
-							cutscene4AlienOutOfShip = true;
+					else if (cutscene4AlienMovingTowards) {
+						if (p.MoveTowards(cutscene4PlayerPosEnd, frameDeltaTime)) {
+							p.LookAt(cutscene4PlayerPosEnd, 0.0f);
+							cam->setTarget(p.GetPosition());
 						}
-
-						else if (cutscene4AlienMovingTowards) {
-							if (p.MoveTowards(cutscene4PlayerPosEnd, frameDeltaTime)) {
-								p.LookAt(cutscene4PlayerPosEnd, 0.0f);
-								cam->setTarget(p.GetPosition());
-							}
-							else
-							{
-								p.SetAnimationID(PLAYER_ANIMATION_CRAWL_WALK);
-								p.SetAnimationName("crawl_walk");
-								cutscene4AlienMovingTowards = false;
-							}
-						}
-
 						else
 						{
-							GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
-							be->GetNodeDrill()->setRotation(be->GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
+							p.SetAnimationID(PLAYER_ANIMATION_CRAWL_WALK);
+							p.SetAnimationName("crawl_walk");
+							cutscene4AlienMovingTowards = false;
+						}
+					}
 
-							if (p.GetHealth() <= 0) {
-								//play death animation
-								p.DeathAnimation(frameDeltaTime);
-								gameOverResetTimer += 1.0f * frameDeltaTime;
-								if (gameOverResetTimer > gameOverResetRate) {
-									SaveLoadGame(true);
-									cam->setPosition(vector3df(999.0f));
-									cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
-									cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
-									cam->setTarget(cowHeadGameOver->getPosition());
-									totalCowsKilled += cowsKilled;
-									//reset boss shite
-									bossScene = false;
-									bossDead = true;
-									gameOverResetTimer = 0.0f;
-									state = STATE_GAME_OVER;
-								}
+					else
+					{
+						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+						be->GetNodeDrill()->setRotation(be->GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
 
+						if (p.GetHealth() <= 0) {
+							//play death animation
+							p.DeathAnimation(frameDeltaTime);
+							gameOverResetTimer += 1.0f * frameDeltaTime;
+							if (gameOverResetTimer > gameOverResetRate) {
+								SaveLoadGame(true);
+								cam->setPosition(vector3df(999.0f));
+								cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
+								cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
+								cam->setTarget(cowHeadGameOver->getPosition());
+								totalCowsKilled += cowsKilled;
+								//reset boss shite
+								bossScene = false;
+								bossDead = true;
+								gameOverResetTimer = 0.0f;
+								state = STATE_GAME_OVER;
 							}
 
-							//lightning upgrade states
-							else if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 5)
-								|| (currentLightningType == 2 && cowsXpLvl == 9) || (currentLightningType == 3 && cowsXpLvl == 14)
-								|| (currentLightningType == 4 && cowsXpLvl == 20))
+						}
+
+						//lightning upgrade states
+						else if ((currentLightningType == 0 && cowsXpLvl == 2) || (currentLightningType == 1 && cowsXpLvl == 5)
+							|| (currentLightningType == 2 && cowsXpLvl == 9) || (currentLightningType == 3 && cowsXpLvl == 14)
+							|| (currentLightningType == 4 && cowsXpLvl == 20))
+						{
+							currentLightningType++;
+							if (currentLightningType == LIGHTNING_TYPES)
+								currentLightningType = LIGHTNING_TYPES - 1;
+							else
 							{
-								currentLightningType++;
-								if (currentLightningType == LIGHTNING_TYPES)
-									currentLightningType = LIGHTNING_TYPES - 1;
+								//re top up all player stats
+								p.SetHealth(100);
+								p.SetEnergy(100);
+
+								OldCameraPosition = cam->getPosition();
+								cam->setPosition(vector3df(-5.0f, 0.0f, 3.0f));
+								cam->setTarget(p.GetPosition());
+								ef->SetVisible(false);
+								p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
+								groundSceneNode->setVisible(false);
+								ufoBladesSceneNode->setVisible(false);
+								ufoSceneNode->setVisible(false);
+								ef->SetHealthAll(0);
+								ef->ForceDeath(xpMod, cowsXp, cowsKilled);
+								LightningUpgrade(device);
+								state = STATE_POWERUP;
+							}
+						}
+
+						//boss scene (he will always be around and never trully killed but you must keep fighting him
+						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						{
+							ef->SetVisible(false);
+							enemyOrb.GetNode()->setVisible(true);
+							be->SetAnimationID(BIG_BOSS_ANIM_IDLE);
+							be->SetAnimationName("walk");
+							be->GetNode()->setVisible(true);
+							be->RandomPosition(12.0f, true);
+							bigEnemyNewPos = be->GetPosition();
+							be->GetNode()->setPosition(vector3df(be->GetNode()->getPosition().X, -10.0f, be->GetNode()->getPosition().Z));
+							be->GetNodeCap()->setPosition(be->GetNode()->getPosition() + vector3df(-0.2f, 3.5f, -0.2f));
+							be->GetNodeDirt()->setPosition(vector3df(be->GetNode()->getPosition().X, 0.1f, be->GetNode()->getPosition().Z));
+							cam->setTarget(be->GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
+							be->LookAt(p.GetPosition(), 180.0f);
+							be->SetHealth(BASE_BOSS_HEALTH + (10 * beKilled));
+							beKilled += 1;
+							bossScene = true;
+							bigEnemyFirstMove = false;
+							bigEnemyWalkOutCap = false;
+							bigEnemyOnMove = false;
+							bigEnemyCapOutOfRange = false;
+							bigEnemyStopShooting = false;
+							bigEnemyCapVelocity = -1.0f;
+						}
+
+						else if (bossScene)
+						{
+							if (!bossDead)
+							{
+								//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
+								if (!bigEnemyFirstMove && be->MoveTowards(be->GetCachedSpawnPosition(), frameDeltaTime, true)) {
+									vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
+									cam->setPosition(cam->getPosition() + p1);
+									//log the current pos (which will be the final on the next step)
+									bigEnemyOldPos = be->GetPosition();
+								}
+
 								else
 								{
-									//re top up all player stats
-									p.SetHealth(100);
-									p.SetEnergy(100);
+									bigEnemyFirstMove = true;
 
-									OldCameraPosition = cam->getPosition();
-									cam->setPosition(vector3df(-5.0f, 0.0f, 3.0f));
-									cam->setTarget(p.GetPosition());
-									ef->SetVisible(false);
-									p.GetNode()->setRotation(vector3df(0.0f, -45.0f, 0.0f));
-									groundSceneNode->setVisible(false);
-									ufoBladesSceneNode->setVisible(false);
-									ufoSceneNode->setVisible(false);
-									ef->SetHealthAll(0);
-									ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-									LightningUpgrade(device);
-									state = STATE_POWERUP;
-								}
-							}
+									//heads towards the centre (the ufo is the middle)
+									//BECAREFUL OF THE Y AXIS!!!!!!!!!
+									if (!bigEnemyWalkOutCap) {
+										bigEnemyWalkOutCap = !be->MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
+										be->GetNodeCap()->setRotation(((be->GetNode()->getPosition() - be->GetNodeCap()->getPosition()).getHorizontalAngle() +
+											vector3df(0.0f, -90.0f, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
+										bigEnemyMoveCounter += 1.0f * frameDeltaTime;
+										be->GetNodeCap()->setMD2Animation("open_idle");
 
-							//boss scene (he will always be around and never trully killed but you must keep fighting him
-							else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-								//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
-							{
-								ef->SetVisible(false);
-								enemyOrb.GetNode()->setVisible(true);
-								be->SetAnimationID(BIG_BOSS_ANIM_IDLE);
-								be->SetAnimationName("walk");
-								be->GetNode()->setVisible(true);
-								be->RandomPosition(12.0f, true);
-								bigEnemyNewPos = be->GetPosition();
-								be->GetNode()->setPosition(vector3df(be->GetNode()->getPosition().X, -10.0f, be->GetNode()->getPosition().Z));
-								be->GetNodeCap()->setPosition(be->GetNode()->getPosition() + vector3df(-0.2f, 3.5f, -0.2f));
-								be->GetNodeDirt()->setPosition(vector3df(be->GetNode()->getPosition().X, 0.1f, be->GetNode()->getPosition().Z));
-								cam->setTarget(be->GetNode()->getPosition() + vector3df(0.0f, 15.0f, 0.0f));
-								be->LookAt(p.GetPosition(), 180.0f);
-								be->SetHealth(BASE_BOSS_HEALTH + (10 * beKilled));
-								beKilled += 1;
-								bossScene = true;
-								bigEnemyFirstMove = false;
-								bigEnemyWalkOutCap = false;
-								bigEnemyOnMove = false;
-								bigEnemyCapOutOfRange = false;
-								bigEnemyStopShooting = false;
-								bigEnemyCapVelocity = -1.0f;
-							}
-
-							else if (bossScene)
-							{
-								if (!bossDead)
-								{
-									//if its the intro sequence of the big enemy, make it fade and show him climbinmg out the ground
-									if (!bigEnemyFirstMove && be->MoveTowards(be->GetCachedSpawnPosition(), frameDeltaTime, true)) {
-										vector3df p1 = (p.GetPosition() - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_SPEED * frameDeltaTime);
-										cam->setPosition(cam->getPosition() + p1);
-										//log the current pos (which will be the final on the next step)
-										bigEnemyOldPos = be->GetPosition();
+										if (bigEnemyMoveCounter > bigEnemyMoveMax) {
+											be->SetAnimationName("idle");
+											bigEnemyMoveCounter = 0.0f;
+											bigEnemyWalkOutCap = true;
+										}
 									}
 
-									else
+									else if (bigEnemyWalkOutCap && !bigEnemyOnMove && be->PollNewPosition(frameDeltaTime)) {
+										bigEnemyNewPos = be->RandomPosition(12.0f, false);
+										be->LookAt(bigEnemyNewPos, 180.0f);
+										bigEnemyOnMove = true;
+									}
+
+									else if (bigEnemyOnMove) {
+										if (be->GetAnimationID() != BIG_BOSS_ANIM_WALK) {
+											be->SetAnimationName("walk");
+											be->SetAnimationID(BIG_BOSS_ANIM_WALK);
+										}
+
+										bigEnemyOnMove = be->MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
+										if (!bigEnemyOnMove) {
+											bigEnemyStopShooting = false;
+											be->LookAt(p.GetPosition(), 180.0f);
+											if (be->GetAnimationID() != BIG_BOSS_ANIM_ATTACK) {
+												be->SetAnimationName("attack_main");
+												be->SetAnimationID(BIG_BOSS_ANIM_ATTACK);
+											}
+										}
+									}
+
+									if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)
 									{
-										bigEnemyFirstMove = true;
+										be->GetNodeCap()->setMD2Animation("close_idle");
 
-										//heads towards the centre (the ufo is the middle)
-										//BECAREFUL OF THE Y AXIS!!!!!!!!!
-										if (!bigEnemyWalkOutCap) {
-											bigEnemyWalkOutCap = !be->MoveTowards((ufoSceneNode->getPosition() - bigEnemyOldPos).normalize(), frameDeltaTime, false);
-											be->GetNodeCap()->setRotation(((be->GetNode()->getPosition() - be->GetNodeCap()->getPosition()).getHorizontalAngle() +
-												vector3df(0.0f, -90.0f, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
-											bigEnemyMoveCounter += 1.0f * frameDeltaTime;
-											be->GetNodeCap()->setMD2Animation("open_idle");
-
-											if (bigEnemyMoveCounter > bigEnemyMoveMax) {
-												be->SetAnimationName("idle");
-												bigEnemyMoveCounter = 0.0f;
-												bigEnemyWalkOutCap = true;
-											}
-										}
-
-										else if (bigEnemyWalkOutCap && !bigEnemyOnMove && be->PollNewPosition(frameDeltaTime)) {
-											bigEnemyNewPos = be->RandomPosition(12.0f, false);
-											be->LookAt(bigEnemyNewPos, 180.0f);
-											bigEnemyOnMove = true;
-										}
-
-										else if (bigEnemyOnMove) {
-											if (be->GetAnimationID() != BIG_BOSS_ANIM_WALK) {
-												be->SetAnimationName("walk");
-												be->SetAnimationID(BIG_BOSS_ANIM_WALK);
-											}
-
-											bigEnemyOnMove = be->MoveTowards(bigEnemyNewPos, frameDeltaTime, false);
-											if (!bigEnemyOnMove) {
-												bigEnemyStopShooting = false;
-												be->LookAt(p.GetPosition(), 180.0f);
-												if (be->GetAnimationID() != BIG_BOSS_ANIM_ATTACK) {
-													be->SetAnimationName("attack_main");
-													be->SetAnimationID(BIG_BOSS_ANIM_ATTACK);
-												}
-											}
-										}
-
-										if (bigEnemyWalkOutCap && !bigEnemyCapOutOfRange)
-										{
-											be->GetNodeCap()->setMD2Animation("close_idle");
-
-											//shoot the capsule off out of the scene
-											be->GetNodeCap()->setPosition(be->GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
-												(bigEnemyMoveCounter - bigEnemyCapsuleTakeoff)) * frameDeltaTime, 0.0f));
-											bigEnemyCapVelocity -= 50.0f * frameDeltaTime;
-											if (be->GetNodeCap()->getPosition().Y > 100.0f)
-												bigEnemyCapOutOfRange = true;
-										}
-
-										cam->setPosition(bossFightCamPos);
-										cam->setTarget(p.GetPosition());
+										//shoot the capsule off out of the scene
+										be->GetNodeCap()->setPosition(be->GetNodeCap()->getPosition() + vector3df(0.0f, (bigEnemyCapVelocity *
+											(bigEnemyMoveCounter - bigEnemyCapsuleTakeoff)) * frameDeltaTime, 0.0f));
+										bigEnemyCapVelocity -= 50.0f * frameDeltaTime;
+										if (be->GetNodeCap()->getPosition().Y > 100.0f)
+											bigEnemyCapOutOfRange = true;
 									}
-								}
 
-								else if (bossDead) {
-									be->DeathAnimation(frameDeltaTime, FMODSystem);
-									vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
-									cam->setPosition(cam->getPosition() + p1);
+									cam->setPosition(bossFightCamPos);
 									cam->setTarget(p.GetPosition());
-									if (be->GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
-										bigEnemyStopShooting = true;
-										enemyOrb.GetNode()->setVisible(false);
-										be->GetNodeDirt()->setPosition(vector3df(-9.99f));
-										be->GetNode()->setVisible(false);
-										float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
-										if (dist < 0.2f)
-										{
-											bossDead = false;
-											//add 2 extra cows after the boss battle
-											ef->SetEnemyCount(ef->GetEnemyCount() + 2);
-											ef->AddSpeed(0.3f);
-											cowsXp += ((float)be->GetAttackDamage() / 10) * xpMod;
-											cowsKilled += 1;
-											xpMod += 2.4f;
-											bossScene = false;
-											enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
-										}
+								}
+							}
+
+							else if (bossDead) {
+								be->DeathAnimation(frameDeltaTime, FMODSystem);
+								vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
+								cam->setPosition(cam->getPosition() + p1);
+								cam->setTarget(p.GetPosition());
+								if (be->GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
+									bigEnemyStopShooting = true;
+									enemyOrb.GetNode()->setVisible(false);
+									be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+									be->GetNode()->setVisible(false);
+									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
+									if (dist < 0.2f)
+									{
+										bossDead = false;
+										//add 2 extra cows after the boss battle
+										ef->SetEnemyCount(ef->GetEnemyCount() + 2);
+										ef->AddSpeed(0.3f);
+										cowsXp += ((float)be->GetAttackDamage() / 10) * xpMod;
+										cowsKilled += 1;
+										xpMod += 2.4f;
+										bossScene = false;
+										enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 									}
 								}
 							}
 						}
 					}
-
-					if (playerNukeGoneOff)
-					{
-						p.GetOrb()->setPosition(p.GetPosition());
-						p.GetOrb()->setScale(p.GetOrb()->getScale() + vector3df(10.0f * frameDeltaTime));
-
-						//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
-						if (p.GetOrb()->getScale().Y > 40.0f) {
-							playerNukeGoneOff = false;
-							ef->SetHealthAll(0);
-							ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-							p.GetOrb()->setScale(vector3df(1.6f));
-							p.GetOrb()->setVisible(false);
-						}
-					}
 				}
 
-				else if (state == STATE_INTRO_CUTSCENE)
+				if (playerNukeGoneOff)
 				{
-					if (ufoSceneNode->getPosition().Y < 0.0f) {
-						CutsceneUnload(device);
-						state = STATE_GAME;
-						GameInit(device);
-					}
+					p.GetOrb()->setPosition(p.GetPosition());
+					p.GetOrb()->setScale(p.GetOrb()->getScale() + vector3df(10.0f * frameDeltaTime));
 
-					else
-						CutsceneUpdate(device, frameDeltaTime);
-				}
-
-				else if (state == STATE_MENU)
-				{
-					earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
-					//Common_Update();
-					FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
-					channel->setVolume(0.8f);
-					//FMODSystem->update();
-
-					if (er.GetMouseState().LeftButtonDown) {
-						CutsceneInit(device);
-						mainMenuMusic->release();
-						state = STATE_INTRO_CUTSCENE;
+					//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
+					if (p.GetOrb()->getScale().Y > 40.0f) {
+						playerNukeGoneOff = false;
+						ef->SetHealthAll(0);
+						ef->ForceDeath(xpMod, cowsXp, cowsKilled);
+						p.GetOrb()->setScale(vector3df(1.6f));
+						p.GetOrb()->setVisible(false);
 					}
 				}
-
-				else if (state == STATE_GAME_OVER)
-				{
-					//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
-					if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
-						gameOverToReset = true;
-
-					if (gameOverToReset) {
-						gameOverTimer += 1.0f * frameDeltaTime;
-						if (gameOverTimer > GAME_OVER_FINISH_TIME) {
-							gameOverTimer = 0.0f;
-							GameReset();
-							gameOverToReset = false;
-							state = STATE_GAME;
-						}
-					}
-				}
-
-				else if (state == STATE_POWERUP)
-				{
-					lightningUpgradeTimer += 1.0f * frameDeltaTime;
-					p.NotFiringAnimation(frameDeltaTime);
-					if (lightningUpgradeTimer > lightningUpgradeWait)
-					{
-						lightningUpgradeTimer = 0.0f;
-						cam->setPosition(OldCameraPosition);
-						cam->setTarget(p.GetPosition());
-						ef->SetVisible(true);
-						groundSceneNode->setVisible(true);
-						ufoBladesSceneNode->setVisible(true);
-						ufoSceneNode->setVisible(true);
-						state = STATE_GAME;
-					}
-				}
-
-				driver->beginScene(true, true, SColor(255, 0, 0, 0));
-				smgr->drawAll();
-				if (state == STATE_MENU) {
-					MenuFontDraw(device);
-					
-					driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
-					driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
-					driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
-						(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
-				}
-
-				else if (state == STATE_INTRO_CUTSCENE) {
-					if (!cutscene3FadeOut && transition_alpha != 0)
-						updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
-					else if (cutscene3FadeOut)
-						updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
-				}
-
-				else if (state == STATE_GAME_OVER) {
-					cowHeadGameOver->setRotation(cowHeadGameOver->getRotation() + vector3df(8.0f * frameDeltaTime, 0.0f, 0.0f));
-				}
-
-				if (state == STATE_GAME || state == STATE_GAME_OVER)
-				{
-					if (state == STATE_GAME_OVER) {
-						dimension2du s = device->getVideoDriver()->getScreenSize();
-						stringw str = L"Cows Destroyed: ";
-						str += cowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
-						str = L"Total Cows Record: ";
-						str += savedCowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
-						str = L"Total Cows Destroyed: ";
-						str += totalCowsKilled;
-						font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
-
-						driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
-					}
-
-					else
-					{
-						health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
-						heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
-						health_outside->draw();
-						if (p.GetHealth() > 0)
-							health_inside->draw();
-						heat_outside->draw();
-						if (p.GetEnergy() > 0)
-							heat_inside->draw();
-						if ((cowsXp > 100 && cowsXpLvl < 20) || (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0)))
-						{
-							//change to x amount of buttons
-							int whichPerk = rand() % 2;
-							if (whichPerk == 1 && (perkCount % NUKE_CHANCE) != 0)
-								whichPerk = 0;
-							perkCount++;
-							//nuke chance is the highest, if it goes above, reset it
-							if (perkCount == NUKE_CHANCE)
-								perkCount = 0;
-							//enable an op power
-							switch (whichPerk)
-							{
-							case 0:
-								shieldBtnToggle->setVisible(true);
-								shieldTimer = 0.0f;
-								break;
-							case 1:
-								nukeBtnToggle->setVisible(true);
-								break;
-							}
-
-							cowsXp = 0;
-							cowsXpLvl += 1;
-						}
-
-						unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
-						unlock_outside->draw();
-						unlock_inside->draw();
-						if (shieldBtnToggle->isVisible())
-							shieldBtnToggle->draw();
-						if (nukeBtnToggle->isVisible())
-							nukeBtnToggle->draw();
-						cow_icon->draw();
-						alien_icon->draw();
-						dimension2du s = device->getVideoDriver()->getScreenSize();
-						stringw str;
-						str += (int)cowsXp;
-						str += L"/100 | LVL ";
-						str += cowsXpLvl;
-						font->draw(str.c_str(), core::rect<s32>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
-
-						HighScoreFontDraw(device, cowsKilled);
-					}
-				}
-
-				driver->endScene();
 			}
+
+			else if (state == STATE_INTRO_CUTSCENE)
+			{
+				if (ufoSceneNode->getPosition().Y < 0.0f) {
+					CutsceneUnload(device);
+					state = STATE_GAME;
+					GameInit(device);
+				}
+
+				else
+					CutsceneUpdate(device, frameDeltaTime);
+			}
+
+			else if (state == STATE_MENU)
+			{
+				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
+				//Common_Update();
+				FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
+				channel->setVolume(0.8f);
+				//FMODSystem->update();
+
+				if (er.GetMouseState().LeftButtonDown) {
+					CutsceneInit(device);
+					mainMenuMusic->release();
+					state = STATE_INTRO_CUTSCENE;
+				}
+			}
+
+			else if (state == STATE_GAME_OVER)
+			{
+				//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
+				if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
+					gameOverToReset = true;
+
+				if (gameOverToReset) {
+					gameOverTimer += 1.0f * frameDeltaTime;
+					if (gameOverTimer > GAME_OVER_FINISH_TIME) {
+						gameOverTimer = 0.0f;
+						GameReset();
+						gameOverToReset = false;
+						state = STATE_GAME;
+					}
+				}
+			}
+
+			else if (state == STATE_POWERUP)
+			{
+				lightningUpgradeTimer += 1.0f * frameDeltaTime;
+				p.NotFiringAnimation(frameDeltaTime);
+				if (lightningUpgradeTimer > lightningUpgradeWait)
+				{
+					lightningUpgradeTimer = 0.0f;
+					cam->setPosition(OldCameraPosition);
+					cam->setTarget(p.GetPosition());
+					ef->SetVisible(true);
+					groundSceneNode->setVisible(true);
+					ufoBladesSceneNode->setVisible(true);
+					ufoSceneNode->setVisible(true);
+					state = STATE_GAME;
+				}
+			}
+
+			driver->beginScene(true, true, SColor(255, 0, 0, 0));
+			smgr->drawAll();
+			if (state == STATE_MENU) {
+				MenuFontDraw(device);
+					
+				driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
+				driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
+				driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
+					(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
+			}
+
+			else if (state == STATE_INTRO_CUTSCENE) {
+				if (!cutscene3FadeOut && transition_alpha != 0)
+					updateFadeIn(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+				else if (cutscene3FadeOut)
+					updateFadeOut(device, 2.0f * frameDeltaTime, device->getTimer()->getTime());
+			}
+
+			else if (state == STATE_GAME_OVER) {
+				cowHeadGameOver->setRotation(cowHeadGameOver->getRotation() + vector3df(8.0f * frameDeltaTime, 0.0f, 0.0f));
+			}
+
+			if (state == STATE_GAME || state == STATE_GAME_OVER)
+			{
+				if (state == STATE_GAME_OVER) {
+					dimension2du s = device->getVideoDriver()->getScreenSize();
+					stringw str = L"Cows Destroyed: ";
+					str += cowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
+					str = L"Total Cows Record: ";
+					str += savedCowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
+					str = L"Total Cows Destroyed: ";
+					str += totalCowsKilled;
+					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
+
+					driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
+				}
+
+				else
+				{
+					health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+					heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
+					health_outside->draw();
+					if (p.GetHealth() > 0)
+						health_inside->draw();
+					heat_outside->draw();
+					if (p.GetEnergy() > 0)
+						heat_inside->draw();
+					if ((cowsXp > 100 && cowsXpLvl < 20) || (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0)))
+					{
+						//change to x amount of buttons
+						int whichPerk = rand() % 2;
+						if (whichPerk == 1 && (perkCount % NUKE_CHANCE) != 0)
+							whichPerk = 0;
+						perkCount++;
+						//nuke chance is the highest, if it goes above, reset it
+						if (perkCount == NUKE_CHANCE)
+							perkCount = 0;
+						//enable an op power
+						switch (whichPerk)
+						{
+						case 0:
+							shieldBtnToggle->setVisible(true);
+							shieldTimer = 0.0f;
+							break;
+						case 1:
+							nukeBtnToggle->setVisible(true);
+							break;
+						}
+
+						cowsXp = 0;
+						cowsXpLvl += 1;
+					}
+
+					unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+					unlock_outside->draw();
+					unlock_inside->draw();
+					if (shieldBtnToggle->isVisible())
+						shieldBtnToggle->draw();
+					if (nukeBtnToggle->isVisible())
+						nukeBtnToggle->draw();
+					cow_icon->draw();
+					alien_icon->draw();
+					dimension2du s = device->getVideoDriver()->getScreenSize();
+					stringw str;
+					str += (int)cowsXp;
+					str += L"/100 | LVL ";
+					str += cowsXpLvl;
+					font->draw(str.c_str(), core::rect<s32>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
+
+					HighScoreFontDraw(device, cowsKilled);
+				}
+			}
+
+			driver->endScene();
 		}
 	}
 

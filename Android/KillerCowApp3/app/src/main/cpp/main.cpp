@@ -72,13 +72,13 @@ public:
 					if ( TouchID == -1 )
 					{
 						fakeMouseEvent.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
-                        if (shieldBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 10 && fakeMouseEvent.MouseInput.X < 10 + 64 &&
-                                fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 64) {
+                        if (shieldBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 10 && fakeMouseEvent.MouseInput.X < 10 + 48 &&
+                                fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 48) {
                             shieldBtnToggle->setVisible(false);
                             GUIShieldToggle = true;
                         }
-                        if (nukeBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 85 && fakeMouseEvent.MouseInput.X < 85 + 64 &&
-                            fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 64)
+                        if (nukeBtnToggle->isVisible() && fakeMouseEvent.MouseInput.X > 64 && fakeMouseEvent.MouseInput.X < 64 + 48 &&
+                            fakeMouseEvent.MouseInput.Y > 108 && fakeMouseEvent.MouseInput.Y < 108 + 48)
                         {
                             nukeBtnToggle->setVisible(false);
                             GUINukeToggle = true;
@@ -426,11 +426,11 @@ void CutsceneInit(IrrlichtDevice* device)
 {
     earthSceneNode->setVisible(false);
     //main ligth for the game
-    dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.65f, 0.65f, 1.0f), 0.0f);
+    dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
     dirLight->getLightData().Type = ELT_SPOT;
     dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 
-    introCutsceneLight->getLightData().DiffuseColor = SColor(255, 100, 100, 100);
+    introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
 
     //load the non important static meshes for the scene with no behaviour
 
@@ -553,7 +553,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
     else if (currentCutscene == 2)
     {
-        introCutsceneLight->getLightData().DiffuseColor = SColor(255, 10, 10, 10);
+        introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
         ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
         //attach and move the camera onto the ufo for crashing landing cam
         cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
@@ -1039,13 +1039,13 @@ void android_main(android_app* app)
     shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
     shieldBtnToggle->setScaleImage(true);
     shieldBtnToggle->setID(234);
-    shieldBtnToggle->setVisible(true);
+    shieldBtnToggle->setVisible(false);
 
     nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
     nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
     nukeBtnToggle->setScaleImage(true);
     nukeBtnToggle->setID(235);
-    nukeBtnToggle->setVisible(true);
+    nukeBtnToggle->setVisible(false);
 
     while (device->run()) {
         //time

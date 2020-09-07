@@ -19,7 +19,7 @@ using namespace gui;
 #define ZOOM_INTO_BOSS_SPEED 1.3f
 #define ZOOM_INTO_BOSS_DEAD_SPEED 0.8f
 static vector3df defaultCamPos = { 10.0f, 17.0f, -16.0f };
-static vector3df bossFightCamPos = { 12.0f, 19.0f, -18.0f };
+static vector3df bossFightCamPos = { 14.0f, 21.0f, -20.0f };
 
 #define GROUNDSCENENODE_BASE_ID 1
 
