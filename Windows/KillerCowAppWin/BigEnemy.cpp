@@ -184,7 +184,6 @@ bool BigEnemy::PollNewPosition(const float dt)
 
 void BigEnemy::Reset()
 {
-	firstDeath = true;
 	/*health = BASE_COW_HEALTH;
 	SetAttackStrikeDone(false);
 	float distAway = rand() % (50 + 1) + 20;

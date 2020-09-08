@@ -131,6 +131,7 @@ float gameOverTimer = 0.0f;
 
 int winX = 640;
 int winY = 480;
+bool fullscreen = false;
 
 static void VideoConfigInit()
 {
@@ -147,6 +148,8 @@ static void VideoConfigInit()
 		winX = atoi(buffer);
 		fgets(buffer, 64, f);
 		winY = atoi(buffer);
+		fgets(buffer, 64, f);
+		fullscreen = (bool)atoi(buffer);
 		fclose(f);
 	}
 }
@@ -616,7 +619,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 							}
 
 							bossDead = true;
-							be->Reset();
 						}
 					}
 					else
@@ -732,10 +734,10 @@ int Sys_Init()
 
 	#ifdef _WIN32
 		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(winX, winY), 16,
-			false, false, true, &er);
+			fullscreen, false, true, &er);
 	#elif __linux__
 		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(winX, winY), 16,
-			false, false, true, &er);
+			fullscreen, false, true, &er);
 	#endif
 
 	if (!device)
@@ -934,8 +936,15 @@ int main()
 								totalCowsKilled += cowsKilled;
 								//reset boss shite
 								bossScene = false;
-								bossDead = true;
+								bossDead = false;
 								gameOverResetTimer = 0.0f;
+								be->Reset();
+								bigEnemyStopShooting = true;
+								enemyOrb.GetNode()->setVisible(false);
+								be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+								be->GetNode()->setVisible(false);
+								firstDeath = true;
+								enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 								state = STATE_GAME_OVER;
 							}
 
@@ -971,8 +980,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -1069,12 +1078,14 @@ int main()
 								}
 							}
 
-							else if (bossDead) {
+							else if (bossDead) 
+							{
 								be->DeathAnimation(frameDeltaTime, FMODSystem);
 								vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 								cam->setPosition(cam->getPosition() + p1);
 								cam->setTarget(p.GetPosition());
 								if (be->GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
+									be->Reset();
 									bigEnemyStopShooting = true;
 									enemyOrb.GetNode()->setVisible(false);
 									be->GetNodeDirt()->setPosition(vector3df(-9.99f));
@@ -1082,6 +1093,7 @@ int main()
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
 									{
+										firstDeath = true;
 										bossDead = false;
 										//add 2 extra cows after the boss battle
 										ef->SetEnemyCount(ef->GetEnemyCount() + 2);
