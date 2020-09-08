@@ -129,6 +129,28 @@ float gameOverTimer = 0.0f;
 #define GAME_OVER_FADE_OUT_TIME 3.0f
 #define GAME_OVER_FINISH_TIME 1.0f
 
+int winX = 640;
+int winY = 480;
+
+static void VideoConfigInit()
+{
+	FILE* f;
+	#ifdef _WIN32
+		fopen_s(&f, "config.txt", "rb");
+	#elif __linux__ 
+		f = fopen("config.txt", "rb");
+	#endif
+
+	if (f) {
+		char buffer[64];
+		fgets(buffer, 64, f);
+		winX = atoi(buffer);
+		fgets(buffer, 64, f);
+		winY = atoi(buffer);
+		fclose(f);
+	}
+}
+
 static void SaveLoadGame(bool s)
 {
 	FILE* f = NULL;
@@ -706,11 +728,13 @@ int Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
+	VideoConfigInit();
+
 	#ifdef _WIN32
-		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 32,
+		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(winX, winY), 16,
 			false, false, true, &er);
 	#elif __linux__
-		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 16,
+		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(winX, winY), 16,
 			false, false, true, &er);
 	#endif
 

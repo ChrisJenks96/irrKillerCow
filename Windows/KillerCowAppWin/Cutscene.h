@@ -28,7 +28,7 @@ static float cutscenespeedAccum = 0.0f;
 static int cutscene1EndPass = 0;
 static int cutscene1currentGround = 0;
 static int cutscene1GroundDistance = 360.0f;
-static vector3df cutscene1CamPosition = { 10.0f, 60.0f, 7.0f };
+static vector3df cutscene1CamPosition = { 10.0f, 63.0f, 7.0f };
 static vector3df cutscene2CamPosition = { -7.55f, 0.46f, 24.6f };
 static vector3df cutscene3CamPosition = { 3.0f, 5.0f, -1.0f };
 static vector3df cutscene3CrashPosition;
