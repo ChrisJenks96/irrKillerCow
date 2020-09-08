@@ -135,7 +135,12 @@ static void SaveLoadGame(bool s)
 	if (s)
 	{
 		if (savedCowsKilled < cowsKilled) {
+			#ifdef _WIN32
 			fopen_s(&f, "media/HS.DAT", "wb");
+			#elif __linux__ 
+			f = fopen("media/HS.DAT", "wb");
+			#endif
+			
 			fwrite(&cowsKilled, 4, 1, f);
 			savedCowsKilled = cowsKilled;
 			fclose(f);
@@ -144,7 +149,12 @@ static void SaveLoadGame(bool s)
 
 	else
 	{
-		fopen_s(&f, "media/HS.DAT", "rb");
+		#ifdef _WIN32
+			fopen_s(&f, "media/HS.DAT", "rb");
+		#elif __linux__ 
+			f = fopen("media/HS.DAT", "rb");
+		#endif
+		
 		if (f) {
 			fread(&savedCowsKilled, 4, 1, f);
 			fclose(f);
@@ -696,8 +706,13 @@ int Sys_Init()
 	/* initialize random seed: */
 	srand(time(NULL));
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 16,
-		false, false, true, &er);
+	#ifdef _WIN32
+		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 32,
+			false, false, true, &er);
+	#elif __linux__
+		device = createDevice(video::EDT_OPENGL, dimension2d<u32>(1280, 720), 16,
+			false, false, true, &er);
+	#endif
 
 	if (!device)
 		return -1;
@@ -816,13 +831,13 @@ int main()
 		shieldBtnToggle->setImage(driver->getTexture("media/gui/shield_icon.png"));
 		shieldBtnToggle->setScaleImage(true);
 		shieldBtnToggle->setID(234);
-		shieldBtnToggle->setVisible(true);
+		shieldBtnToggle->setVisible(false);
 
 		nukeBtnToggle = gui->addButton(recti(64, 108, 64 + 48, 108 + 48));
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(true);
+		nukeBtnToggle->setVisible(false);
 
 		while (device->run())
 		{
@@ -932,8 +947,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);

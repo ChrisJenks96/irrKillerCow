@@ -1,0 +1,9 @@
+sudo apt-get install g++
+sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev libx11-dev x11proto-core-dev x11proto-gl-dev x11proto-kb-dev libpng12-dev zlib1g-dev x11proto-xf86vidmode-dev libxxf86vm-dev libxau-dev libxext-dev libxi-dev x11proto-input-dev x11proto-xext-dev libjpeg62-dev
+cd /usr/lib
+sudo cp libGL.so.1.0.9631 libGL.so
+sudo cp libGLU.so.1.3.060502 libGLU.so
+sudo cp libXxf86vm.so.1.0.0 libXxf86vm.so
+sudo cp libXext.so.6.4.0 libXext.so
+sudo cp libX11.so.6.2.0 libX11.so
+sudo ldconfig
