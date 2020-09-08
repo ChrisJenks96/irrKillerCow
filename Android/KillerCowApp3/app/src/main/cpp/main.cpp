@@ -30,6 +30,8 @@ IGUIButton* nukeBtnToggle;
 bool GUINukeToggle{ false };
 bool GUIShieldToggle{ false };
 
+JNIEnv* jni = 0;
+
 irr::android::SDisplayMetrics displayMetrics;
 
 class MyEventReceiver : public IEventReceiver
@@ -139,7 +141,7 @@ public:
 
 private:
 	IrrlichtDevice * Device;
-	android_app* AndroidApp;
+    android_app* AndroidApp;
 	gui::IGUIElement * SpriteToMove;
 	core::rect<s32> SpriteStartRect;
 	core::position2d<irr::s32> TouchStartPos;
@@ -270,7 +272,7 @@ static void SaveLoadGame(bool s)
     if (s)
     {
         if (savedCowsKilled < cowsKilled) {
-            f = fopen("/sdcard/HS.DAT", "wb");
+            f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "wb");
             if (f){
                 fwrite(&cowsKilled, 4, 1, f);
                 savedCowsKilled = cowsKilled;
@@ -281,7 +283,7 @@ static void SaveLoadGame(bool s)
 
     else
     {
-        f = fopen("/sdcard/HS.DAT", "rb");
+        f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "rb");
         if (f) {
             fread(&savedCowsKilled, 4, 1, f);
             fclose(f);
@@ -588,6 +590,7 @@ void GameInit(IrrlichtDevice* device)
     ef->SetEnemyCount(STARTING_ENEMIES);
     be = new BigEnemy(device, FMODSystem, 12.0f);
     enemyOrb = EnemyOrb(device);
+    enemyOrb.GetNode()->setPosition(vector3df(-999.0f));
     be->GetNode()->setVisible(false);
 
     ufoSceneNode->setPosition(vector3df(-2.0f, -4.0f, 5.0f));
@@ -637,7 +640,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
     {
         if (!bigEnemyStopShooting) {
             vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * enemyOrbSpeed * frameDeltaTime;
-            enemyOrbSpeed += 4.0f * frameDeltaTime;
+            enemyOrbSpeed += 2.0f * frameDeltaTime;
             float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
             enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
             if (dist < 0.2f && !GUIShieldToggle) {
@@ -795,7 +798,6 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 
     //rotate the blades around the craft
     ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-    //ef->Update(p, FMODSystem, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
     ef->Update(p, FMODSystem, GUIShieldToggle, cowsKilled, frameDeltaTime);
 
     if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
@@ -854,7 +856,7 @@ void GameReset()
     p.SetEnergy(100);
     p.SetAnimationName("idle");
     ef->ForceReset();
-    cam->setPosition(defaultCamPos);
+    cam->setPosition(vector3df(defaultCamPos));
     cam->setTarget(p.GetPosition());
     ef->SetEnemyCount(STARTING_ENEMIES);
 }
@@ -952,10 +954,7 @@ void android_main(android_app* app)
         }
     }
 
-    //void* extradriverdata = 0;
-    //Common_Init(&extradriverdata);
-
-    JNIEnv* jni = 0;
+    //for fmod to work...
     app->activity->vm->AttachCurrentThread(&jni, NULL);
 
     FMOD_RESULT r;
@@ -980,7 +979,6 @@ void android_main(android_app* app)
     //channel_bkg->setChannelGroup(channelGroupBKGMusic);
 
     cam = smgr->addCameraSceneNode();
-
     StaticMeshesLoad(device);
 
     IMesh *mesh = smgr->getMesh("media/gui/earth.obj");
@@ -1102,18 +1100,24 @@ void android_main(android_app* app)
                         if (gameOverResetTimer > gameOverResetRate) {
                             SaveLoadGame(true);
                             cam->setPosition(vector3df(999.0f));
-                            cowHeadGameOver->setPosition(
-                                    cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
+                            cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
                             cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
                             cam->setTarget(cowHeadGameOver->getPosition());
                             totalCowsKilled += cowsKilled;
                             //reset boss shite
                             bossScene = false;
-                            bossDead = true;
+                            bossDead = false;
                             gameOverResetTimer = 0.0f;
+                            be->Reset();
+                            bigEnemyStopShooting = true;
+                            enemyOrb.GetNode()->setVisible(false);
+                            be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+                            be->GetNode()->setVisible(false);
+                            firstDeath = true;
+                            enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
+                            enemyOrb.GetNode()->setPosition(vector3df(-999.0f));
                             state = STATE_GAME_OVER;
                         }
-
                     }
 
                         //lightning upgrade states
@@ -1247,28 +1251,31 @@ void android_main(android_app* app)
                                 cam->setPosition(bossFightCamPos);
                                 cam->setTarget(p.GetPosition());
                             }
-                        } else if (bossDead) {
+                        } else if (bossDead){
                             be->DeathAnimation(frameDeltaTime, FMODSystem);
-                            vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() *
-                                           (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
+                            vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
                             cam->setPosition(cam->getPosition() + p1);
                             cam->setTarget(p.GetPosition());
                             if (be->GetAnimationID() == BIG_BOSS_ANIM_DEATH_END3) {
+                                be->Reset();
                                 bigEnemyStopShooting = true;
                                 enemyOrb.GetNode()->setVisible(false);
                                 be->GetNodeDirt()->setPosition(vector3df(-9.99f));
                                 be->GetNode()->setVisible(false);
                                 float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
-                                if (dist < 0.2f) {
+                                if (dist < 0.2f)
+                                {
+                                    firstDeath = true;
                                     bossDead = false;
                                     //add 2 extra cows after the boss battle
                                     ef->SetEnemyCount(ef->GetEnemyCount() + 2);
                                     ef->AddSpeed(0.3f);
-                                    cowsXp += ((float) be->GetAttackDamage() / 10) * xpMod;
+                                    cowsXp += ((float)be->GetAttackDamage() / 10) * xpMod;
                                     cowsKilled += 1;
                                     xpMod += 2.4f;
                                     bossScene = false;
                                     enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
+                                    enemyOrb.GetNode()->setPosition(vector3df(-999.0f));
                                 }
                             }
                         }

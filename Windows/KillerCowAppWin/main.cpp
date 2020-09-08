@@ -535,7 +535,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	{
 		if (!bigEnemyStopShooting) {
 			vector3df newPos = ((p.GetPosition() - enemyOrb.GetNode()->getPosition()).normalize()) * enemyOrbSpeed * frameDeltaTime;
-			enemyOrbSpeed += 4.0f * frameDeltaTime;
+			enemyOrbSpeed += 2.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
 			if (dist < 0.2f && !er.GUIShieldToggle) {
@@ -947,7 +947,6 @@ int main()
 								enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
 								state = STATE_GAME_OVER;
 							}
-
 						}
 
 						//lightning upgrade states

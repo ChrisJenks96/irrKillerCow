@@ -26,6 +26,8 @@ using namespace gui;
 
 static FMOD::Sound* bigMooEffect;
 
+static bool firstDeath{ true };
+
 class BigEnemy
 {
 public:
@@ -59,7 +61,6 @@ public:
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
-	bool firstDeath{ true };
 	FMOD::Channel* channel;
 	float animationTimer{ 0.0f };
 	float animationRate{ 4.0f };
@@ -71,7 +72,7 @@ private:
 	int health{ BASE_BOSS_HEALTH };
 	bool attackStrikeDone{ false };
 	int animationID{ BIG_BOSS_ANIM_IDLE };
-	int attackDamage{ 20 };
+	int attackDamage{ 6 };
 	bool attackOnce{ false };
 	bool isAttacking{ false };
 	float attackDistance{ 0.0f };
