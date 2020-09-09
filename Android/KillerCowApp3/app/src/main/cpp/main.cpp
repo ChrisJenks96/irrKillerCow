@@ -233,11 +233,11 @@ float gameOverResetTimer = 0.0f;
 float gameOverResetRate = 4.0f;
 
 int perkCount = 0;
-#define NUKE_CHANCE 3
+#define NUKE_CHANCE 6
 #define SHIELD_CHANCE 0
 
 float shieldTimer = 0.0f;
-float shieldRate = 3.5f;
+float shieldRate = 3.2f;
 
 vector3df OldCameraPosition;
 
@@ -601,6 +601,7 @@ void GameReset()
     cowsXpLvl = 0;
     cowsKilled = 0;
     perkCount = 0;
+    firstDeath = true;
     p.SetHealth(100);
     p.SetEnergy(100);
     p.SetAnimationName("idle");
@@ -1129,7 +1130,6 @@ void android_main(android_app* app)
                             enemyOrb.GetNode()->setVisible(false);
                             be->GetNodeDirt()->setPosition(vector3df(-9.99f));
                             be->GetNode()->setVisible(false);
-                            firstDeath = true;
                             enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
                             enemyOrb.GetNode()->setPosition(vector3df(-999.0f));
                             state = STATE_GAME_OVER;
