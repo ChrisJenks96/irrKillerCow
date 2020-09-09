@@ -156,6 +156,7 @@ bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
 
 void Enemy::Reset()
 {
+	speed = 2.1f;
 	health = BASE_COW_HEALTH;
 	SetDeathAnimationTrigger(false);
 	SetAttackStrikeDone(false);

@@ -648,8 +648,6 @@ void GameInit(IrrlichtDevice* device)
     dirLight->getLightData().OuterCone = 100.0f;
     dirLight->getLightData().Falloff = 20.0f;
     dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
-
-    GameReset();
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
