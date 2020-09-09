@@ -272,7 +272,7 @@ static void SaveLoadGame(bool s)
     if (s)
     {
         if (savedCowsKilled < cowsKilled) {
-            f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "wb");
+            f = fopen("/data/data/com.albongames.killercowapp3/files/HS.DAT", "wb");
             if (f){
                 fwrite(&cowsKilled, 4, 1, f);
                 savedCowsKilled = cowsKilled;
@@ -283,7 +283,7 @@ static void SaveLoadGame(bool s)
 
     else
     {
-        f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "rb");
+        f = fopen("/data/data/com.albongames.killercowapp3/files/HS.DAT", "rb");
         if (f) {
             fread(&savedCowsKilled, 4, 1, f);
             fclose(f);
@@ -291,7 +291,7 @@ static void SaveLoadGame(bool s)
 
         else
         {
-            f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "wb");
+            f = fopen("/data/data/com.albongames.killercowapp3/files/HS.DAT", "wb");
             if (f){
                 cowsKilled = 0;
                 fwrite(&cowsKilled, 4, 1, f);

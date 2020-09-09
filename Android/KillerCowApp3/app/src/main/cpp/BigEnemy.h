@@ -61,7 +61,7 @@ public:
 	IAnimatedMeshSceneNode* GetNodeCap() { return node_cap; }
 	~BigEnemy();
 private:
-	FMOD::Channel* channel;
+	FMOD::Channel* channel{0};
 	float animationTimer{ 0.0f };
 	float animationRate{ 4.0f };
 	float newPositionTimer{ 0.0f };

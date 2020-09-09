@@ -71,7 +71,7 @@ public:
 	float GetCurrentAttackLength() { return currAttackLength; }
 	~Enemy();
 private:
-	FMOD::Channel* channel;
+	FMOD::Channel* channel {0};
 	int animationID{ ENEMY_ANIMATION_IDLE };
 	float deathAnimationTimer{ 0.0f };
 	bool deathAnimationTrigger{ false };

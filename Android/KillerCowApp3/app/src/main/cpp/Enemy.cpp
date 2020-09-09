@@ -25,6 +25,8 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 	selector->drop(); // We're done with this selector, so drop it now.
 
 	soundEffectID = rand() % 3;
+    healthDepleteTimer = 0.0f;
+    int health = BASE_COW_HEALTH;
 }
 
 void Enemy::RandomPosition(const float distAway)
@@ -41,7 +43,7 @@ void Enemy::RandomPosition(const float distAway)
 void Enemy::RemoveHealth(int damage, const float dt)
 {
 	//5 as the cows are hard to kill
-	healthDepleteTimer += 5.0f * dt;
+	healthDepleteTimer += 2.0f * dt;
 	if (healthDepleteTimer > healthDepleteRate) {
 		health -= damage;
 		healthDepleteTimer = 0.0f;
@@ -112,27 +114,18 @@ bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
         channel->isPlaying(&cowDeathFlag);
         if (!cowDeathFlag) {
             channel->setMode(FMOD_LOOP_OFF);
-            switch (soundEffectID)
-            {
-                case 0:
-                    FMODSystem->playSound(cowMooEffect, 0, false, &channel);
-                    break;
-                case 1:
-                    FMODSystem->playSound(cowMooEffect1, 0, false, &channel);
-                    break;
-                case 2:
-                    FMODSystem->playSound(cowMooEffect2, 0, false, &channel);
-                    break;
-                case 3:
-                    FMODSystem->playSound(cowMooEffect3, 0, false, &channel);
-                    break;
-                default:
-                    FMODSystem->playSound(cowMooEffect, 0, false, &channel);
-                    break;
-            }
+            if (soundEffectID == 0)
+                FMODSystem->playSound(cowMooEffect, 0, false, &channel);
+            else if (soundEffectID == 1)
+                FMODSystem->playSound(cowMooEffect1, 0, false, &channel);
+            else if (soundEffectID == 2)
+                FMODSystem->playSound(cowMooEffect2, 0, false, &channel);
+            else
+                FMODSystem->playSound(cowMooEffect, 0, false, &channel);
 
             channel->setVolume(0.1f);
         }
+
         deathAnimationTimer = 0.0f;
     }
 
@@ -164,7 +157,7 @@ void Enemy::Reset()
 	RandomPosition(distAway);
 	isAttacking = false;
 	attackOnce = false;
-	node->setVisible(true);
+	//node->setVisible(true);
 	node->setPosition(vector3df(node->getPosition().X, 0.0f, node->getPosition().Z));
 }
 
@@ -225,7 +218,7 @@ void EnemyFactory::Update(Player& p, FMOD::System* FMODSystem, bool& shieldActiv
 		enemies[i].LookAt(p.GetPosition(), -90.0f);
 		if (enemies[i].isDeathAnimationTrigger()){
 			if (enemies[i].DeathAnimation(FMODSystem, dt)){
-				enemies[i].GetNode()->setVisible(false);
+				//enemies[i].GetNode()->setVisible(false);
 				enemies[i].Reset();
 			}
 		}
@@ -258,7 +251,6 @@ void EnemyFactory::Update(Player& p, FMOD::System* FMODSystem, bool& shieldActiv
 				}
 					
 				else if (shieldActive) {
-					
 					enemies[i].SetDeathAnimationTrigger(true);
 					enemies[i].SetHealth(0);
 					cowsKilled += 1;
