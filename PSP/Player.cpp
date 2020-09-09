@@ -10,8 +10,8 @@ Player::Player(IrrlichtDevice* d)
 	energyDepleteRate = 0.1f;
 	energyRestoreTimer = 0.0f;
 	energyRestoreRate = 0.2f;
-	energy{ 100 };
-	health{ 100 };
+	energy = 100;
+	health = 100;
 
 	IVideoDriver* driver = d->getVideoDriver();
 	ISceneManager* smgr = d->getSceneManager();

@@ -83,7 +83,7 @@ public:
 	void SetAnimationID(int i) { animationID = i; }
 	int GetAnimationID() { return animationID; }
 	bool DeathAnimation(void* FMODSystem, const float dt);
-	ENEMY_STATE MoveTowards(const vector3df p, const float dt);
+	enum ENEMY_STATE MoveTowards(const vector3df p, const float dt);
 	void SetSpeed(float s) { speed = s; }
 	float GetSpeed() { return speed; }
 	float GetCurrentAttackLength() { return currAttackLength; }

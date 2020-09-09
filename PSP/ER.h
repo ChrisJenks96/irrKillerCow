@@ -12,12 +12,13 @@ using namespace gui;
 IGUIButton* shieldBtnToggle;
 IGUIButton* nukeBtnToggle;
 
-class MyEventReceiver : public IEventReceiver
+bool GUINukeToggle = false;
+bool GUIShieldToggle = false;
+
+/*class MyEventReceiver : public IEventReceiver
 {
 public:
     bool Keys[256];
-    bool GUINukeToggle{ false };
-    bool GUIShieldToggle{ false };
     // We'll create a struct to record info on the mouse state
     struct SMouseState
     {
@@ -107,4 +108,4 @@ public:
 
 private:
     SEvent::SJoystickEvent JoystickState;
-};
+};*/

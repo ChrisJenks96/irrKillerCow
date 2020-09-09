@@ -85,18 +85,18 @@ void Enemy::Attack(const float dt)
 	}
 }
 
-ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
+enum ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (isAttacking && attackOnce)
-		return ENEMY_STATE::ATTACK;
+		return ATTACK;
 
 	else if ((distance < attackDistance)) {
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
 			node->setMD2Animation("idle");
-			return ENEMY_STATE::ATTACK;
+			return ATTACK;
 		}
 	}
 
@@ -107,14 +107,14 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 
 	if (distance < 0.5f) {
 		node->setMD2Animation("walk");
-		return ENEMY_STATE::RESET;
+		return RESET;
 	}
 
 	//we've died :(
 	if (!node->isVisible())
 		Reset();
 
-	return ENEMY_STATE::NONE;
+	return NONE;
 }
 
 bool Enemy::DeathAnimation(void* FMODSystem, const float dt)
@@ -285,7 +285,7 @@ void EnemyFactory::Update(Player& p, void* FMODSystem, bool& shieldActive, int& 
 
 Enemy* EnemyFactory::GetNearestEnemy(Player& p) {
 	float distance = 999.0f;
-	Enemy* e = nullptr;
+	Enemy* e = NULL;
 	for (int i = 0; i < usable; i++) {
 		float thisDist = (p.GetPosition() - enemies[i].GetPosition()).getLengthSQ();
 		if (thisDist < distance) {

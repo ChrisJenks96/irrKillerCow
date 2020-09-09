@@ -1,35 +1,23 @@
 #Put makefile in 'PSP' root folder
 #PSP irrlicht lib should be in the 'PSPSDK/LIB' folder
 
-IDIR = C:\sdk\irrlicht-1.8.4\include
-CC= psp-g++ -Wall
-CFLAGS= -I$(IDIR)
+PSPSDK=$(shell psp-config --pspsdk-path)
 
-ODIR= obj
-LDIR = 
+TARGET = killercow
+OBJS = main.o BigEnemy.o Enemy.o EnemyOrb.o Player.o
 
-LIBS= -lIrrlicht -lpspgum -lpspgu -lpspgl -lm -lpsprtc -lstdc++
+INCDIR = C:\sdk\irrlicht-1.8.4\include
+CFLAGS = -G0 -Wall -O2
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+ASFLAGS = $(CFLAGS)
 
-all: KillerCows
+LIBDIR =
+LDFLAGS =
+LIBS= -lIrrlicht -lpspgum -lpspgu -lpsppower -lc -lglut -lSDL -lSDL_ttf -lSDL_image -lpspirkeyb -lpspwlan -lpsppower \
+	-lGL -lGLU -lfreetype -ljpeg -lpng -lz -lm -lSDL -lpspgu -lpsphprm -lpspaudio -lstdc++ -lpspvfpu -lpsprtc
 
-KillerCows: main.o BigEnemy.o Enemy.o EnemyOrb.o Player.o
-	$(CC) main.cpp BigEnemy.cpp Enemy.cpp EnemyOrb.cpp Player.cpp -o KillerCows -I$(IDIR) $(LDIR) $(LIBS)
-	sudo cp libfmod.so.11 /usr/lib/
+EXTRA_TARGETS = EBOOT.PBP
+PSP_EBOOT_TITLE = Killer Cows
 
-main.o: main.cpp
-	$(CC) -c main.cpp -I$(IDIR)
-
-BigEnemy.o: BigEnemy.cpp
-	$(CC) -c BigEnemy.cpp -I$(IDIR)
-
-Enemy.o: Enemy.cpp
-	$(CC) -c Enemy.cpp -I$(IDIR)
-
-EnemyOrb.o: EnemyOrb.cpp
-	$(CC) -c EnemyOrb.cpp -I$(IDIR)
-
-Player.o: Player.cpp
-	$(CC) -c Player.cpp -I$(IDIR)
-
-clean:
-	rm -rf *o KillerCows
+PSPSDK=$(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak

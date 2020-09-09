@@ -54,7 +54,7 @@ float lightningWait = 0.0f;
 
 //system stuff
 IrrlichtDevice* device;
-MyEventReceiver er;
+//MyEventReceiver er;
 ICameraSceneNode* cam;
 IMeshSceneNode* cutsceneGroundSceneNode[2];
 IAnimatedMeshSceneNode* groundSceneNode;
@@ -480,9 +480,9 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	//rotate the player around
 	if (p.GetHealth() > 0)
 	{
-		intersectPoint = getSceneNodeFromScreenCoordinatesBB(device->getSceneManager(), device->getVideoDriver(), groundSceneNode->getTriangleSelector(), er.GetMouseState().Position, 0);
-		const vector3df toTarget = intersectPoint - p.GetNode()->getPosition();
-		p.GetNode()->setRotation((toTarget.getHorizontalAngle() - 4.0f) * vector3df(0.0f, 1.0f, 0.0f));
+		//intersectPoint = getSceneNodeFromScreenCoordinatesBB(device->getSceneManager(), device->getVideoDriver(), groundSceneNode->getTriangleSelector(), er.GetMouseState().Position, 0);
+		//const vector3df toTarget = intersectPoint - p.GetNode()->getPosition();
+		//p.GetNode()->setRotation((toTarget.getHorizontalAngle() - 4.0f) * vector3df(0.0f, 1.0f, 0.0f));
 		
 		//THIS CAN BE JOYSTICK CODE... DO NOT DELETE!!!!!!!!!
 
@@ -500,14 +500,14 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 			enemyOrbSpeed += 2.0f * frameDeltaTime;
 			float dist = (p.GetPosition() - enemyOrb.GetNode()->getPosition()).getLengthSQ();
 			enemyOrb.GetNode()->setPosition(enemyOrb.GetNode()->getPosition() + newPos);
-			if (dist < 0.2f && !er.GUIShieldToggle) {
+			if (dist < 0.2f && !GUIShieldToggle) {
 				enemyOrb.GetNode()->setPosition(be->GetPosition());
 				p.RemoveHealth(be->GetAttackDamage());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
 			}
 
-			else if (dist < 2.8f && er.GUIShieldToggle) {
+			else if (dist < 2.8f && GUIShieldToggle) {
 				enemyOrb.GetNode()->setPosition(be->GetPosition());
 				if (bigEnemyOnMove)
 					bigEnemyStopShooting = true;
@@ -522,19 +522,20 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	else
 		enemyOrb.GetNode()->setPosition(be->GetNode()->getPosition() + vector3df(0.0f, 4.0f, 0.4));
 
-	if (er.GUINukeToggle)
+	if (GUINukeToggle)
 	{
 		if (!playerNukeGoneOff) {
 			p.SetEnergy(p.GetEnergy() - 50);
 			p.GetOrb()->setVisible(true);
 			playerNukeGoneOff = true;
-			er.GUINukeToggle = false;
+			GUINukeToggle = false;
 		}
 	}
 
 	//firing state for the player
 	bool leftPressedMidEffect = false;
-	if (er.GetMouseState().LeftButtonDown) {
+	//if (er.GetMouseState().LeftButtonDown) {
+	if (true){
 		if (p.GetEnergy() > 0)
 		{
 			if (lightningEffectMidTrigger) {
@@ -647,13 +648,13 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 	else if (p.GetEnergy() <= 0) {
 		p.SetEnergy(0);
 		shieldBtnToggle->setVisible(false);
-		er.GUIShieldToggle = false;
+		GUIShieldToggle = false;
 	}
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-	//ef->Update(p, FMODSystem, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
-	ef->Update(p, NULL, er.GUIShieldToggle, cowsKilled, frameDeltaTime);
+	//ef->Update(p, FMODSystem, GUIShieldToggle, cowsKilled, frameDeltaTime);
+	ef->Update(p, NULL, GUIShieldToggle, cowsKilled, frameDeltaTime);
 
 	if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
 		globalPlayerMunchFlag = true;
@@ -695,7 +696,7 @@ int Sys_Init()
 	//VideoConfigInit();
 
 	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(480, 272), 16,
-		false, false, false, &er);
+		false, false, false, 0);
 
 	if (!device)
 		return -1;
@@ -839,13 +840,13 @@ int main()
 
 				else
 				{
-					p.ShieldToggle(er.GUIShieldToggle);
-					if (er.GUIShieldToggle) {
+					p.ShieldToggle(GUIShieldToggle);
+					if (GUIShieldToggle) {
 						shieldTimer += 1.0f * frameDeltaTime;
 						if (shieldTimer > shieldRate) {
 							shieldTimer = 0.0f;
-							er.GUIShieldToggle = false;
-							p.ShieldToggle(er.GUIShieldToggle);
+							GUIShieldToggle = false;
+							p.ShieldToggle(GUIShieldToggle);
 							shieldBtnToggle->setVisible(false);
 						}
 					}
@@ -1103,7 +1104,8 @@ int main()
 				//channel->setVolume(0.8f);
 				//FMODSystem->update();
 
-				if (er.GetMouseState().LeftButtonDown) {
+				//if (er.GetMouseState().LeftButtonDown) {
+				if (true){
 					CutsceneInit(device);
 					//mainMenuMusic->release();
 					state = STATE_INTRO_CUTSCENE;
@@ -1113,7 +1115,7 @@ int main()
 			else if (state == STATE_GAME_OVER)
 			{
 				//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
-				if (!gameOverToReset && er.GetMouseState().LeftButtonDown)
+				if (!gameOverToReset && true)//er.GetMouseState().LeftButtonDown)
 					gameOverToReset = true;
 
 				if (gameOverToReset) {
