@@ -531,7 +531,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
             if (!lightningOnceFlag) {
                 channel->setMode(FMOD_LOOP_OFF);
                 FMODSystem->playSound(lightningCutsceneOnce, 0, false, &channel);
-                channel->setVolume(0.3f);
+                channel->setVolume(0.6f);
             }
         }
 
@@ -547,7 +547,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
             if (!bkgMusicPlaying) {
                 channel_bkg->setMode(FMOD_LOOP_NORMAL);
                 FMODSystem->playSound(backgroundMusic, 0, false, &channel_bkg);
-                channel_bkg->setVolume(0.4f);
+                channel_bkg->setVolume(0.6f);
             }
         }
     }
