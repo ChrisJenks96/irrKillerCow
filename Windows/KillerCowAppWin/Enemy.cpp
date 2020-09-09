@@ -74,14 +74,14 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (isAttacking && attackOnce)
-		return ENEMY_STATE::ATTACK;
+		return ATTACK;
 
 	else if ((distance < attackDistance)) {
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
 			node->setMD2Animation("idle");
-			return ENEMY_STATE::ATTACK;
+			return ATTACK;
 		}
 	}
 
@@ -92,14 +92,14 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 
 	if (distance < 0.5f) {
 		node->setMD2Animation("walk");
-		return ENEMY_STATE::RESET;
+		return RESET;
 	}
 
 	//we've died :(
 	if (!node->isVisible())
 		Reset();
 
-	return ENEMY_STATE::NONE;
+	return NONE;
 }
 
 bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)

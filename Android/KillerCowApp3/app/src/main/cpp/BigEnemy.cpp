@@ -79,35 +79,35 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, FMOD::System* FMODSystem, const float dist
 
 void BigEnemy::DeathAnimation(const float dt, FMOD::System* FMODSystem)
 {
-	animationTimer += 1.0f * dt;
-	//presume we've started on 'attack_start'
-	if (animationID == BIG_BOSS_ANIM_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
-		SetAnimationName("death_idle");
-		animationID = BIG_BOSS_ANIM_DEATH_END2;
-		animationTimer = 0.0f;
-	}
+    animationTimer += 1.0f * dt;
+    //presume we've started on 'attack_start'
+    if (animationID == BIG_BOSS_ANIM_DEATH_END && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+        SetAnimationName("death_idle");
+        animationID = BIG_BOSS_ANIM_DEATH_END2;
+        animationTimer = 0.0f;
+    }
 
-	else if ((animationID != BIG_BOSS_ANIM_DEATH_END2 && animationID != BIG_BOSS_ANIM_DEATH_END) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
-		SetAnimationName("death");
-		animationID = BIG_BOSS_ANIM_DEATH_END;
-		animationTimer = 0.0f;
-		if (firstDeath) {
-			bool cowDeathFlag;
-			channel->isPlaying(&cowDeathFlag);
-			if (!cowDeathFlag) {
-				channel->setMode(FMOD_LOOP_OFF);
-				FMODSystem->playSound(bigMooEffect, 0, false, &channel);
-				channel->setVolume(0.4f);
-			}
+    else if ((animationID != BIG_BOSS_ANIM_DEATH_END2 && animationID != BIG_BOSS_ANIM_DEATH_END) && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+        SetAnimationName("death");
+        animationID = BIG_BOSS_ANIM_DEATH_END;
+        animationTimer = 0.0f;
+        if (firstDeath) {
+            bool cowDeathFlag;
+            channel->isPlaying(&cowDeathFlag);
+            if (!cowDeathFlag) {
+                channel->setMode(FMOD_LOOP_OFF);
+                FMODSystem->playSound(bigMooEffect, 0, false, &channel);
+                channel->setVolume(0.4f);
+            }
 
-			firstDeath = false;
-		}
-	}
+            firstDeath = false;
+        }
+    }
 
-	else if (animationID == BIG_BOSS_ANIM_DEATH_END2 && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
-		animationID = BIG_BOSS_ANIM_DEATH_END3;
-		animationTimer = 0.0f;
-	}
+    else if (animationID == BIG_BOSS_ANIM_DEATH_END2 && animationTimer > ANIMATION_FRAME_TO_TIME(4)) {
+        animationID = BIG_BOSS_ANIM_DEATH_END3;
+        animationTimer = 0.0f;
+    }
 }
 
 vector3df BigEnemy::RandomPosition(const float distAway, bool setPos)

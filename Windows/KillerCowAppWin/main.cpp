@@ -191,8 +191,11 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 {
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
-	
+
 	//loading in the ground
+	
+	//IReadFile* file = createMemoryReadFile(mmemory, msize, mfilename, deleteMemoryWhenDropped);
+	
 	IAnimatedMesh* mesh = smgr->getMesh("media/base_plane/base_plane.obj");
 	if (mesh)
 	{
@@ -476,6 +479,24 @@ void LightningUpgrade(IrrlichtDevice* device)
 	p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
+void GameReset()
+{
+	globalPlayerMunchFlag = false;
+	cowsXp = 0;
+	cowsXpLvl = 0;
+	cowsKilled = 0;
+	perkCount = 0;
+	p.SetHealth(100);
+	p.SetEnergy(100);
+	p.SetAnimationName("idle");
+	p.SetAnimationID(PLAYER_ANIMATION_IDLE);
+	p.ResetAnimationTimer();
+	ef->ForceReset();
+	cam->setPosition(vector3df(defaultCamPos));
+	cam->setTarget(p.GetPosition());
+	ef->SetEnemyCount(STARTING_ENEMIES);
+}
+
 void GameInit(IrrlichtDevice* device)
 {
 	SaveLoadGame(false);
@@ -511,6 +532,8 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->getLightData().OuterCone = 100.0f;
 	dirLight->getLightData().Falloff = 20.0f;
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
+
+	GameReset();
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
@@ -749,27 +772,6 @@ int Sys_Init()
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
 
-	//void* extradriverdata = 0;
-	//Common_Init(&extradriverdata);
-	FMOD_RESULT r;
-	r = FMOD::System_Create(&FMODSystem);
-	if (r == FMOD_OK)
-	{
-		r = FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
-		if (r == FMOD_OK)
-		{
-			FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
-			FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
-			FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
-			FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
-			FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
-			FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
-			FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
-			channel->setChannelGroup(channelGroupLightning);
-			channel_bkg->setChannelGroup(channelGroupBKGMusic);
-		}
-	}
-
 	StaticMeshesLoad(device);
 
 	IMesh* mesh = smgr->getMesh("media/gui/earth.obj");
@@ -791,26 +793,31 @@ int Sys_Init()
 		}
 	}
 
+	//void* extradriverdata = 0;
+	//Common_Init(&extradriverdata);
+	FMOD_RESULT r;
+	r = FMOD::System_Create(&FMODSystem);
+	if (r == FMOD_OK)
+	{
+		r = FMODSystem->init(4 + MAX_COWS, FMOD_INIT_NORMAL, 0);
+		if (r == FMOD_OK)
+		{
+			FMODSystem->createSound("media/music/KillerCowOST.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &mainMenuMusic);
+			FMODSystem->createSound("media/music/Lightning_Effect_Start.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectStart);
+			FMODSystem->createSound("media/music/Lightning_Effect_Mid.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &lightningEffectMid);
+			FMODSystem->createSound("media/music/Lightning_Effect_End.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningEffectEnd);
+			FMODSystem->createSound("media/music/Moron.mp3", FMOD_DEFAULT | FMOD_LOOP_NORMAL, 0, &backgroundMusic);
+			FMODSystem->createChannelGroup("Lightning", &channelGroupLightning);
+			FMODSystem->createChannelGroup("BKGMusic", &channelGroupBKGMusic);
+			channel->setChannelGroup(channelGroupLightning);
+			channel_bkg->setChannelGroup(channelGroupBKGMusic);
+		}
+	}
+
 	introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160), 2000.0f);
 	introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
 	introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
 	return 0;
-}
-
-void GameReset()
-{
-	globalPlayerMunchFlag = false;
-	cowsXp = 0;
-	cowsXpLvl = 0;
-	cowsKilled = 0;
-	perkCount = 0;
-	p.SetHealth(100);
-	p.SetEnergy(100);
-	p.SetAnimationName("idle");
-	ef->ForceReset();
-	cam->setPosition(vector3df(defaultCamPos));
-	cam->setTarget(p.GetPosition());
-	ef->SetEnemyCount(STARTING_ENEMIES);
 }
 
 int main()
@@ -979,8 +986,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -1235,7 +1242,7 @@ int main()
 					heat_outside->draw();
 					if (p.GetEnergy() > 0)
 						heat_inside->draw();
-					if ((cowsXp > 100 && cowsXpLvl < 20) || (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0)))
+					if (cowsXp >= 100)
 					{
 						//change to x amount of buttons
 						int whichPerk = rand() % 2;

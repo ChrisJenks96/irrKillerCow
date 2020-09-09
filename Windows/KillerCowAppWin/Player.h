@@ -56,6 +56,7 @@ class Player
 		void ShieldUVScroll(const float dt);
 		void ShieldToggle(bool t) {nodeShield->setVisible(t);}
 		void ShieldTexture(stringw st, IVideoDriver* driver) { nodeShield->setMaterialTexture(0, driver->getTexture(st));  }
+		void ResetAnimationTimer() { animationTimer = 0.0f; }
 		ISceneNode* GetOrb() { return orb; }
 
 		//animations

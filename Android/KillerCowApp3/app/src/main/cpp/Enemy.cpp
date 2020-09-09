@@ -74,14 +74,14 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 {
 	float distance = (p - node->getPosition()).getLengthSQ();
 	if (isAttacking && attackOnce)
-		return ENEMY_STATE::ATTACK;
+		return ATTACK;
 
 	else if ((distance < attackDistance)) {
 		if (!attackOnce) {
 			isAttacking = true;
 			attackOnce = true;
 			node->setMD2Animation("idle");
-			return ENEMY_STATE::ATTACK;
+			return ATTACK;
 		}
 	}
 
@@ -92,66 +92,66 @@ ENEMY_STATE Enemy::MoveTowards(const vector3df p, const float dt)
 
 	if (distance < 0.5f) {
 		node->setMD2Animation("walk");
-		return ENEMY_STATE::RESET;
+		return RESET;
 	}
 
 	//we've died :(
 	if (!node->isVisible())
 		Reset();
 
-	return ENEMY_STATE::NONE;
+	return NONE;
 }
 
 bool Enemy::DeathAnimation(FMOD::System* FMODSystem, const float dt)
 {
-	deathAnimationTimer += 1.0f * dt;
-	if ((animationID != ENEMY_ANIMATION_DEATH && animationID != ENEMY_ANIMATION_DEATH_IDLE) && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4)){
-		SetAnimationName("death");
-		animationID = ENEMY_ANIMATION_DEATH;
-		bool cowDeathFlag;
-		channel->isPlaying(&cowDeathFlag);
-		if (!cowDeathFlag) {
-			channel->setMode(FMOD_LOOP_OFF);
-			switch (soundEffectID)
-			{
-				case 0:
-					FMODSystem->playSound(cowMooEffect, 0, false, &channel);
-					break;
-				case 1:
-					FMODSystem->playSound(cowMooEffect1, 0, false, &channel);
-					break;
-				case 2:
-					FMODSystem->playSound(cowMooEffect2, 0, false, &channel);
-					break;
-				case 3:
-					FMODSystem->playSound(cowMooEffect3, 0, false, &channel);
-					break;
-				default:
-					FMODSystem->playSound(cowMooEffect, 0, false, &channel);
-					break;
-			}
-			
-			channel->setVolume(0.1f);
-		}
-		deathAnimationTimer = 0.0f;
-	}
+    deathAnimationTimer += 1.0f * dt;
+    if ((animationID != ENEMY_ANIMATION_DEATH && animationID != ENEMY_ANIMATION_DEATH_IDLE) && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4)){
+        SetAnimationName("death");
+        animationID = ENEMY_ANIMATION_DEATH;
+        bool cowDeathFlag;
+        channel->isPlaying(&cowDeathFlag);
+        if (!cowDeathFlag) {
+            channel->setMode(FMOD_LOOP_OFF);
+            switch (soundEffectID)
+            {
+                case 0:
+                    FMODSystem->playSound(cowMooEffect, 0, false, &channel);
+                    break;
+                case 1:
+                    FMODSystem->playSound(cowMooEffect1, 0, false, &channel);
+                    break;
+                case 2:
+                    FMODSystem->playSound(cowMooEffect2, 0, false, &channel);
+                    break;
+                case 3:
+                    FMODSystem->playSound(cowMooEffect3, 0, false, &channel);
+                    break;
+                default:
+                    FMODSystem->playSound(cowMooEffect, 0, false, &channel);
+                    break;
+            }
 
-	else if (animationID == ENEMY_ANIMATION_DEATH && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4))
-	{
-		SetAnimationName("death_idle");
-		animationID = ENEMY_ANIMATION_DEATH_IDLE;
-		deathAnimationTimer = 0.0f;
-	}
+            channel->setVolume(0.1f);
+        }
+        deathAnimationTimer = 0.0f;
+    }
 
-	//lets see the death idle animation for 1s then we'll tell the player the enemy is dead
-	else if (animationID == ENEMY_ANIMATION_DEATH_IDLE && deathAnimationTimer > 2.0f)
-	{
-		animationID = ENEMY_ANIMATION_WALK;
-		deathAnimationTimer = 0.0f;
-		return true;
-	}
+    else if (animationID == ENEMY_ANIMATION_DEATH && deathAnimationTimer > ANIMATION_FRAME_TO_TIME(4))
+    {
+        SetAnimationName("death_idle");
+        animationID = ENEMY_ANIMATION_DEATH_IDLE;
+        deathAnimationTimer = 0.0f;
+    }
 
-	return false;
+        //lets see the death idle animation for 1s then we'll tell the player the enemy is dead
+    else if (animationID == ENEMY_ANIMATION_DEATH_IDLE && deathAnimationTimer > 2.0f)
+    {
+        animationID = ENEMY_ANIMATION_WALK;
+        deathAnimationTimer = 0.0f;
+        return true;
+    }
+
+    return false;
 }
 
 void Enemy::Reset()
@@ -189,10 +189,11 @@ EnemyFactory::EnemyFactory(IrrlichtDevice* d, FMOD::System* FMODSystem, const in
 	}
 
 	//different versions... add variation
-	FMODSystem->createSound("file:///android_asset/media/music/Moo_1.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect);
-	FMODSystem->createSound("file:///android_asset/media/music/Moo_2.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect1);
-	FMODSystem->createSound("file:///android_asset/media/music/Moo_3.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect2);
-	FMODSystem->createSound("file:///android_asset/media/music/Moo_4.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect3);
+	FMOD_RESULT r;
+    r = FMODSystem->createSound("file:///android_asset/media/music/Moo_1.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect);
+    r = FMODSystem->createSound("file:///android_asset/media/music/Moo_2.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect1);
+    r = FMODSystem->createSound("file:///android_asset/media/music/Moo_3.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect2);
+    r = FMODSystem->createSound("file:///android_asset/media/music/Moo_4.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &cowMooEffect3);
 	//FMODSystem->createChannelGroup("Moo", &channelGroupMoo);
 }
 

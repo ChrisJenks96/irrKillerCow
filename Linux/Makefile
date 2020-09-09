@@ -2,8 +2,7 @@
 #Linux irrlicht lib should be in the 'Linux' folder where this makefile is.
 
 IDIR = irrlicht-1.8.4/include/ -Ifmodstudioapi20011linux/api/core/inc/ -I../Windows/KillerCowAppWin/
-CC= g++ -Wall
-CFLAGS= -I$(IDIR)
+CC= g++ -Wall -O3 -I$(IDIR)
 
 ODIR= obj
 LDIR = -Lirrlicht-1.8.4/lib/Linux/ -Lfmodstudioapi20011linux/api/core/lib/x86/

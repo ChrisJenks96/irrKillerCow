@@ -26,7 +26,7 @@ using namespace gui;
 
 static FMOD::Sound* bigMooEffect;
 
-static bool firstDeath{ true };
+static bool firstDeath{true};
 
 class BigEnemy
 {

@@ -288,6 +288,17 @@ static void SaveLoadGame(bool s)
             fread(&savedCowsKilled, 4, 1, f);
             fclose(f);
         }
+
+        else
+        {
+            f = fopen("/data/data/com.example.killercowapp3/files/HS.DAT", "wb");
+            if (f){
+                cowsKilled = 0;
+                fwrite(&cowsKilled, 4, 1, f);
+                savedCowsKilled = cowsKilled;
+                fclose(f);
+            }
+        }
     }
 }
 
@@ -297,6 +308,9 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
     ISceneManager* smgr = device->getSceneManager();
 
     //loading in the ground
+
+    //IReadFile* file = createMemoryReadFile(mmemory, msize, mfilename, deleteMemoryWhenDropped);
+
     IAnimatedMesh* mesh = smgr->getMesh("media/base_plane/base_plane.obj");
     if (mesh)
     {
@@ -580,6 +594,24 @@ void LightningUpgrade(IrrlichtDevice* device)
     p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
+void GameReset()
+{
+    globalPlayerMunchFlag = false;
+    cowsXp = 0;
+    cowsXpLvl = 0;
+    cowsKilled = 0;
+    perkCount = 0;
+    p.SetHealth(100);
+    p.SetEnergy(100);
+    p.SetAnimationName("idle");
+    p.SetAnimationID(PLAYER_ANIMATION_IDLE);
+    p.ResetAnimationTimer();
+    ef->ForceReset();
+    cam->setPosition(vector3df(defaultCamPos));
+    cam->setTarget(p.GetPosition());
+    ef->SetEnemyCount(STARTING_ENEMIES);
+}
+
 void GameInit(IrrlichtDevice* device)
 {
     SaveLoadGame(false);
@@ -616,6 +648,8 @@ void GameInit(IrrlichtDevice* device)
     dirLight->getLightData().OuterCone = 100.0f;
     dirLight->getLightData().Falloff = 20.0f;
     dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
+
+    GameReset();
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
@@ -843,22 +877,6 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
     str += cowsMuggedOff;
     dimension2du s = device->getVideoDriver()->getScreenSize();
     font->draw(str.c_str(), core::rect<s32>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
-}
-
-void GameReset()
-{
-    globalPlayerMunchFlag = false;
-    cowsXp = 0;
-    cowsXpLvl = 0;
-    cowsKilled = 0;
-    perkCount = 0;
-    p.SetHealth(100);
-    p.SetEnergy(100);
-    p.SetAnimationName("idle");
-    ef->ForceReset();
-    cam->setPosition(vector3df(defaultCamPos));
-    cam->setTarget(p.GetPosition());
-    ef->SetEnemyCount(STARTING_ENEMIES);
 }
 
 /* Main application code. */
@@ -1275,7 +1293,6 @@ void android_main(android_app* app)
                                     xpMod += 2.4f;
                                     bossScene = false;
                                     enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
-                                    enemyOrb.GetNode()->setPosition(vector3df(-999.0f));
                                 }
                             }
                         }
@@ -1392,8 +1409,7 @@ void android_main(android_app* app)
                  heat_outside->draw();
                  if (p.GetEnergy() > 0)
                      heat_inside->draw();
-                if ((cowsXp > 100 && cowsXpLvl < 20) ||
-                    (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0))) {
+                if (cowsXp > 100) {
                     //change to x amount of buttons
                     int whichPerk = rand() % 2;
                     if (whichPerk == 1 && (perkCount % NUKE_CHANCE) != 0)
