@@ -1222,7 +1222,7 @@ int main()
 			{
 				if (state == STATE_GAME_OVER) {
 					dimension2du s = device->getVideoDriver()->getScreenSize();
-					stringw str = L"Cows Destroyed: ";
+					stringc str = "Cows Destroyed: ";
 					str += cowsKilled;
 					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Record: ";
