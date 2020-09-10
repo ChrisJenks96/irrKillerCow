@@ -24,7 +24,7 @@ extern int QUAD_SEGMENT_INCREMENT;
 class LightningSceneNode : public ISceneNode
 {
 public:
-    LightningSceneNode(scene::ISceneNode* parent, scene::ISceneManager* mgr, s32 id)
+    LightningSceneNode(scene::ISceneNode* parent, scene::ISceneManager* mgr, int id)
         : scene::ISceneNode(parent, mgr, id)
     {
 		ArkValueNegative = false;
@@ -78,7 +78,7 @@ public:
         }
 
         Box.reset(Vertices[0].Pos);
-        for (s32 i = 0; i < TOTAL_VERTS; i++)
+        for (int i = 0; i < TOTAL_VERTS; i++)
             Box.addInternalPoint(Vertices[i].Pos);
     }
 
@@ -140,12 +140,12 @@ public:
         return Box;
     }
 
-    virtual u32 getMaterialCount() const
+    virtual unsigned int getMaterialCount() const
     {
         return 1;
     }
 
-    virtual video::SMaterial& getMaterial(u32 i)
+    virtual video::SMaterial& getMaterial(unsigned int i)
     {
         return Material;
     }
@@ -156,7 +156,7 @@ public:
 		int indCounter;
         bool ArkValueNegative;
 		core::aabbox3d<f32> Box;
-        u16 indices[TOTAL_IND];
+        unsigned short indices[TOTAL_IND];
 		video::S3DVertex Vertices[TOTAL_VERTS];
 		video::SMaterial Material;
 };

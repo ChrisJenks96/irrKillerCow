@@ -1,11 +1,11 @@
-#include <irrlicht.h>
+#include <pspkernel.h>
 
-using namespace irr;
-using namespace core;
-using namespace scene;
-using namespace video;
-using namespace io;
-using namespace gui;
+/* Define the module info section */
+PSP_MODULE_INFO("KILLERCOWPSP", 0, 1, 1);
+/* Define the main thread's attribute value (optional) */
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
+
+#include <irrlicht.h>
 
 #include "Player.h"
 #include "Enemy.h"
@@ -475,7 +475,7 @@ void GameInit(IrrlichtDevice* device)
 	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
-void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
+void GameUpdate(IrrlichtDevice* device, int& MouseX, int& MouseXPrev, const float& frameDeltaTime)
 {
 	//rotate the player around
 	if (p.GetHealth() > 0)
@@ -487,7 +487,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
 		//THIS CAN BE JOYSTICK CODE... DO NOT DELETE!!!!!!!!!
 
 		//MouseX = er.GetMouseState().Position.X;
-		//s32 MouseXDiff = MouseX - MouseXPrev;
+		//int MouseXDiff = MouseX - MouseXPrev;
 		//p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
 		//MouseXPrev = MouseX;
 	}
@@ -677,7 +677,7 @@ void MenuFontDraw(IrrlichtDevice* device)
 {
 	stringw str = L"Click to Start Game";
 	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<s32>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
+	font->draw(str.c_str(), core::rect<int>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
 void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
@@ -685,7 +685,7 @@ void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
 	stringw str = L"X ";
 	str += cowsMuggedOff;
 	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<s32>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
+	font->draw(str.c_str(), core::rect<int>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 int Sys_Init()
@@ -695,7 +695,7 @@ int Sys_Init()
 
 	//VideoConfigInit();
 
-	device = createDevice(video::EDT_OPENGL, dimension2d<u32>(480, 272), 16,
+	device = createDevice(video::EDT_SOFTWARE, dimension2d<unsigned int>(480, 272), 16,
 		false, false, false, 0);
 
 	if (!device)
@@ -728,7 +728,7 @@ int Sys_Init()
 		}
 	}*/
 
-	StaticMeshesLoad(device);
+	//StaticMeshesLoad(device);
 
 	IMesh* mesh = smgr->getMesh("media/gui/earth.obj");
 	if (mesh)
@@ -738,8 +738,8 @@ int Sys_Init()
 
 		if (earthSceneNode)
 		{
-			earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
-			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			earthSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
 			earthSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/gui/earth.png"));
 			/*earthSceneNode->getMaterial(0).EmissiveColor = SColor(255, 10, 10, 10);
@@ -778,11 +778,8 @@ int main()
 		//always boot in menu state
 		int state = STATE_MENU;
 		MenuInit(device);
-		
-		u32 then = device->getTimer()->getTime();
-		ICursorControl* cursor = device->getCursorControl();
-		s32 MouseX = cursor->getPosition().X;
-		s32 MouseXPrev = MouseX;
+
+		unsigned int then = device->getTimer()->getTime();
 
 		IVideoDriver* driver = device->getVideoDriver();
 		IGUIEnvironment* gui = device->getGUIEnvironment();
@@ -790,7 +787,7 @@ int main()
 
 		//LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
 		//ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
-		ITexture* title_logo = driver->getTexture("media/gui/title.png");
+		/*ITexture* title_logo = driver->getTexture("media/gui/title.png");
 		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
 		ITexture* go_logo = driver->getTexture("media/gui/go.png");
 
@@ -821,16 +818,16 @@ int main()
 		nukeBtnToggle->setImage(driver->getTexture("media/gui/nuke_icon.png"));
 		nukeBtnToggle->setScaleImage(true);
 		nukeBtnToggle->setID(235);
-		nukeBtnToggle->setVisible(false);
+		nukeBtnToggle->setVisible(false);*/
 
 		while (device->run())
 		{
 			//time
-			const u32 now = device->getTimer()->getTime();
+			const unsigned int now = device->getTimer()->getTime();
 			const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 			then = now;
 
-			if (state == STATE_GAME)
+			/*if (state == STATE_GAME)
 			{
 				//fade back into the game
 				if (cutscene3FadeOut && transition_alpha != 0) {
@@ -1035,7 +1032,7 @@ int main()
 								}
 							}
 
-							else if (bossDead) 
+							else if (bossDead)
 							{
 								//be->DeathAnimation(frameDeltaTime, FMODSystem);
 								be->DeathAnimation(frameDeltaTime, NULL);
@@ -1144,17 +1141,16 @@ int main()
 					ufoSceneNode->setVisible(true);
 					state = STATE_GAME;
 				}
-			}
+			}*/
 
 			driver->beginScene(true, true, SColor(255, 0, 0, 0));
 			smgr->drawAll();
-			if (state == STATE_MENU) {
-				MenuFontDraw(device);
-					
-				//driver->draw2DImage(fmod_logo, vector2di(20, driver->getScreenSize().Height - fmod_logo->getSize().Height - 20));
-				driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
-				driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
-					(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
+			if (state == STATE_MENU)
+			{
+				//MenuFontDraw(device);	
+				//driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
+				//driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
+					//(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
@@ -1170,17 +1166,17 @@ int main()
 
 			if (state == STATE_GAME || state == STATE_GAME_OVER)
 			{
-				if (state == STATE_GAME_OVER) {
+				/*if (state == STATE_GAME_OVER) {
 					dimension2du s = device->getVideoDriver()->getScreenSize();
 					stringw str = L"Cows Destroyed: ";
 					str += cowsKilled;
-					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Record: ";
 					str += savedCowsKilled;
-					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Destroyed: ";
 					str += totalCowsKilled;
-					font->draw(str.c_str(), core::rect<s32>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
 
 					driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
 				}
@@ -1235,10 +1231,9 @@ int main()
 					str += (int)cowsXp;
 					str += L"/100 | LVL ";
 					str += cowsXpLvl;
-					font->draw(str.c_str(), core::rect<s32>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->draw(str.c_str(), core::rect<int>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
 
-					HighScoreFontDraw(device, cowsKilled);
-				}
+					HighScoreFontDraw(device, cowsKilled);*/
 			}
 
 			driver->endScene();

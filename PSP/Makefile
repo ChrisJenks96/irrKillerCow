@@ -13,8 +13,8 @@ ASFLAGS = $(CFLAGS)
 
 LIBDIR =
 LDFLAGS =
-LIBS= -lIrrlicht -lpspgum -lpspgu -lpsppower -lc -lglut -lSDL -lSDL_ttf -lSDL_image -lpspirkeyb -lpspwlan -lpsppower \
-	-lGL -lGLU -lfreetype -ljpeg -lpng -lz -lm -lSDL -lpspgu -lpsphprm -lpspaudio -lstdc++ -lpspvfpu -lpsprtc
+LIBS= -lIrrlicht -lSDL -lpspirkeyb -lpspgum -lpspgu -lGL -lGLU -lm -lpsppower \
+	-lfreetype -ljpeg -lpng -lpsphprm -lpspaudio -lstdc++ -lpspvfpu -lpsprtc 
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = Killer Cows

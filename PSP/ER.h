@@ -32,7 +32,7 @@ public:
     {
         if (event.EventType == EET_GUI_EVENT)
         {
-            s32 id = event.GUIEvent.Caller->getID();
+            int id = event.GUIEvent.Caller->getID();
 
             switch (event.GUIEvent.EventType)
             {
