@@ -487,6 +487,9 @@ void GameReset()
 	cowsKilled = 0;
 	perkCount = 0;
 	firstDeath = true;
+	currentLightningType = 0;
+	LightningUpgrade(device);
+
 	p.SetHealth(100);
 	p.SetEnergy(100);
 	p.SetAnimationName("idle");
