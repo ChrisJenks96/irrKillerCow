@@ -1,8 +1,8 @@
 #pragma once
 
-#include <irrlicht.h>
+#include <engine.h>
 
-using namespace irr;
+using namespace engine;
 using namespace core;
 using namespace scene;
 using namespace video;

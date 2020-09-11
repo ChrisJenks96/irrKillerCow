@@ -1,17 +1,17 @@
 #pragma once
 
-#include <irrlicht.h>
-#include <vector>
-#include "Helper.h"
-#include "Player.h"
-#include "Enemy.h"
-
-using namespace irr;
+#include <engine.h>
+using namespace engine;
 using namespace core;
 using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+
+#include <vector>
+#include "Helper.h"
+#include "Player.h"
+#include "Enemy.h"
 
 #define BASE_BOSS_HEALTH 55
 #define BASE_BOSS_HEIGHT -2.0f
@@ -51,9 +51,9 @@ public:
 		currAttackLength = 0.0f;
 		speed = 3.7f;
 	}
-	BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway);
+	BigEnemy(engineDevice* d, void* FMODSystem, const float distAway);
 	const vector3df& GetPosition() { return node->getPosition(); }
-	void LookAt(const vector3df p, const float offset);
+	void LookAt(vector3df p, const float offset);
 	void Reset();
 	void SetAttackAttrib(const float dist, const float length) { attackDistance = dist; attackLength = length; }
 	void Attack(const float dt);

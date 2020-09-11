@@ -1,6 +1,6 @@
 #include "Enemy.h"
 
-Enemy::Enemy(IrrlichtDevice* d, const float distAway)
+Enemy::Enemy(engineDevice* d, const float distAway)
 {
 	animationID = ENEMY_ANIMATION_IDLE;
 	deathAnimationTimer = 0.0f;
@@ -27,17 +27,17 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 		RandomPosition(distAway);
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("idle");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
 
-	scene::ITriangleSelector* selector = 0;
+	/*scene::ITriangleSelector* selector = 0;
 	selector = smgr->createTriangleSelector(node);
 	node->setTriangleSelector(selector);
-	selector->drop(); // We're done with this selector, so drop it now.
+	selector->drop(); // We're done with this selector, so drop it now.*/
 
 	soundEffectID = rand() % 3;
 }
@@ -63,9 +63,9 @@ void Enemy::RemoveHealth(int damage, const float dt)
 	}
 }
 
-void Enemy::LookAt(const vector3df p, const float offset)
+void Enemy::LookAt(vector3df p, const float offset)
 {
-	const vector3df toTarget = p - node->getPosition();
+	vector3df toTarget = p - node->getPosition();
 	node->setRotation((toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 }
 
@@ -188,7 +188,7 @@ Enemy::~Enemy()
 
 }
 
-EnemyFactory::EnemyFactory(IrrlichtDevice* d, void* FMODSystem, const int size, const int usable)
+EnemyFactory::EnemyFactory(engineDevice* d, void* FMODSystem, const int size, const int usable)
 {
 	playerGettingMunched = false;
 	//20 - 70

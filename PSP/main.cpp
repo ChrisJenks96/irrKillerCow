@@ -1,11 +1,38 @@
 #include <pspkernel.h>
+#include <engine.h>
+#include <pspctrl.h> 
 
-/* Define the module info section */
-PSP_MODULE_INFO("KILLERCOWPSP", 0, 1, 1);
-/* Define the main thread's attribute value (optional) */
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
+using namespace engine;
+using namespace core;
+using namespace scene;
+using namespace video;
+using namespace io;
+using namespace gui;
 
-#include <irrlicht.h>
+class MyEventReceiver : public IEventReceiver
+{
+public:
+	virtual bool OnEvent(SEvent event)
+	{
+		/*
+		If the button CIRCLE or SQUARE was left up, we get the position of the scene node,
+		and modify the Y coordinate a little bit. So if you press CIRCLE, the node
+		moves up, and if you press SQUARE it moves down.
+		*/
+
+		/*if (event.EventType == engine::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
+		{
+			switch (event.KeyInput.Key)
+			{
+			case KEY_RBUTTON:
+				return true;
+			case KEY_LBUTTON:
+				return true;
+			}
+		}*/
+		return false;
+	}
+};
 
 #include "Player.h"
 #include "Enemy.h"
@@ -53,19 +80,19 @@ float lightningWait = 0.0f;
 #define LIGHTNING_WAIT_MAX 0.7f
 
 //system stuff
-IrrlichtDevice* device;
+engineDevice* device;
 //MyEventReceiver er;
 ICameraSceneNode* cam;
-IMeshSceneNode* cutsceneGroundSceneNode[2];
+IAnimatedMeshSceneNode* cutsceneGroundSceneNode[2];
 IAnimatedMeshSceneNode* groundSceneNode;
-IMeshSceneNode* ufoSceneNode;
-IMeshSceneNode* ufoBladesSceneNode;
-IMeshSceneNode* cowHeadGameOver;
-ILightSceneNode* dirLight;
-ILightSceneNode* ufoSpotlight;
-IMeshSceneNode* earthSceneNode;
-ILightSceneNode* introCutsceneLight;
-vector3df intersectPoint = vector3df(0.0f);
+IAnimatedMeshSceneNode* ufoSceneNode;
+IAnimatedMeshSceneNode* ufoBladesSceneNode;
+IAnimatedMeshSceneNode* cowHeadGameOver;
+//ILightSceneNode* dirLight;
+//ILightSceneNode* ufoSpotlight;
+IAnimatedMeshSceneNode* earthSceneNode;
+//ILightSceneNode* introCutsceneLight;
+vector3df intersectPoint = vector3df(0.0f, 0.0f, 0.0f);
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
 EnemyOrb enemyOrb;
@@ -147,7 +174,7 @@ static void SaveLoadGame(bool s)
 	}
 }
 
-static void StaticMeshesLoad(IrrlichtDevice* device)
+static void StaticMeshesLoad(engineDevice* device)
 {
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
@@ -157,25 +184,25 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	if (mesh)
 	{
 		groundSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
-		groundSceneNode->setScale(vector3df(2.0f));
+		groundSceneNode->setScale(vector3df(2.0f, 2.0f, 2.0f));
 
 		if (groundSceneNode)
 		{
 			//groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
-			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
-			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			groundSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			groundSceneNode->setVisible(false);
 
-			groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
+			/*groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 			groundSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 			groundSceneNode->getMaterial(0).getTextureMatrix(0).setScale(18.0f);
 			groundSceneNode->getMaterial(2).setTexture(0, driver->getTexture("media/base_plane/hay.png"));
-			groundSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
+			groundSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));*/
 
-			scene::ITriangleSelector* selector = 0;
+			/*scene::ITriangleSelector* selector = 0;
 			selector = smgr->createTriangleSelector(groundSceneNode);
 			groundSceneNode->setTriangleSelector(selector);
-			selector->drop();
+			selector->drop();*/
 		}
 	}
 
@@ -185,19 +212,19 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			cutsceneGroundSceneNode[i] = smgr->addMeshSceneNode(mesh);
-			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f));
+			cutsceneGroundSceneNode[i] = smgr->addAnimatedMeshSceneNode(mesh);
+			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f, 20.0f, 20.0f));
 			if (groundSceneNode)
 			{
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
 				//ground texture id (0,0)
-				cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
+				/*cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
 				cutsceneGroundSceneNode[i]->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/hay.png"));
 				cutsceneGroundSceneNode[i]->getMaterial(2).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
-				cutsceneGroundSceneNode[i]->getMaterial(2).getTextureMatrix(0).setScale(vector3df(12.0f, 24.0f, 0.0f));
+				cutsceneGroundSceneNode[i]->getMaterial(2).getTextureMatrix(0).setScale(vector3df(12.0f, 24.0f, 0.0f));*/
 			}
 		}
 
@@ -209,29 +236,30 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	mesh = smgr->getMesh("media/ufo/ufo_crashed.obj");
 	if (mesh)
 	{
-		ufoSceneNode = smgr->addMeshSceneNode(mesh);
-		ufoSceneNode->setScale(vector3df(1.25f));
+		ufoSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
+		ufoSceneNode->setScale(vector3df(1.25f, 1.25f, 1.25f));
 
 		if (ufoSceneNode){
-			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
-			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			ufoSceneNode->setVisible(false);
-			ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
+			/*ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
 			ufoSceneNode->getMaterial(0).Shininess = 60;
 			ufoSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
 			ufoSceneNode->getMaterial(1).Shininess = 60;
 			ufoSceneNode->getMaterial(2).setTexture(0, driver->getTexture("media/ufo/seat.png"));
 			ufoSceneNode->getMaterial(3).setTexture(0, driver->getTexture("media/ufo/pod.png"));
 			ufoSceneNode->getMaterial(4).setTexture(0, driver->getTexture("media/ufo/body.png"));
-			ufoSceneNode->getMaterial(4).Shininess = 45;
+			ufoSceneNode->getMaterial(4).Shininess = 45;*/
+
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
-			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
+			/*ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
 			ufoSpotlight->getLightData().Type = video::ELT_SPOT;
 			ufoSpotlight->getLightData().InnerCone = 30.0f;
 			ufoSpotlight->getLightData().OuterCone = 70.0f;
 			ufoSpotlight->getLightData().Falloff = 20.0f;
-			ufoSpotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
+			ufoSpotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights*/
 		}
 	}
 
@@ -239,15 +267,15 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	mesh = smgr->getMesh("media/ufo/ufo_blades.obj");
 	if (mesh)
 	{
-		ufoBladesSceneNode = smgr->addMeshSceneNode(mesh);
-		ufoBladesSceneNode->setScale(vector3df(1.25f));
+		ufoBladesSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
+		ufoBladesSceneNode->setScale(vector3df(1.25f, 1.25f, 1.25f));
 		ufoBladesSceneNode->setVisible(false);
 
 		if (ufoBladesSceneNode)
 		{
-			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, true);
-			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			ufoBladesSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/blades.png"));
+			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
+			//ufoBladesSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/blades.png"));
 		}
 			
 		ufoBladesSceneNode->setParent(ufoSceneNode);
@@ -257,37 +285,37 @@ static void StaticMeshesLoad(IrrlichtDevice* device)
 	mesh = smgr->getMesh("media/cow/cow_head.obj");
 	if (mesh)
 	{
-		cowHeadGameOver = smgr->addMeshSceneNode(mesh);
-		cowHeadGameOver->setScale(vector3df(1.25f));
+		cowHeadGameOver = smgr->addAnimatedMeshSceneNode(mesh);
+		cowHeadGameOver->setScale(vector3df(1.25f, 1.25f, 1.25f));
 		cowHeadGameOver->setVisible(true);
 
 		if (cowHeadGameOver)
 		{
 			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
-			cowHeadGameOver->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
-			cowHeadGameOver->setPosition(vector3df(999.0f));
-			cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
-			cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));
-			cowHeadGameOver->getMaterial(2).setTexture(0, driver->getTexture("media/cow/cow.png"));
+			cowHeadGameOver->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
+			cowHeadGameOver->setPosition(vector3df(999.0f, 999.0f, 999.0f));
+			//cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
+			//cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));
+			//cowHeadGameOver->getMaterial(2).setTexture(0, driver->getTexture("media/cow/cow.png"));
 		}
 	}
 
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
-	cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture));
+	//cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture));
 	cutsceneLightning->setVisible(false);
 }
 
 //MUST ALWAYS LOAD CUTSCENEINIT FIRST... THIS BOOTS ALL OUR ASSETS FOR THE GAME
-void CutsceneInit(IrrlichtDevice* device)
+void CutsceneInit(engineDevice* device)
 {
 	earthSceneNode->setVisible(false);
 	//main ligth for the game
-	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
+	/*dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
 	dirLight->getLightData().Type = ELT_SPOT;
-	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
+	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights*/
 
-	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
+	//introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
 	
 	//load the non important static meshes for the scene with no behaviour
 
@@ -306,7 +334,7 @@ void CutsceneInit(IrrlichtDevice* device)
 	//FMODSystem->createSound("media/music/Lightning_Once.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &lightningCutsceneOnce);
 }
 
-void CutsceneUnload(IrrlichtDevice* device)
+void CutsceneUnload(engineDevice* device)
 {
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
@@ -315,9 +343,9 @@ void CutsceneUnload(IrrlichtDevice* device)
 	//lightningCutsceneOnce = 0;
 }
 
-void CutsceneUpdate(IrrlichtDevice* device, const float dt)
+void CutsceneUpdate(engineDevice* device, const float dt)
 {
-	dirLight->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 20.0f, 0.0f));
+	//dirLight->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 20.0f, 0.0f));
 	if (currentCutscene == 0)
 	{
 		//scroll the cutscene forward to give the illusion of the craft moving
@@ -366,7 +394,7 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 1)
 	{
-		ufoSpotlight->setPosition(vector3df(0.0f, 4.0f, 0.0f));
+		//ufoSpotlight->setPosition(vector3df(0.0f, 4.0f, 0.0f));
 		cam->setTarget(ufoSceneNode->getPosition());
 		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
 		//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
@@ -410,8 +438,8 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 
 	else if (currentCutscene == 2)
 	{
-		introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
-		ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
+		//introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
+		//ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 		//attach and move the camera onto the ufo for crashing landing cam
 		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
 		cam->setPosition(ufoSceneNode->getPosition() + cutscene3CamPosition);
@@ -426,17 +454,17 @@ void CutsceneUpdate(IrrlichtDevice* device, const float dt)
 	}
 }
 
-void LightningUpgrade(IrrlichtDevice* device)
+void LightningUpgrade(engineDevice* device)
 {
-	cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
-	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
+	//cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
+	//p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
 	shieldRate = 3.5f * (currentLightningType + 1);
 	p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
-void GameInit(IrrlichtDevice* device)
+void GameInit(engineDevice* device)
 {
 	SaveLoadGame(false);
 	ISceneManager* smgr = device->getSceneManager();
@@ -458,7 +486,7 @@ void GameInit(IrrlichtDevice* device)
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning->setParent(p.GetNode());
 	cutsceneLightning->setPosition(vector3df(-0.65f, 0.8f, 1.3f));
-	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE));
+	cutsceneLightning->setScale(vector3df(LIGHTNING_SCALE, LIGHTNING_SCALE, LIGHTNING_SCALE));
 	cutsceneLightning->setRotation(vector3df(-90.0f, 0.0f, 90.0f));
 
 	LightningUpgrade(device);
@@ -466,16 +494,16 @@ void GameInit(IrrlichtDevice* device)
 	cam->setPosition(defaultCamPos);
 	cam->setTarget(p.GetPosition());
 
-	dirLight->remove();
+	/*dirLight->remove();
 	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 80.0f, 0.0f), SColorf(0.0f, 0.4f, 0.4f, 1.0f), 160.0f);
 	dirLight->getLightData().Type = video::ELT_SPOT;
 	dirLight->getLightData().InnerCone = 30.0f;
 	dirLight->getLightData().OuterCone = 100.0f;
 	dirLight->getLightData().Falloff = 20.0f;
-	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
+	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));*/
 }
 
-void GameUpdate(IrrlichtDevice* device, int& MouseX, int& MouseXPrev, const float& frameDeltaTime)
+void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 {
 	//rotate the player around
 	if (p.GetHealth() > 0)
@@ -568,7 +596,7 @@ void GameUpdate(IrrlichtDevice* device, int& MouseX, int& MouseXPrev, const floa
 				QUAD_SEGMENT_INCREMENT = -10.0f;
 				cutsceneLightning->ArkUpdate(frameDeltaTime);
 				float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
-				cutsceneLightning->setScale(vector3df(lightningLength));
+				cutsceneLightning->setScale(vector3df(lightningLength, lightningLength, lightningLength));
 				cutsceneLightning->setVisible(true);
 				if (e != NULL) {
 					if (e->getID() == 667)
@@ -668,24 +696,24 @@ void GameUpdate(IrrlichtDevice* device, int& MouseX, int& MouseXPrev, const floa
 	}
 }
 
-void MenuInit(IrrlichtDevice* device)
+void MenuInit(engineDevice* device)
 {
-	font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
+	//font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
 }
 
-void MenuFontDraw(IrrlichtDevice* device)
+void MenuFontDraw(engineDevice* device)
 {
 	stringw str = L"Click to Start Game";
-	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<int>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
+	//dimension2du s = device->getVideoDriver()->getScreenSize();
+	//font->draw(str.c_str(), core::rect<int>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
-void HighScoreFontDraw(IrrlichtDevice* device, const int cowsMuggedOff)
+void HighScoreFontDraw(engineDevice* device, const int cowsMuggedOff)
 {
 	stringw str = L"X ";
 	str += cowsMuggedOff;
-	dimension2du s = device->getVideoDriver()->getScreenSize();
-	font->draw(str.c_str(), core::rect<int>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
+	//dimension2du s = device->getVideoDriver()->getScreenSize();
+	//font->draw(str.c_str(), core::rect<int>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 int Sys_Init()
@@ -695,13 +723,13 @@ int Sys_Init()
 
 	//VideoConfigInit();
 
-	device = createDevice(video::EDT_SOFTWARE, dimension2d<unsigned int>(480, 272), 16,
-		false, false, false, 0);
+	MyEventReceiver receiver;
+	device = createDevice(&receiver);
 
 	if (!device)
 		return -1;
 
-	device->setWindowCaption(L"Killer Cows");
+	//device->setWindowCaption(L"Killer Cows");
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
@@ -728,30 +756,26 @@ int Sys_Init()
 		}
 	}*/
 
-	//StaticMeshesLoad(device);
+	StaticMeshesLoad(device);
 
-	IMesh* mesh = smgr->getMesh("media/gui/earth.obj");
+	IAnimatedMesh* mesh = smgr->getMesh("media/gui/earth.obj");
 	if (mesh)
 	{
-		earthSceneNode = smgr->addMeshSceneNode(mesh);
-		earthSceneNode->setScale(vector3df(5.0f));
+		earthSceneNode = smgr->addAnimatedMeshSceneNode(mesh);
+		earthSceneNode->setScale(vector3df(5.0f, 5.0f, 5.0f));
 
 		if (earthSceneNode)
 		{
 			earthSceneNode->setMaterialFlag(EMF_LIGHTING, false);
 			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
-			earthSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/gui/earth.png"));
-			/*earthSceneNode->getMaterial(0).EmissiveColor = SColor(255, 10, 10, 10);
-			earthSceneNode->getMaterial(0).DiffuseColor = SColor(255, 10, 10, 10);
-			earthSceneNode->getMaterial(0).AmbientColor = SColor(255, 10, 10, 10);
-			earthSceneNode->getMaterial(0).SpecularColor = SColor(255, 10, 10, 10);*/
+			//earthSceneNode->setMaterialTexture(0, driver->getTexture("media/gui/earth.png"));
 		}
 	}
 
-	introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160), 2000.0f);
-	introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
-	introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
+	//introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160), 2000.0f);
+	//introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
+	//introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
 	return 0;
 }
 
@@ -771,8 +795,9 @@ void GameReset()
 	ef->SetEnemyCount(STARTING_ENEMIES);
 }
 
-int main()
+int engineMain(unsigned int argc, void *argv)
 {
+	//setupPSP();
 	if (Sys_Init() != -1)
 	{
 		//always boot in menu state
@@ -785,8 +810,6 @@ int main()
 		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
 
-		//LEGALLY HAVE TO DO THIS!!! DONT REMOVE...!!!!!
-		//ITexture* fmod_logo = driver->getTexture("media/gui/fmod.png");
 		/*ITexture* title_logo = driver->getTexture("media/gui/title.png");
 		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
 		ITexture* go_logo = driver->getTexture("media/gui/go.png");
@@ -827,7 +850,7 @@ int main()
 			const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 			then = now;
 
-			/*if (state == STATE_GAME)
+			if (state == STATE_GAME)
 			{
 				//fade back into the game
 				if (cutscene3FadeOut && transition_alpha != 0) {
@@ -875,7 +898,7 @@ int main()
 
 					else
 					{
-						GameUpdate(device, MouseX, MouseXPrev, frameDeltaTime);
+						GameUpdate(device, frameDeltaTime);
 						be->GetNodeDrill()->setRotation(be->GetNodeDrill()->getRotation() + vector3df(0.0f, 750.0f * frameDeltaTime, 0.0f));
 
 						if (p.GetHealth() <= 0) {
@@ -884,7 +907,7 @@ int main()
 							gameOverResetTimer += 1.0f * frameDeltaTime;
 							if (gameOverResetTimer > gameOverResetRate) {
 								SaveLoadGame(true);
-								cam->setPosition(vector3df(999.0f));
+								cam->setPosition(vector3df(999.0f, 999.0f, 999.0f));
 								cowHeadGameOver->setPosition(cam->getPosition() + vector3df(0.0f, 1.8f, 0.0f));
 								cowHeadGameOver->setRotation(vector3df(0.0f, 0.0f, -90.0f));
 								cam->setTarget(cowHeadGameOver->getPosition());
@@ -896,7 +919,7 @@ int main()
 								be->Reset();
 								bigEnemyStopShooting = true;
 								enemyOrb.GetNode()->setVisible(false);
-								be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+								be->GetNodeDirt()->setPosition(vector3df(-9.99f, -9.99f, -9.99f));
 								be->GetNode()->setVisible(false);
 								firstDeath = true;
 								enemyOrbSpeed = ENEMY_ORB_DEFAULT_SPEED;
@@ -934,8 +957,8 @@ int main()
 						}
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
-						//else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
+						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -1043,7 +1066,7 @@ int main()
 									be->Reset();
 									bigEnemyStopShooting = true;
 									enemyOrb.GetNode()->setVisible(false);
-									be->GetNodeDirt()->setPosition(vector3df(-9.99f));
+									be->GetNodeDirt()->setPosition(vector3df(-9.99f, -9.99f, -9.99f));
 									be->GetNode()->setVisible(false);
 									float dist = (defaultCamPos - cam->getPosition()).getLengthSQ();
 									if (dist < 0.2f)
@@ -1068,14 +1091,14 @@ int main()
 				if (playerNukeGoneOff)
 				{
 					p.GetOrb()->setPosition(p.GetPosition());
-					p.GetOrb()->setScale(p.GetOrb()->getScale() + vector3df(10.0f * frameDeltaTime));
+					p.GetOrb()->setScale(p.GetOrb()->getScale() + vector3df(10.0f * frameDeltaTime, 10.0f * frameDeltaTime, 10.0f * frameDeltaTime));
 
 					//DISABLE NUKE BUTTON EHRE TO PREVENT INF NUKES
 					if (p.GetOrb()->getScale().Y > 40.0f) {
 						playerNukeGoneOff = false;
 						ef->SetHealthAll(0);
 						ef->ForceDeath(xpMod, cowsXp, cowsKilled);
-						p.GetOrb()->setScale(vector3df(1.6f));
+						p.GetOrb()->setScale(vector3df(1.6f, 1.6f, 1.6f));
 						p.GetOrb()->setVisible(false);
 					}
 				}
@@ -1096,12 +1119,12 @@ int main()
 			else if (state == STATE_MENU)
 			{
 				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
-				//Common_Update();
+				
 				//FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
 				//channel->setVolume(0.8f);
 				//FMODSystem->update();
 
-				//if (er.GetMouseState().LeftButtonDown) {
+				//if (er.GetMouseState().LeftButtonDown){
 				if (true){
 					CutsceneInit(device);
 					//mainMenuMusic->release();
@@ -1141,14 +1164,14 @@ int main()
 					ufoSceneNode->setVisible(true);
 					state = STATE_GAME;
 				}
-			}*/
+			}
 
-			driver->beginScene(true, true, SColor(255, 0, 0, 0));
+			driver->beginScene(true, true, SColor(0, 0, 0, 0));
 			smgr->drawAll();
 			if (state == STATE_MENU)
 			{
 				//MenuFontDraw(device);	
-				//driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 40));
+				//driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 0));
 				//driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
 					//(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
 			}

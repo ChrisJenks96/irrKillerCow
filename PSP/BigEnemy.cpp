@@ -1,6 +1,6 @@
 #include "BigEnemy.h"
 
-BigEnemy::BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway)
+BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 {
 	animationTimer = 0.0f;
 	animationRate = 4.0f;
@@ -29,14 +29,14 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway)
 		RandomPosition(distAway, true);
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("attack_main");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 			node->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
 			//way to find out which enemy/bigenemy we killed
 			node->setID(667);
-			node->setScale(vector3df(1.2f));
+			node->setScale(vector3df(1.2f, 1.2f, 1.2f));
 		}
 	}
 
@@ -47,11 +47,11 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway)
 		if (node_cap)
 		{
 			node_cap->setRotation(vector3df(0.0f, 20.0f, 0.0f));
-			node_cap->setPosition(vector3df(999.0f));
-			node_cap->setScale(vector3df(2.1f));
-			node_cap->setMaterialFlag(EMF_LIGHTING, true);
+			node_cap->setPosition(vector3df(999.0f, 999.0f, 999.0f));
+			node_cap->setScale(vector3df(2.1f, 2.1f, 2.1f));
+			node_cap->setMaterialFlag(EMF_LIGHTING, false);
 			node_cap->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
-			node_cap->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node_cap->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node_cap->setMD2Animation("close_idle");
 			node_cap->setMaterialTexture(0, driver->getTexture("media/cow/big_cow_cap.png"));
 		}
@@ -63,11 +63,11 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway)
 		node_dirt = smgr->addAnimatedMeshSceneNode(mesh);
 		if (node_dirt)
 		{
-			node_dirt->setScale(vector3df(1.5f));
-			node_dirt->setMaterialFlag(EMF_LIGHTING, true);
+			node_dirt->setScale(vector3df(1.5f, 1.5f, 1.5f));
+			node_dirt->setMaterialFlag(EMF_LIGHTING, false);
 			node_dirt->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
-			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			node_dirt->setPosition(vector3df(999.0f));
+			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
+			node_dirt->setPosition(vector3df(999.0f, 999.0f, 999.0f));
 			node_dirt->setMaterialTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 		}
 	}
@@ -78,17 +78,17 @@ BigEnemy::BigEnemy(IrrlichtDevice* d, void* FMODSystem, const float distAway)
 		node_drill = smgr->addAnimatedMeshSceneNode(mesh, node_cap);
 		if (node_drill)
 		{
-			node_drill->setMaterialFlag(EMF_LIGHTING, true);
-			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node_drill->setMaterialFlag(EMF_LIGHTING, false);
+			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
 			node_drill->setMaterialTexture(0, driver->getTexture("media/cow/drill.png"));
 		}
 	}
 
-	scene::ITriangleSelector* selector = 0;
+	/*scene::ITriangleSelector* selector = 0;
 	selector = smgr->createTriangleSelector(node);
 	node->setTriangleSelector(selector);
-	selector->drop(); // We're done with this selector, so drop it now.
+	selector->drop(); // We're done with this selector, so drop it now.*/
 
 	//FMODSystem->createSound("media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
 	//FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);
@@ -157,9 +157,9 @@ void BigEnemy::RemoveHealth(int damage, const float dt)
 	}
 }
 
-void BigEnemy::LookAt(const vector3df p, const float offset)
+void BigEnemy::LookAt(vector3df p, const float offset)
 {
-	const vector3df toTarget = p - node->getPosition();
+	vector3df toTarget = p - node->getPosition();
 	node->setRotation((toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f)) * vector3df(0.0f, 1.0f, 0.0f));
 }
 

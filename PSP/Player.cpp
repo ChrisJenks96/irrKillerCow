@@ -1,6 +1,6 @@
 #include "Player.h"
 
-Player::Player(IrrlichtDevice* d)
+Player::Player(engineDevice* d)
 {
 	animationTimer = 0.0f;
 	nodeShieldY = 0.0f;
@@ -24,8 +24,8 @@ Player::Player(IrrlichtDevice* d)
 		node->setScale(vector3df(0.7f, 0.7f, 0.7f));
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, true);
-			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			node->setMaterialTexture(0, driver->getTexture("media/player/player.png"));
 			//set idle animation of player
@@ -40,12 +40,12 @@ Player::Player(IrrlichtDevice* d)
 	{
 		nodeShield = smgr->addAnimatedMeshSceneNode(mesh);
 		nodeShield->setParent(node);
-		nodeShield->setScale(vector3df(4.0f));
+		nodeShield->setScale(vector3df(4.0f, 4.0f, 4.0f));
 		if (nodeShield)
 		{
 			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
 			nodeShield->setMaterialFlag(EMF_LIGHTING, false);
-			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			nodeShield->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
 			nodeShield->setVisible(false);
@@ -57,12 +57,12 @@ Player::Player(IrrlichtDevice* d)
 	if (mesh)
 	{
 		orb = smgr->addAnimatedMeshSceneNode(mesh);
-		orb->setScale(vector3df(4.0f));
+		orb->setScale(vector3df(4.0f, 4.0f, 4.0f));
 		if (nodeShield)
 		{
 			orb->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
 			orb->setMaterialFlag(EMF_LIGHTING, false);
-			orb->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
+			orb->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			orb->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			orb->setMaterialTexture(0, driver->getTexture("media/shields/shield_red.png"));
 			orb->setVisible(false);
@@ -73,12 +73,12 @@ Player::Player(IrrlichtDevice* d)
 	orb->setPosition(node->getPosition());
 
 	//weapon firing lighting effect
-	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
+	/*weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
 	weaponFiringLight->getLightData().Type = ELT_SPOT;
 	weaponFiringLight->getLightData().InnerCone = 10.0f;
 	weaponFiringLight->getLightData().OuterCone = 20.0f;
 	weaponFiringLight->getLightData().Falloff = 0.0f;
-	WeaponFiringLightToggle(false);
+	WeaponFiringLightToggle(false);*/
 }
 
 void Player::AddEnergy(const float dt)
@@ -171,15 +171,15 @@ void Player::NotFiringAnimation(const float dt)
 
 void Player::ShieldUVScroll(const float dt)
 {
-	nodeShield->getMaterial(0).getTextureMatrix(0).setTextureTranslate(0, nodeShieldY);
+	//nodeShield->getMaterial(0).getTextureMatrix(0).setTextureTranslate(0, nodeShieldY);
 	nodeShieldY -= 1.2f * dt;
 	if (nodeShieldY >= 1.0f)
 		nodeShieldY = 0.0f;
 }
 
-ISceneNode* Player::Fire(IrrlichtDevice* device, const float length)
+ISceneNode* Player::Fire(engineDevice* device, const float length)
 {
-	WeaponFiringLightToggle(true);
+	/*WeaponFiringLightToggle(true);
 
 	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
@@ -191,7 +191,7 @@ ISceneNode* Player::Fire(IrrlichtDevice* device, const float length)
 	scene::ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeAndCollisionPointFromRay(
 		ray, intersection, hitTriangle, 0, 0);
 	if (selectedSceneNode)
-		return selectedSceneNode;
+		return selectedSceneNode;*/
 	return NULL;
 }
 
@@ -200,9 +200,9 @@ void Player::Idle()
 	WeaponFiringLightToggle(false);
 }
 
-void Player::LookAt(const vector3df p, const float offset)
+void Player::LookAt(vector3df p, const float offset)
 {
-	const vector3df toTarget = (p - node->getPosition()).normalize();
+	vector3df toTarget = (p - node->getPosition()).normalize();
 	node->setRotation(toTarget.getHorizontalAngle() + vector3df(0.0f, offset, 0.0f));
 }
 

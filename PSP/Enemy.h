@@ -1,19 +1,19 @@
 #pragma once
 
-#include <irrlicht.h>
+#include <engine.h>
+using namespace engine;
+using namespace core;
+using namespace scene;
+using namespace video;
+using namespace io;
+using namespace gui;
+
 #include <vector>
 #include "Helper.h"
 #include "Player.h"
 #include "LightningSceneNode.h"
 
 //#include <fmod.hpp>
-
-using namespace irr;
-using namespace core;
-using namespace scene;
-using namespace video;
-using namespace io;
-using namespace gui;
 
 #define BASE_COW_HEALTH 15
 
@@ -60,9 +60,9 @@ public:
 		speed = 2.1f;
 	}
 
-	Enemy(IrrlichtDevice* d, const float distAway);
+	Enemy(engineDevice* d, const float distAway);
 	const vector3df& GetPosition() { return node->getPosition(); }
-	void LookAt(const vector3df p, const float offset);
+	void LookAt(vector3df p, const float offset);
 	void Reset();
 	void SetAttackAttrib(const float dist, const float length) { attackDistance = dist; attackLength = length; }
 	void Attack(const float dt);
@@ -114,7 +114,7 @@ class EnemyFactory
 	friend class Enemy;
 	public:
 		EnemyFactory() { playerGettingMunched = false; }
-		EnemyFactory(IrrlichtDevice* d, void* FMODSystem, const int size, const int usable);
+		EnemyFactory(engineDevice* d, void* FMODSystem, const int size, const int usable);
 		void Update(Player& p, void* FMODSystem, bool& shieldActive, int& cowsKilled, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
 		void ResetEmission() { for (int i = 0; i < enemies.size(); i++) { enemies[i].GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }

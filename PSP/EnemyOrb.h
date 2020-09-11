@@ -1,10 +1,10 @@
 #pragma once
 
-#include <irrlicht.h>
 #include "Helper.h"
 #include "LightningSceneNode.h"
 
-using namespace irr;
+#include <engine.h>
+using namespace engine;
 using namespace core;
 using namespace scene;
 using namespace video;
@@ -19,7 +19,7 @@ class EnemyOrb
 {
 public:
 	EnemyOrb() {}
-	EnemyOrb(IrrlichtDevice* d);
+	EnemyOrb(engineDevice* d);
 	void Update(const float dt, bool resetQSI);
 	ISceneNode* GetNode() { return node; }
 	~EnemyOrb() {}

@@ -1,15 +1,15 @@
 #pragma once
 
-#include <irrlicht.h>
-#include "Helper.h"
-#include "EnemyOrb.h"
-
-using namespace irr;
+#include <engine.h>
+using namespace engine;
 using namespace core;
 using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+
+#include "Helper.h"
+#include "EnemyOrb.h"
 
 #define ANIMATION_FRAME_TO_TIME(x) x / 10.0f
 
@@ -38,10 +38,10 @@ class Player
 			energy = 100;
 			health= 100;
 		}
-		Player(IrrlichtDevice* d);
+		Player(engineDevice* d);
 		const vector3df& GetPosition() { return node->getPosition(); }
-		void LookAt(const vector3df p, const float offset);
-		ISceneNode* Fire(IrrlichtDevice* device, const float length);
+		void LookAt(vector3df p, const float offset);
+		ISceneNode* Fire(engineDevice* device, const float length);
 		void WeaponFiringLightToggle(bool t) { weaponFiringLight->setVisible(t); }
 		void ResetEmission() { node->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); }
 		void Idle();
@@ -67,7 +67,7 @@ class Player
 		bool MoveTowards(const vector3df p, const float dt);
 		void ShieldUVScroll(const float dt);
 		void ShieldToggle(bool t) {nodeShield->setVisible(t);}
-		void ShieldTexture(stringw st, IVideoDriver* driver) { nodeShield->setMaterialTexture(0, driver->getTexture(st));  }
+		void ShieldTexture(stringc st, IVideoDriver* driver) { nodeShield->setMaterialTexture(0, driver->getTexture(st.c_str()));  }
 		ISceneNode* GetOrb() { return orb; }
 
 		//animations

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <irrlicht.h>
-
-using namespace irr;
+#include <stdlib.h>
+#include <engine.h>
+using namespace engine;
 using namespace core;
 using namespace scene;
 using namespace video;
@@ -106,10 +106,10 @@ public:
                         randomOffset = -randomOffset;
                     }
 
-                    Vertices[i].Pos += vector3df(randomOffset);
-                    Vertices[i + 1].Pos += vector3df(randomOffset);
-                    Vertices[i + 2].Pos += vector3df(randomOffset);
-                    Vertices[i + 3].Pos += vector3df(randomOffset);
+                    Vertices[i].Pos += vector3df(randomOffset, randomOffset, randomOffset);
+                    Vertices[i + 1].Pos += vector3df(randomOffset, randomOffset, randomOffset);
+                    Vertices[i + 2].Pos += vector3df(randomOffset, randomOffset, randomOffset);
+                    Vertices[i + 3].Pos += vector3df(randomOffset, randomOffset, randomOffset);
                 }
 
                 arkVertInc += QUAD_SEGMENT_INCREMENT;
@@ -119,20 +119,20 @@ public:
         }
     }
 
-    virtual void OnRegisterSceneNode()
+    /*virtual void OnRegisterSceneNode()
     {
         if (IsVisible)
             SceneManager->registerNodeForRendering(this);
 
         ISceneNode::OnRegisterSceneNode();
-    }
+    }*/
 
     virtual void render()
     {
         video::IVideoDriver* driver = SceneManager->getVideoDriver();
         driver->setMaterial(Material);
         driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-        driver->drawVertexPrimitiveList(&Vertices[0], TOTAL_VERTS, &indices[0], indCounter / 3, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
+        //driver->drawVertexPrimitiveList(&Vertices[0], TOTAL_VERTS, &indices[0], indCounter / 3, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
     }
 
     virtual const core::aabbox3d<f32>& getBoundingBox() const
