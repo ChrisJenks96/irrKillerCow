@@ -570,8 +570,9 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 
 	//firing state for the player
 	bool leftPressedMidEffect = false;
-	//if (er.GetMouseState().LeftButtonDown) {
-	if (true){
+
+	/*if (er.GetMouseState().LeftButtonDown) 
+	{
 		if (p.GetEnergy() > 0)
 		{
 			if (lightningEffectMidTrigger) {
@@ -638,10 +639,10 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 				}
 			}
 		}
-	}
+	}*/
 
-	else
-	{
+	//else
+	//{
 		lightningWait = 0.0f;
 		p.NotFiringAnimation(frameDeltaTime);
 		p.Idle();
@@ -649,7 +650,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 		if (p.GetEnergy() <= 100)
 			p.AddEnergy(frameDeltaTime);
 		ef->ResetEmission();
-	}
+	//}
 
 	if (lightningEffectStartTrigger) {
 		//channel->isPlaying(&lightningEffectStartTrigger);
@@ -689,7 +690,6 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 
 	//rotate the blades around the craft
 	ufoBladesSceneNode->setRotation(ufoBladesSceneNode->getRotation() + vector3df(0.0f, 25.0f * frameDeltaTime, 0.0f));
-	//ef->Update(p, FMODSystem, GUIShieldToggle, cowsKilled, frameDeltaTime);
 	ef->Update(p, NULL, GUIShieldToggle, cowsKilled, frameDeltaTime);
 
 	if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
