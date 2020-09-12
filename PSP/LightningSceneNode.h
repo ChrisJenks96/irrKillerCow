@@ -80,6 +80,8 @@ public:
         Box.reset(Vertices[0].Pos);
         for (int i = 0; i < TOTAL_VERTS; i++)
             Box.addInternalPoint(Vertices[i].Pos);
+
+		SceneManager->registerNodeForRendering(this);
     }
 
     void ArkUpdate(const float dt)
@@ -133,6 +135,7 @@ public:
         driver->setMaterial(Material);
         driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
         //driver->drawVertexPrimitiveList(&Vertices[0], TOTAL_VERTS, &indices[0], indCounter / 3, video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
+		driver->drawIndexedTriangleList(&Vertices[0], TOTAL_VERTS, &indices[0], indCounter / 3);
     }
 
     virtual const core::aabbox3d<f32>& getBoundingBox() const

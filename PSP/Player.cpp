@@ -26,7 +26,7 @@ Player::Player(engineDevice* d)
 		{
 			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
-			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
+			node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			node->setMaterialTexture(0, driver->getTexture("media/player/player.png"));
 			//set idle animation of player
 			animationID = PLAYER_ANIMATION_IDLE;
@@ -73,12 +73,12 @@ Player::Player(engineDevice* d)
 	orb->setPosition(node->getPosition());
 
 	//weapon firing lighting effect
-	/*weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
-	weaponFiringLight->getLightData().Type = ELT_SPOT;
-	weaponFiringLight->getLightData().InnerCone = 10.0f;
-	weaponFiringLight->getLightData().OuterCone = 20.0f;
-	weaponFiringLight->getLightData().Falloff = 0.0f;
-	WeaponFiringLightToggle(false);*/
+	weaponFiringLight = smgr->addLightSceneNode(node, vector3df(0.0f, 10.0f, -70.0f), lightning_types[currentLightningType].col);
+	//weaponFiringLight->getLightData().Type = ELT_SPOT;
+	//weaponFiringLight->getLightData().InnerCone = 10.0f;
+	//weaponFiringLight->getLightData().OuterCone = 20.0f;
+	//weaponFiringLight->getLightData().Falloff = 0.0f;
+	WeaponFiringLightToggle(false);
 }
 
 void Player::AddEnergy(const float dt)
@@ -179,9 +179,9 @@ void Player::ShieldUVScroll(const float dt)
 
 ISceneNode* Player::Fire(engineDevice* device, const float length)
 {
-	/*WeaponFiringLightToggle(true);
+	WeaponFiringLightToggle(true);
 
-	core::line3d<f32> ray;
+	/*core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
 	ray.end = ray.start + SceneNodeDir(node) * length;
 	// Tracks the current intersection point with the level or a mesh
