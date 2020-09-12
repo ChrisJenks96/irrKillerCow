@@ -189,7 +189,7 @@ static void StaticMeshesLoad(engineDevice* device)
 		if (groundSceneNode)
 		{
 			//groundSceneNode->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
-			groundSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			groundSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			groundSceneNode->setVisible(false);
 
@@ -218,7 +218,7 @@ static void StaticMeshesLoad(engineDevice* device)
 			cutsceneGroundSceneNode[i]->setScale(vector3df(20.0f, 20.0f, 20.0f));
 			if (groundSceneNode)
 			{
-				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, false);
+				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_LIGHTING, true);
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
@@ -246,7 +246,7 @@ static void StaticMeshesLoad(engineDevice* device)
 		ufoSceneNode->setScale(vector3df(1.25f, 1.25f, 1.25f));
 
 		if (ufoSceneNode){
-			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			ufoSceneNode->setVisible(false);
 
@@ -262,12 +262,12 @@ static void StaticMeshesLoad(engineDevice* device)
 
 			//add the light to the bottom of the craft
 			//smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, -5.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 20.0f);
-			/*ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
-			ufoSpotlight->getLightData().Type = video::ELT_SPOT;
-			ufoSpotlight->getLightData().InnerCone = 30.0f;
-			ufoSpotlight->getLightData().OuterCone = 70.0f;
-			ufoSpotlight->getLightData().Falloff = 20.0f;
-			ufoSpotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights*/
+			ufoSpotlight = smgr->addLightSceneNode(ufoSceneNode, vector3df(0.0f, 1.0f, 0.0f), SColorf(0.0f, 1.0f, 1.0f, 1.0f), 30000.0f);
+			//ufoSpotlight->getLightData().Type = video::ELT_SPOT;
+			//ufoSpotlight->getLightData().InnerCone = 30.0f;
+			//ufoSpotlight->getLightData().OuterCone = 70.0f;
+			//ufoSpotlight->getLightData().Falloff = 20.0f;
+			ufoSpotlight->setRotation(vector3df(90.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 		}
 	}
 
@@ -281,7 +281,7 @@ static void StaticMeshesLoad(engineDevice* device)
 
 		if (ufoBladesSceneNode)
 		{
-			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			ufoBladesSceneNode->setMaterialTexture(0, driver->getTexture("media/ufo/blades.png"));
 			//ufoBladesSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/blades.png"));
@@ -300,7 +300,7 @@ static void StaticMeshesLoad(engineDevice* device)
 
 		if (cowHeadGameOver)
 		{
-			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
+			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, true);
 			cowHeadGameOver->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
 			cowHeadGameOver->setPosition(vector3df(999.0f, 999.0f, 999.0f));
 			cowHeadGameOver->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
@@ -321,11 +321,11 @@ void CutsceneInit(engineDevice* device)
 {
 	earthSceneNode->setVisible(false);
 	//main ligth for the game
-	/*dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
-	dirLight->getLightData().Type = ELT_SPOT;
-	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights*/
+	dirLight = device->getSceneManager()->addLightSceneNode(0, vector3df(0.0f, 10.0f, 0.0f), SColorf(0.0f, 0.85f, 0.85f, 1.0f), 0.0f);
+	//dirLight->getLightData().Type = ELT_SPOT;
+	dirLight->setRotation(vector3df(60.0f, 0.0f, 0.0f)); //default is (1,1,0) for directional lights
 
-	//introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
+	introCutsceneLight->getLightData().DiffuseColor = SColor(255, 140, 140, 140);
 	
 	//load the non important static meshes for the scene with no behaviour
 
@@ -355,7 +355,7 @@ void CutsceneUnload(engineDevice* device)
 
 void CutsceneUpdate(engineDevice* device, const float dt)
 {
-	//dirLight->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 20.0f, 0.0f));
+	dirLight->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 20.0f, 0.0f));
 	if (currentCutscene == 0)
 	{
 		//scroll the cutscene forward to give the illusion of the craft moving
@@ -404,10 +404,9 @@ void CutsceneUpdate(engineDevice* device, const float dt)
 
 	else if (currentCutscene == 1)
 	{
-		//ufoSpotlight->setPosition(vector3df(0.0f, 4.0f, 0.0f));
+		ufoSpotlight->setPosition(vector3df(0.0f, 4.0f, 0.0f));
 		cam->setTarget(ufoSceneNode->getPosition());
 		ufoSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
-		//ufoBladesSceneNode->setPosition(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, cutsceneUFOSpeed * dt));
 
 		cutscenespeedAccum += cutsceneUFOSpeed * dt;
 		//lightning strike point
@@ -448,8 +447,8 @@ void CutsceneUpdate(engineDevice* device, const float dt)
 
 	else if (currentCutscene == 2)
 	{
-		//introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
-		//ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
+		introCutsceneLight->getLightData().DiffuseColor = SColor(255, 18, 18, 18);
+		ufoSpotlight->setPosition(vector3df(0.0f, 1.0f, 0.0f));
 		//attach and move the camera onto the ufo for crashing landing cam
 		cam->setTarget(ufoSceneNode->getPosition() + vector3df(0.0f, 0.0f, 10.0f));
 		cam->setPosition(ufoSceneNode->getPosition() + cutscene3CamPosition);
@@ -502,13 +501,13 @@ void GameInit(engineDevice* device)
 	cam->setPosition(defaultCamPos);
 	cam->setTarget(p.GetPosition());
 
-	/*dirLight->remove();
+	dirLight->remove();
 	dirLight = smgr->addLightSceneNode(0, vector3df(0.0f, 80.0f, 0.0f), SColorf(0.0f, 0.4f, 0.4f, 1.0f), 160.0f);
-	dirLight->getLightData().Type = video::ELT_SPOT;
-	dirLight->getLightData().InnerCone = 30.0f;
-	dirLight->getLightData().OuterCone = 100.0f;
-	dirLight->getLightData().Falloff = 20.0f;
-	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));*/
+	//dirLight->getLightData().Type = video::ELT_SPOT;
+	//dirLight->getLightData().InnerCone = 30.0f;
+	//dirLight->getLightData().OuterCone = 100.0f;
+	//dirLight->getLightData().Falloff = 20.0f;
+	dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
 }
 
 void GameUpdate(engineDevice* device, const float& frameDeltaTime)
@@ -772,16 +771,16 @@ int Sys_Init()
 
 		if (earthSceneNode)
 		{
-			earthSceneNode->setMaterialFlag(EMF_LIGHTING, false);
+			earthSceneNode->setMaterialFlag(EMF_LIGHTING, true);
 			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
 			earthSceneNode->setMaterialTexture(0, driver->getTexture("media/gui/earth.png"));
 		}
 	}
 
-	//introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f), SColor(255, 160, 160, 160), 2000.0f);
-	//introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
-	//introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
+	introCutsceneLight = smgr->addLightSceneNode(0, vector3df(0.0f, 0.0f, 0.0f), SColor(255, 160, 160, 160), 2000.0f);
+	introCutsceneLight->getLightData().Type = ELT_DIRECTIONAL;
+	introCutsceneLight->setRotation(vector3df(60.0f, 0.0f, 0.0f));
 	return 0;
 }
 

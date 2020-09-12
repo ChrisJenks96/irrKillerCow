@@ -27,7 +27,7 @@ Enemy::Enemy(engineDevice* d, const float distAway)
 		RandomPosition(distAway);
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("idle");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));

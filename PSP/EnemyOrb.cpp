@@ -13,7 +13,7 @@ EnemyOrb::EnemyOrb(engineDevice* d)
 			node->setPosition(vector3df(999.0f, 999.0f, 999.0f));
 			node->setScale(vector3df(1.6f, 1.6f, 1.6f));
 			node->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			node->setMaterialTexture(0, driver->getTexture("media/power_orb/centre.png"));

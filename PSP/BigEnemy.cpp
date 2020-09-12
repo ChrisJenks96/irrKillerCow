@@ -29,7 +29,7 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 		RandomPosition(distAway, true);
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("attack_main");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
@@ -49,7 +49,7 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 			node_cap->setRotation(vector3df(0.0f, 20.0f, 0.0f));
 			node_cap->setPosition(vector3df(999.0f, 999.0f, 999.0f));
 			node_cap->setScale(vector3df(2.1f, 2.1f, 2.1f));
-			node_cap->setMaterialFlag(EMF_LIGHTING, false);
+			node_cap->setMaterialFlag(EMF_LIGHTING, true);
 			node_cap->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_cap->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node_cap->setMD2Animation("close_idle");
@@ -64,7 +64,7 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 		if (node_dirt)
 		{
 			node_dirt->setScale(vector3df(1.5f, 1.5f, 1.5f));
-			node_dirt->setMaterialFlag(EMF_LIGHTING, false);
+			node_dirt->setMaterialFlag(EMF_LIGHTING, true);
 			node_dirt->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node_dirt->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node_dirt->setPosition(vector3df(999.0f, 999.0f, 999.0f));
@@ -78,7 +78,7 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 		node_drill = smgr->addAnimatedMeshSceneNode(mesh, node_cap);
 		if (node_drill)
 		{
-			node_drill->setMaterialFlag(EMF_LIGHTING, false);
+			node_drill->setMaterialFlag(EMF_LIGHTING, true);
 			node_drill->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node_drill->setPosition(vector3df(0.0f, 2.5f, 0.0f));
 			node_drill->setMaterialTexture(0, driver->getTexture("media/cow/drill.png"));

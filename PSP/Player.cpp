@@ -24,7 +24,7 @@ Player::Player(engineDevice* d)
 		node->setScale(vector3df(0.7f, 0.7f, 0.7f));
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			//node->getMaterial(0).SpecularColor = SColor(255, 255, 255, 255);
 			node->setMaterialTexture(0, driver->getTexture("media/player/player.png"));
@@ -44,7 +44,7 @@ Player::Player(engineDevice* d)
 		if (nodeShield)
 		{
 			nodeShield->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
-			nodeShield->setMaterialFlag(EMF_LIGHTING, false);
+			nodeShield->setMaterialFlag(EMF_LIGHTING, true);
 			nodeShield->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			nodeShield->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			nodeShield->setMaterialTexture(0, driver->getTexture("media/shields/shield_blue.png"));
@@ -61,7 +61,7 @@ Player::Player(engineDevice* d)
 		if (nodeShield)
 		{
 			orb->setMaterialType(EMT_TRANSPARENT_ALPHA_CHANNEL);
-			orb->setMaterialFlag(EMF_LIGHTING, false);
+			orb->setMaterialFlag(EMF_LIGHTING, true);
 			orb->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			orb->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			orb->setMaterialTexture(0, driver->getTexture("media/shields/shield_red.png"));
