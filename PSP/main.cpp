@@ -127,6 +127,8 @@ float gameOverTimer = 0.0f;
 #define GAME_OVER_FINISH_TIME 1.0f
 
 SceCtrlData pad;
+int MouseX;
+int MouseXPrev;
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -513,16 +515,11 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 	//rotate the player around
 	if (p.GetHealth() > 0)
 	{
-		//intersectPoint = getSceneNodeFromScreenCoordinatesBB(device->getSceneManager(), device->getVideoDriver(), groundSceneNode->getTriangleSelector(), er.GetMouseState().Position, 0);
-		//const vector3df toTarget = intersectPoint - p.GetNode()->getPosition();
-		//p.GetNode()->setRotation((toTarget.getHorizontalAngle() - 4.0f) * vector3df(0.0f, 1.0f, 0.0f));
-		
-		//THIS CAN BE JOYSTICK CODE... DO NOT DELETE!!!!!!!!!
-
-		//MouseX = er.GetMouseState().Position.X;
-		//int MouseXDiff = MouseX - MouseXPrev;
-		//p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, (MouseXDiff * (100.0f * frameDeltaTime)), 0.0f));
-		//MouseXPrev = MouseX;
+		float tx = (pad.Lx - 128) / 127.0f; //(-128 / 128)
+		if (tx > 0)
+			p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, 100.0f * frameDeltaTime, 0.0f));
+		else if (tx < 0)
+			p.GetNode()->setRotation(p.GetNode()->getRotation() + vector3df(0.0f, -100.0f * frameDeltaTime, 0.0f));
 	}
 
 	enemyOrb.Update(frameDeltaTime, true);
@@ -568,78 +565,79 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 	//firing state for the player
 	bool leftPressedMidEffect = false;
 
-	/*if (er.GetMouseState().LeftButtonDown) 
-	{
-		if (p.GetEnergy() > 0)
-		{
-			if (lightningEffectMidTrigger) {
-				leftPressedMidEffect = true;
-				//channel->getMode(&currMode);
-				//if (currMode != FMOD_LOOP_NORMAL) {
-					//channel->setMode(FMOD_LOOP_NORMAL);
-					//channel->setLoopPoints(20, FMOD_TIMEUNIT_MS, 750, FMOD_TIMEUNIT_MS);
-				//}
-			}
-
-			else if (!lightningEffectStartTrigger) {
-				bool playing = false;
-				//channel->isPlaying(&playing);
-				if (!playing){
-					//channel->setMode(FMOD_LOOP_OFF);
-					//FMODSystem->playSound(lightningEffectStart, channelGroupLightning, false, &channel);
-					//channel->setVolume(0.3f);
-					//channel->setPaused(false);
-					lightningEffectStartTrigger = true;
+	if (pad.Buttons != 0) {
+		if (pad.Buttons & PSP_CTRL_CROSS) {
+			if (p.GetEnergy() > 0)
+			{
+				if (lightningEffectMidTrigger) {
+					leftPressedMidEffect = true;
+					//channel->getMode(&currMode);
+					//if (currMode != FMOD_LOOP_NORMAL) {
+						//channel->setMode(FMOD_LOOP_NORMAL);
+						//channel->setLoopPoints(20, FMOD_TIMEUNIT_MS, 750, FMOD_TIMEUNIT_MS);
+					//}
 				}
-				
-			}
 
-			p.FiringAnimation(frameDeltaTime);
-			ISceneNode* e = p.Fire(device, 25.0f * (p.GetEnergy() / 100.0f));
-			lightningWait += 1.0f * frameDeltaTime;
-			if (lightningWait > 0.7f) {
-				p.RemoveEnergy(frameDeltaTime);
-				QUAD_SEGMENT_INCREMENT = -10.0f;
-				cutsceneLightning->ArkUpdate(frameDeltaTime);
-				float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
-				cutsceneLightning->setScale(vector3df(lightningLength, lightningLength, lightningLength));
-				cutsceneLightning->setVisible(true);
-				if (e != NULL) {
-					if (e->getID() == 667)
-					{
-						be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-						if (be->GetHealth() <= 0) {
-							if (!bossDead) {
-								cam->setTarget(p.GetPosition());
-								be->SetAnimationID(BIG_BOSS_ANIM_DEATH);
-							}
-
-							bossDead = true;
-						}
+				else if (!lightningEffectStartTrigger) {
+					bool playing = false;
+					//channel->isPlaying(&playing);
+					if (!playing) {
+						//channel->setMode(FMOD_LOOP_OFF);
+						//FMODSystem->playSound(lightningEffectStart, channelGroupLightning, false, &channel);
+						//channel->setVolume(0.3f);
+						//channel->setPaused(false);
+						lightningEffectStartTrigger = true;
 					}
-					else
-					{
-						Enemy* enemy = ef->FindEnemy(e);
-						if (enemy != NULL) {
-							enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-							enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
-							if (enemy->GetHealth() <= 0) {
-								if (!enemy->isDeathAnimationTrigger()) {
-									cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
-									cowsKilled += 1;
+
+				}
+
+				p.FiringAnimation(frameDeltaTime);
+				ISceneNode* e = p.Fire(device, 25.0f * (p.GetEnergy() / 100.0f));
+				lightningWait += 1.0f * frameDeltaTime;
+				if (lightningWait > 0.7f) {
+					p.RemoveEnergy(frameDeltaTime);
+					QUAD_SEGMENT_INCREMENT = -10.0f;
+					cutsceneLightning->ArkUpdate(frameDeltaTime);
+					float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
+					cutsceneLightning->setScale(vector3df(lightningLength, lightningLength, lightningLength));
+					cutsceneLightning->setVisible(true);
+					if (e != NULL) {
+						if (e->getID() == 667)
+						{
+							be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+							if (be->GetHealth() <= 0) {
+								if (!bossDead) {
+									cam->setTarget(p.GetPosition());
+									be->SetAnimationID(BIG_BOSS_ANIM_DEATH);
 								}
 
-								enemy->SetDeathAnimationTrigger(true);
+								bossDead = true;
+							}
+						}
+						else
+						{
+							Enemy* enemy = ef->FindEnemy(e);
+							if (enemy != NULL) {
+								enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
+								enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+								if (enemy->GetHealth() <= 0) {
+									if (!enemy->isDeathAnimationTrigger()) {
+										cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
+										cowsKilled += 1;
+									}
+
+									enemy->SetDeathAnimationTrigger(true);
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-	}*/
-
-	//else
-	//{
+	}
+	
+	else
+	{
 		lightningWait = 0.0f;
 		p.NotFiringAnimation(frameDeltaTime);
 		p.Idle();
@@ -647,7 +645,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 		if (p.GetEnergy() <= 100)
 			p.AddEnergy(frameDeltaTime);
 		ef->ResetEmission();
-	//}
+	}
 
 	if (lightningEffectStartTrigger) {
 		//channel->isPlaying(&lightningEffectStartTrigger);
@@ -733,6 +731,8 @@ int Sys_Init()
 
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
+	MouseX = pad.Lx;
+	MouseXPrev = MouseX;
 
 	if (!device)
 		return -1;
