@@ -9,31 +9,6 @@ using namespace video;
 using namespace io;
 using namespace gui;
 
-class MyEventReceiver : public IEventReceiver
-{
-public:
-	virtual bool OnEvent(SEvent event)
-	{
-		/*
-		If the button CIRCLE or SQUARE was left up, we get the position of the scene node,
-		and modify the Y coordinate a little bit. So if you press CIRCLE, the node
-		moves up, and if you press SQUARE it moves down.
-		*/
-
-		/*if (event.EventType == engine::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
-		{
-			switch (event.KeyInput.Key)
-			{
-			case KEY_RBUTTON:
-				return true;
-			case KEY_LBUTTON:
-				return true;
-			}
-		}*/
-		return false;
-	}
-};
-
 #include "Player.h"
 #include "Enemy.h"
 #include <time.h>
@@ -80,8 +55,8 @@ float lightningWait = 0.0f;
 #define LIGHTNING_WAIT_MAX 0.7f
 
 //system stuff
+static int state = 0;
 engineDevice* device;
-//MyEventReceiver er;
 ICameraSceneNode* cam;
 IAnimatedMeshSceneNode* cutsceneGroundSceneNode[2];
 IAnimatedMeshSceneNode* groundSceneNode;
@@ -150,6 +125,29 @@ int currentCutscene = 0;
 float gameOverTimer = 0.0f;
 #define GAME_OVER_FADE_OUT_TIME 3.0f
 #define GAME_OVER_FINISH_TIME 1.0f
+
+SceCtrlData pad;
+
+class MyEventReceiver : public IEventReceiver
+{
+public:
+	virtual bool OnEvent(SEvent event)
+	{
+		if (event.EventType == engine::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
+		{
+			switch (event.KeyInput.Key)
+			{
+			case KEY_CROSS:
+				return true;
+			case KEY_RBUTTON:
+				return true;
+			case KEY_LBUTTON:
+				return true;
+			}
+		}
+		return false;
+	}
+};
 
 static void SaveLoadGame(bool s)
 {
@@ -733,6 +731,9 @@ int Sys_Init()
 	MyEventReceiver receiver;
 	device = createDevice(&receiver);
 
+	sceCtrlSetSamplingCycle(0);
+	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
+
 	if (!device)
 		return -1;
 
@@ -806,7 +807,7 @@ int engineMain(unsigned int argc, void *argv)
 	if (Sys_Init() != -1)
 	{
 		//always boot in menu state
-		int state = STATE_MENU;
+		state = STATE_MENU;
 		MenuInit(device);
 
 		unsigned int then = device->getTimer()->getTime();
@@ -854,6 +855,8 @@ int engineMain(unsigned int argc, void *argv)
 			const unsigned int now = device->getTimer()->getTime();
 			const f32 frameDeltaTime = (f32)(now - then) / 1000.f; // Time in seconds
 			then = now;
+
+			sceCtrlReadBufferPositive(&pad, 1);
 
 			if (state == STATE_GAME)
 			{
@@ -1130,19 +1133,25 @@ int engineMain(unsigned int argc, void *argv)
 				//FMODSystem->update();
 
 				//if (er.GetMouseState().LeftButtonDown){
-				if (true){
-					CutsceneInit(device);
-					//mainMenuMusic->release();
-					state = STATE_INTRO_CUTSCENE;
+				if (pad.Buttons != 0) {
+					if (pad.Buttons & PSP_CTRL_CROSS) {
+						CutsceneInit(device);
+						//mainMenuMusic->release();
+						state = STATE_INTRO_CUTSCENE;
+					}
 				}
 			}
 
 			else if (state == STATE_GAME_OVER)
 			{
 				//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
-				if (!gameOverToReset && true)//er.GetMouseState().LeftButtonDown)
-					gameOverToReset = true;
-
+				if (pad.Buttons != 0) {
+					if (pad.Buttons & PSP_CTRL_CROSS) {
+						if (!gameOverToReset)
+							gameOverToReset = true;
+					}
+				}
+				
 				if (gameOverToReset) {
 					gameOverTimer += 1.0f * frameDeltaTime;
 					if (gameOverTimer > GAME_OVER_FINISH_TIME) {
