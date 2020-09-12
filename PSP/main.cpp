@@ -336,7 +336,6 @@ void CutsceneInit(engineDevice* device)
 
 	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
 	ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
-	//ufoBladesSceneNode->setPosition(vector3df(0.0f, 40.0f, 0.0f));
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 	cam->setPosition(cutscene1CamPosition);
 	cam->setTarget(ufoSceneNode->getPosition());
@@ -349,8 +348,6 @@ void CutsceneUnload(engineDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(false);
 	cutsceneGroundSceneNode[1]->setVisible(false);
 	groundSceneNode->setVisible(true);
-	//lightningCutsceneOnce->release();
-	//lightningCutsceneOnce = 0;
 }
 
 void CutsceneUpdate(engineDevice* device, const float dt)
@@ -470,7 +467,7 @@ void LightningUpgrade(engineDevice* device)
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
 	shieldRate = 3.5f * (currentLightningType + 1);
-	//p.LightningChangeCol(lightning_types[currentLightningType].col);
+	p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
 void GameInit(engineDevice* device)
@@ -816,11 +813,11 @@ int engineMain(unsigned int argc, void *argv)
 		IGUIEnvironment* gui = device->getGUIEnvironment();
 		ISceneManager* smgr = device->getSceneManager();
 
-		/*ITexture* title_logo = driver->getTexture("media/gui/title.png");
+		ITexture* title_logo = driver->getTexture("media/gui/title.png");
 		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
 		ITexture* go_logo = driver->getTexture("media/gui/go.png");
 
-		IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
+		/*IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
 		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
 		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(85, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
@@ -966,7 +963,7 @@ int engineMain(unsigned int argc, void *argv)
 
 						//boss scene (he will always be around and never trully killed but you must keep fighting him
 						else if ((cowsKilled != 0 && (cowsKilled % 25) == 0) && !bossScene)
-						//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
+							//else if ((cowsKilled == 0 || cowsKilled == 3) && !bossScene)
 						{
 							ef->SetVisible(false);
 							enemyOrb.GetNode()->setVisible(true);
@@ -1065,7 +1062,6 @@ int engineMain(unsigned int argc, void *argv)
 
 							else if (bossDead)
 							{
-								//be->DeathAnimation(frameDeltaTime, FMODSystem);
 								be->DeathAnimation(frameDeltaTime, NULL);
 								vector3df p1 = (defaultCamPos - cam->getPosition()).normalize() * (ZOOM_INTO_BOSS_DEAD_SPEED * frameDeltaTime);
 								cam->setPosition(cam->getPosition() + p1);
@@ -1127,12 +1123,11 @@ int engineMain(unsigned int argc, void *argv)
 			else if (state == STATE_MENU)
 			{
 				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
-				
+
 				//FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
 				//channel->setVolume(0.8f);
 				//FMODSystem->update();
 
-				//if (er.GetMouseState().LeftButtonDown){
 				if (pad.Buttons != 0) {
 					if (pad.Buttons & PSP_CTRL_CROSS) {
 						CutsceneInit(device);
@@ -1144,14 +1139,13 @@ int engineMain(unsigned int argc, void *argv)
 
 			else if (state == STATE_GAME_OVER)
 			{
-				//cam->setTarget(ef->GetNearestEnemy(p)->GetPosition());
 				if (pad.Buttons != 0) {
 					if (pad.Buttons & PSP_CTRL_CROSS) {
 						if (!gameOverToReset)
 							gameOverToReset = true;
 					}
 				}
-				
+
 				if (gameOverToReset) {
 					gameOverTimer += 1.0f * frameDeltaTime;
 					if (gameOverTimer > GAME_OVER_FINISH_TIME) {
@@ -1185,9 +1179,9 @@ int engineMain(unsigned int argc, void *argv)
 			if (state == STATE_MENU)
 			{
 				//MenuFontDraw(device);	
-				//driver->draw2DImage(title_logo, vector2di((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 0));
-				//driver->draw2DImage(ag_logo, vector2di((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
-					//(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
+				driver->draw2DImage(title_logo, position2d<s32>((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 0));
+				driver->draw2DImage(ag_logo, position2d<s32>((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
+					(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
@@ -1203,9 +1197,9 @@ int engineMain(unsigned int argc, void *argv)
 
 			if (state == STATE_GAME || state == STATE_GAME_OVER)
 			{
-				/*if (state == STATE_GAME_OVER) {
-					dimension2du s = device->getVideoDriver()->getScreenSize();
-					stringw str = L"Cows Destroyed: ";
+				if (state == STATE_GAME_OVER)
+				{
+					/*stringw str = L"Cows Destroyed: ";
 					str += cowsKilled;
 					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Record: ";
@@ -1213,21 +1207,21 @@ int engineMain(unsigned int argc, void *argv)
 					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Destroyed: ";
 					str += totalCowsKilled;
-					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);*/
 
-					driver->draw2DImage(go_logo, vector2di((s.Width / 2) - (go_logo->getSize().Width / 2), 20));
+					driver->draw2DImage(go_logo, position2d<s32>(driver->getScreenSize().Width / 2 - (go_logo->getSize().Width / 2), 20));
 				}
 
 				else
 				{
-					health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
+					/*health_inside->setMaxSize(dimension2du(p.HealthGUIValueUpdate(), 10));
 					heat_inside->setMaxSize(dimension2du(p.EnergyGUIValueUpdate(), 10));
 					health_outside->draw();
 					if (p.GetHealth() > 0)
 						health_inside->draw();
 					heat_outside->draw();
 					if (p.GetEnergy() > 0)
-						heat_inside->draw();
+						heat_inside->draw();*/
 					if ((cowsXp > 100 && cowsXpLvl < 20) || (cowsXp > 100 && cowsXpLvl >= 20 && (cowsXpLvl % 3 == 0)))
 					{
 						//change to x amount of buttons
@@ -1254,7 +1248,7 @@ int engineMain(unsigned int argc, void *argv)
 						cowsXpLvl += 1;
 					}
 
-					unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+					/*unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
 					unlock_outside->draw();
 					unlock_inside->draw();
 					if (shieldBtnToggle->isVisible())
@@ -1271,6 +1265,7 @@ int engineMain(unsigned int argc, void *argv)
 					font->draw(str.c_str(), core::rect<int>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
 
 					HighScoreFontDraw(device, cowsKilled);*/
+				}
 			}
 
 			driver->endScene();
