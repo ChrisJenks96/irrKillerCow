@@ -77,7 +77,6 @@ public:
 	int GetAttackDamage() { return attackDamage; }
 	void SetAttackDamage(int a) { attackDamage = a; }
 	bool GetAttackStrikeDone() { return attackStrikeDone; }
-	ISceneNode* GetNode() { return node; }
 	void SetAttackStrikeDone(int a) { attackStrikeDone = a; }
 	void SetAnimationName(const char* name) { node->setMD2Animation(name); }
 	void SetAnimationID(int i) { animationID = i; }
@@ -87,6 +86,7 @@ public:
 	void SetSpeed(float s) { speed = s; }
 	float GetSpeed() { return speed; }
 	float GetCurrentAttackLength() { return currAttackLength; }
+	IAnimatedMeshSceneNode* GetNode() { return node; }
 	~Enemy();
 private:
 	//FMOD::Channel* channel;
@@ -117,8 +117,17 @@ class EnemyFactory
 		EnemyFactory(engineDevice* d, void* FMODSystem, const int size, const int usable);
 		void Update(Player& p, void* FMODSystem, bool& shieldActive, int& cowsKilled, const float dt);
 		Enemy* FindEnemy(ISceneNode* s);
-		void ResetEmission() { for (int i = 0; i < enemies.size(); i++) { enemies[i].GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); } }
+		void ResetEmission() { for (int i = 0; i < enemies.size(); i++) { enemies[i].GetNode()->getMaterial(0).EmissiveColor = SColor(0, 0, 0, 0); } }
 		void AddSpeed(float s) { for (int i = 0; i < enemies.size(); i++) { enemies[i].SetSpeed(enemies[i].GetSpeed() + s); } }
+		//PSP SPEC FUNCTION... DO NOT PUT THIS ON ANY OTHER PLATFORM!!!!
+		ISceneNode* HitEnemy(const vector3df p, const float hit_dist){
+			for (int i = 0; i < enemies.size(); i++) { 
+				if (p.getDistanceFrom(enemies[i].GetPosition()) < hit_dist)
+					return enemies[i].GetNode();
+			}
+
+			return NULL;
+		}
 		void ForceReset();
 		void SetHealthAll(int health) { for (int i = 0; i < enemies.size(); i++) { enemies[i].SetHealth(health); } }
 		void ForceDeath(float& xpMod, float& cowsXp, int& cowsKilled);
@@ -128,6 +137,7 @@ class EnemyFactory
 		void SetPlayerGettingMunched(bool p) { playerGettingMunched = p; }
 		void SetEnemyCount(int c);
 		int GetEnemyCount() { return usable; }
+		Enemy* GetEnemy(int id) { return &enemies[id]; }
 		~EnemyFactory();
 	private:
 		//how many cows are munching us

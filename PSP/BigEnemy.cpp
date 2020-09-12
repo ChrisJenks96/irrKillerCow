@@ -33,7 +33,7 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("attack_main");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
-			node->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+			node->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0);
 			//way to find out which enemy/bigenemy we killed
 			node->setID(667);
 			node->setScale(vector3df(1.2f, 1.2f, 1.2f));

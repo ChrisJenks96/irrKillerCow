@@ -589,7 +589,11 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 				}
 
 				p.FiringAnimation(frameDeltaTime);
-				ISceneNode* e = p.Fire(device, 25.0f * (p.GetEnergy() / 100.0f));
+				p.WeaponFiringLightToggle(true);
+
+				float length = 25.0f * (p.GetEnergy() / 100.0f);
+				vector3df dstFakeRay = p.GetPosition() + SceneNodeDir(p.GetNode()) * length;
+;				ISceneNode* e = ef->HitEnemy(dstFakeRay, 1.0f);
 				lightningWait += 1.0f * frameDeltaTime;
 				if (lightningWait > 0.7f) {
 					p.RemoveEnergy(frameDeltaTime);
@@ -617,7 +621,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 							Enemy* enemy = ef->FindEnemy(e);
 							if (enemy != NULL) {
 								enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
-								enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+								enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0);
 								if (enemy->GetHealth() <= 0) {
 									if (!enemy->isDeathAnimationTrigger()) {
 										cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
@@ -687,7 +691,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 
 	if (ef->isPlayerGettingMunched() && !globalPlayerMunchFlag){
 		globalPlayerMunchFlag = true;
-		p.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
+		p.GetNode()->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0);
 	}
 
 	else if (globalPlayerMunchFlag){

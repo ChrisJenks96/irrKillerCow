@@ -31,7 +31,7 @@ Enemy::Enemy(engineDevice* d, const float distAway)
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("idle");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
-			node->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0);
+			node->getMaterial(0).EmissiveColor = SColor(0, 0, 0, 0);
 		}
 	}
 
