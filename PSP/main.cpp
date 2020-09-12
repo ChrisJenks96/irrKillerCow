@@ -88,10 +88,10 @@ IAnimatedMeshSceneNode* groundSceneNode;
 IAnimatedMeshSceneNode* ufoSceneNode;
 IAnimatedMeshSceneNode* ufoBladesSceneNode;
 IAnimatedMeshSceneNode* cowHeadGameOver;
-//ILightSceneNode* dirLight;
-//ILightSceneNode* ufoSpotlight;
+ILightSceneNode* dirLight;
+ILightSceneNode* ufoSpotlight;
 IAnimatedMeshSceneNode* earthSceneNode;
-//ILightSceneNode* introCutsceneLight;
+ILightSceneNode* introCutsceneLight;
 vector3df intersectPoint = vector3df(0.0f, 0.0f, 0.0f);
 //custom scenenode
 LightningSceneNode* cutsceneLightning;
@@ -194,7 +194,7 @@ static void StaticMeshesLoad(engineDevice* device)
 			groundSceneNode->setVisible(false);
 
 			//groundSceneNode->setMaterialTexture(0, driver->getTexture("media/base_plane/dirt.png"));
-			//groundSceneNode->setMaterialTexture(1, driver->getTexture("media/base_plane/grass_dirt.png"));
+			groundSceneNode->setMaterialTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 			/*groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 			groundSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 			groundSceneNode->getMaterial(0).getTextureMatrix(0).setScale(18.0f);
@@ -312,7 +312,7 @@ static void StaticMeshesLoad(engineDevice* device)
 
 	QUAD_SEGMENT_INCREMENT = -10.0f;
 	cutsceneLightning = new LightningSceneNode(smgr->getRootSceneNode(), smgr, 666);
-	//cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture));
+	cutsceneLightning->setMaterialTexture(0, driver->getTexture(lightning_types[currentLightningType].texture.c_str()));
 	cutsceneLightning->setVisible(false);
 }
 
@@ -467,12 +467,11 @@ void CutsceneUpdate(engineDevice* device, const float dt)
 void LightningUpgrade(engineDevice* device)
 {
 	cutsceneLightning->setMaterialTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture.c_str()));
-	//cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
 	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
 	shieldRate = 3.5f * (currentLightningType + 1);
-	p.LightningChangeCol(lightning_types[currentLightningType].col);
+	//p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
 void GameInit(engineDevice* device)
@@ -481,10 +480,8 @@ void GameInit(engineDevice* device)
 	ISceneManager* smgr = device->getSceneManager();
 
 	p = Player(device);
-	//ef = new EnemyFactory(device, FMODSystem, MAX_COWS, STARTING_ENEMIES);
 	ef = new EnemyFactory(device, NULL, MAX_COWS, STARTING_ENEMIES);
 	ef->SetEnemyCount(STARTING_ENEMIES);
-	//be = new BigEnemy(device, FMODSystem, 12.0f);
 	be = new BigEnemy(device, NULL, 12.0f);
 	enemyOrb = EnemyOrb(device);
 	be->GetNode()->setVisible(false);
@@ -1117,8 +1114,8 @@ int engineMain(unsigned int argc, void *argv)
 			{
 				if (ufoSceneNode->getPosition().Y < 0.0f) {
 					CutsceneUnload(device);
-					state = STATE_GAME;
 					GameInit(device);
+					state = STATE_GAME;
 				}
 
 				else
