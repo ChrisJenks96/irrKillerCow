@@ -121,13 +121,14 @@ public:
         }
     }
 
-    /*virtual void OnRegisterSceneNode()
-    {
-        if (IsVisible)
-            SceneManager->registerNodeForRendering(this);
+	virtual void OnPreRender()
+	{
+		if (IsVisible)
+			SceneManager->registerNodeForRendering(this);
 
-        ISceneNode::OnRegisterSceneNode();
-    }*/
+		ISceneNode::OnPreRender();
+	}
+
 
     virtual void render()
     {
