@@ -29,7 +29,7 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 #define STATE_GAME_OVER 4
 #define STATE_POWERUP 5
 
-#define MAX_COWS 15
+#define MAX_COWS 10
 #define STARTING_ENEMIES 4
 
 //MUSIC RELATED STUFF
@@ -592,8 +592,9 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 				p.WeaponFiringLightToggle(true);
 
 				float length = 25.0f * (p.GetEnergy() / 100.0f);
-				vector3df dstFakeRay = p.GetPosition() + SceneNodeDir(p.GetNode()) * length;
-;				ISceneNode* e = ef->HitEnemy(dstFakeRay, 1.0f);
+				vector3df dstFakeRay = p.GetPosition() + SceneNodeDir(p.GetNode());
+				ISceneNode* e = ef->HitEnemy(dstFakeRay, length, 10.0f);
+
 				lightningWait += 1.0f * frameDeltaTime;
 				if (lightningWait > 0.7f) {
 					p.RemoveEnergy(frameDeltaTime);
@@ -604,7 +605,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 					cutsceneLightning->setVisible(true);
 					if (e != NULL) 
 					{
-						if (e->getID() == 667)
+						/*if (e->getID() == 667)
 						{
 							be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 							if (be->GetHealth() <= 0) {
@@ -617,7 +618,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 							}
 						}
 						else
-						{
+						{*/
 							Enemy* enemy = ef->FindEnemy(e);
 							if (enemy != NULL) {
 								enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
@@ -631,7 +632,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 									enemy->SetDeathAnimationTrigger(true);
 								}
 							}
-						}
+						//}
 					}
 				}
 			}

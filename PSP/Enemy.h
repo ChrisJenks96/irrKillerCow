@@ -120,10 +120,23 @@ class EnemyFactory
 		void ResetEmission() { for (int i = 0; i < enemies.size(); i++) { enemies[i].GetNode()->getMaterial(0).EmissiveColor = SColor(0, 0, 0, 0); } }
 		void AddSpeed(float s) { for (int i = 0; i < enemies.size(); i++) { enemies[i].SetSpeed(enemies[i].GetSpeed() + s); } }
 		//PSP SPEC FUNCTION... DO NOT PUT THIS ON ANY OTHER PLATFORM!!!!
-		ISceneNode* HitEnemy(const vector3df p, const float hit_dist){
+		ISceneNode* HitEnemy(const vector3df p, const float length, const float hit_dist){
+			int lenSegments = 8;
+			float lenSegmentIter = length / (float)lenSegments;
+			vector3df finP;
 			for (int i = 0; i < enemies.size(); i++) { 
-				if (p.getDistanceFrom(enemies[i].GetPosition()) < hit_dist)
-					return enemies[i].GetNode();
+				for (int j = 0; j < lenSegments; j++) {
+					finP = p * (length - (lenSegmentIter * j));
+					if (finP.getDistanceFrom(enemies[i].GetPosition()) < hit_dist){
+						ISceneNode* ret = enemies[i].GetNode();
+						if (ret != NULL) {
+							return ret;
+						}
+
+						//we found it but something went to shit in code
+						return NULL;
+					}
+				}
 			}
 
 			return NULL;
