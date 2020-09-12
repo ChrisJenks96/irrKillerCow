@@ -16,7 +16,7 @@ EnemyOrb::EnemyOrb(engineDevice* d)
 			node->setMaterialFlag(EMF_LIGHTING, false);
 			node->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
-			//node->setMaterialTexture(0, driver->getTexture("media/power_orb/centre.png"));
+			node->setMaterialTexture(0, driver->getTexture("media/power_orb/centre.png"));
 		}
 	}
 
@@ -25,7 +25,7 @@ EnemyOrb::EnemyOrb(engineDevice* d)
 	float angle = 360.0f / (float)NUM_LIGHTNING_SPLIT_AXIS;
 	for (int i = 0; i < NUM_LIGHTNING_SPLIT_AXIS; i++) {
 		bolts[i] = new LightningSceneNode(node, smgr, 666);
-		//bolts[i]->setMaterialTexture(0, driver->getTexture("media/lightning/red_bolt.png"));
+		bolts[i]->setMaterialTexture(0, driver->getTexture("media/lightning/red_bolt.png"));
 		bolts[i]->setRotation(vector3df(angle * i, 0.0f, 0.0f));
 		bolts[i]->setScale(vector3df(0.03f, 0.03f, 0.03f));
 		bolts[i]->setVisible(true);
@@ -33,7 +33,7 @@ EnemyOrb::EnemyOrb(engineDevice* d)
 
 	for (int i = 4; i < NUM_LIGHTNING_SPLIT_AXIS + 4; i++) {
 		bolts[i] = new LightningSceneNode(node, smgr, 666);
-		//bolts[i]->setMaterialTexture(0, driver->getTexture("media/lightning/red_bolt.png"));
+		bolts[i]->setMaterialTexture(0, driver->getTexture("media/lightning/red_bolt.png"));
 		bolts[i]->setRotation(vector3df(0.0f, 0.0f, angle * i));
 		bolts[i]->setScale(vector3df(0.03f, 0.03f, 0.03f));
 		bolts[i]->setVisible(true);

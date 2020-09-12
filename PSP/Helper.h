@@ -97,8 +97,8 @@ static vector3df getSceneNodeFromScreenCoordinatesBB(ISceneManager* smgr, IVideo
 #define LIGHTNING_TYPES 5
 typedef struct LIGHTNING_TYPE
 {
-	stringw texture;
-	stringw shield_texture;
+	stringc texture;
+	stringc shield_texture;
 	SColorf col;
 	int damage;
 	float energyDepleteRate;

@@ -193,6 +193,8 @@ static void StaticMeshesLoad(engineDevice* device)
 			groundSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			groundSceneNode->setVisible(false);
 
+			//groundSceneNode->setMaterialTexture(0, driver->getTexture("media/base_plane/dirt.png"));
+			//groundSceneNode->setMaterialTexture(1, driver->getTexture("media/base_plane/grass_dirt.png"));
 			/*groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 			groundSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 			groundSceneNode->getMaterial(0).getTextureMatrix(0).setScale(18.0f);
@@ -220,6 +222,10 @@ static void StaticMeshesLoad(engineDevice* device)
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 				cutsceneGroundSceneNode[i]->setMaterialFlag(EMF_BACK_FACE_CULLING, false);
 				cutsceneGroundSceneNode[i]->setPosition(vector3df(-40.0f, 0.0f, 0.0f));
+
+				cutsceneGroundSceneNode[i]->setMaterialTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
+				//cutsceneGroundSceneNode[i]->setTextureScale(vector3df(12.0f, 24.0f, 0.0f));
+				
 				//ground texture id (0,0)
 				/*cutsceneGroundSceneNode[i]->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass1.png"));
 				cutsceneGroundSceneNode[i]->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/hay.png"));
@@ -243,6 +249,8 @@ static void StaticMeshesLoad(engineDevice* device)
 			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, false);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			ufoSceneNode->setVisible(false);
+
+			ufoSceneNode->setMaterialTexture(0, driver->getTexture("media/ufo/body.png"));
 			/*ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
 			ufoSceneNode->getMaterial(0).Shininess = 60;
 			ufoSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
@@ -275,6 +283,7 @@ static void StaticMeshesLoad(engineDevice* device)
 		{
 			ufoBladesSceneNode->setMaterialFlag(EMF_LIGHTING, false);
 			ufoBladesSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
+			ufoBladesSceneNode->setMaterialTexture(0, driver->getTexture("media/ufo/blades.png"));
 			//ufoBladesSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/blades.png"));
 		}
 			
@@ -294,6 +303,7 @@ static void StaticMeshesLoad(engineDevice* device)
 			cowHeadGameOver->setMaterialFlag(EMF_LIGHTING, false);
 			cowHeadGameOver->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, false);
 			cowHeadGameOver->setPosition(vector3df(999.0f, 999.0f, 999.0f));
+			cowHeadGameOver->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
 			//cowHeadGameOver->getMaterial(0).setTexture(0, driver->getTexture("media/cow/eye.png"));
 			//cowHeadGameOver->getMaterial(1).setTexture(0, driver->getTexture("media/cow/eye.png"));
 			//cowHeadGameOver->getMaterial(2).setTexture(0, driver->getTexture("media/cow/cow.png"));
@@ -456,8 +466,9 @@ void CutsceneUpdate(engineDevice* device, const float dt)
 
 void LightningUpgrade(engineDevice* device)
 {
+	cutsceneLightning->setMaterialTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture.c_str()));
 	//cutsceneLightning->getMaterial(0).setTexture(0, device->getVideoDriver()->getTexture(lightning_types[currentLightningType].texture));
-	//p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
+	p.ShieldTexture(lightning_types[currentLightningType].shield_texture, device->getVideoDriver());
 	p.SetEnergyDepleteRate(lightning_types[currentLightningType].energyDepleteRate);
 	p.SetEnergyRestoreRate(lightning_types[currentLightningType].energyRestoreRate);
 	shieldRate = 3.5f * (currentLightningType + 1);
@@ -735,8 +746,6 @@ int Sys_Init()
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
 
-	//void* extradriverdata = 0;
-	//Common_Init(&extradriverdata);
 	/*FMOD_RESULT r;
 	r = FMOD::System_Create(&FMODSystem);
 	if (r == FMOD_OK)
@@ -769,7 +778,7 @@ int Sys_Init()
 			earthSceneNode->setMaterialFlag(EMF_LIGHTING, false);
 			earthSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			earthSceneNode->setPosition(cam->getPosition() + vector3df(0.0f, 0.0f, 65.0f));
-			//earthSceneNode->setMaterialTexture(0, driver->getTexture("media/gui/earth.png"));
+			earthSceneNode->setMaterialTexture(0, driver->getTexture("media/gui/earth.png"));
 		}
 	}
 
