@@ -85,10 +85,10 @@ BigEnemy::BigEnemy(engineDevice* d, void* FMODSystem, const float distAway)
 		}
 	}
 
-	/*scene::ITriangleSelector* selector = 0;
-	selector = smgr->createTriangleSelector(node);
+	scene::ITriangleSelector* selector = 0;
+	selector = smgr->createTriangleSelectorFromBoundingBox(node);
 	node->setTriangleSelector(selector);
-	selector->drop(); // We're done with this selector, so drop it now.*/
+	selector->drop(); // We're done with this selector, so drop it now.
 
 	//FMODSystem->createSound("media/music/BigMoo.mp3", FMOD_DEFAULT | FMOD_LOOP_OFF, 0, &bigMooEffect);
 	//FMODSystem->createChannelGroup("Moo", &channelGroupBigMoo);

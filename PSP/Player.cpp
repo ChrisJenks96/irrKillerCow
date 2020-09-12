@@ -181,17 +181,18 @@ ISceneNode* Player::Fire(engineDevice* device, const float length)
 {
 	WeaponFiringLightToggle(true);
 
-	/*core::line3d<f32> ray;
+	core::line3d<f32> ray;
 	ray.start = node->getPosition() + vector3df(0.0f, 1.0f, 0.0f);
 	ray.end = ray.start + SceneNodeDir(node) * length;
 	// Tracks the current intersection point with the level or a mesh
-	core::vector3df intersection;
+	//core::vector3df intersection;
 	// Used to show with triangle has been hit
-	core::triangle3df hitTriangle;
-	scene::ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeAndCollisionPointFromRay(
-		ray, intersection, hitTriangle, 0, 0);
+	//core::triangle3df hitTriangle;
+	//scene::ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeAndCollisionPointFromRay(
+		//ray, intersection, hitTriangle, 0, 0);
+	ISceneNode* selectedSceneNode = device->getSceneManager()->getSceneCollisionManager()->getSceneNodeFromRayBB(ray);
 	if (selectedSceneNode)
-		return selectedSceneNode;*/
+		return selectedSceneNode;
 	return NULL;
 }
 

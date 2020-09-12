@@ -598,7 +598,8 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 					float lightningLength = LIGHTNING_SCALE * ((float)p.GetEnergy() / 100.0f);
 					cutsceneLightning->setScale(vector3df(lightningLength, lightningLength, lightningLength));
 					cutsceneLightning->setVisible(true);
-					if (e != NULL) {
+					if (e != NULL) 
+					{
 						if (e->getID() == 667)
 						{
 							be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
