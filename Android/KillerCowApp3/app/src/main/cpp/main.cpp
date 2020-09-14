@@ -216,7 +216,7 @@ vector3df bigEnemyNewPos;
 float bigEnemyMoveCounter = 0.0f;
 float bigEnemyCapsuleTakeoff = 1.0f;
 float bigEnemyMoveMax = 2.1f;
-float bigEnemyCapVelocity = -0.0f;
+float bigEnemyCapVelocity = 0.0f;
 bool bigEnemyOnMove = false;
 bool bigEnemyStopShooting = false;
 bool bigEnemyFirstMove = false;
@@ -594,7 +594,7 @@ void LightningUpgrade(IrrlichtDevice* device)
     p.LightningChangeCol(lightning_types[currentLightningType].col);
 }
 
-void GameReset()
+void GameReset(IrrlichtDevice* device)
 {
     globalPlayerMunchFlag = false;
     cowsXp = 0;
@@ -602,6 +602,8 @@ void GameReset()
     cowsKilled = 0;
     perkCount = 0;
     firstDeath = true;
+    currentLightningType = 0;
+    LightningUpgrade(device);
     p.SetHealth(100);
     p.SetEnergy(100);
     p.SetAnimationName("idle");
@@ -649,6 +651,8 @@ void GameInit(IrrlichtDevice* device)
     dirLight->getLightData().OuterCone = 100.0f;
     dirLight->getLightData().Falloff = 20.0f;
     dirLight->setRotation(vector3df(90.0f, 0.0f, 0.0f));
+
+    GameReset(device);
 }
 
 void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const float& frameDeltaTime)
@@ -769,7 +773,7 @@ void GameUpdate(IrrlichtDevice* device, s32& MouseX, s32& MouseXPrev, const floa
                             enemy->GetNode()->getMaterial(0).EmissiveColor = SColor(255, 255, 0, 0);
                             if (enemy->GetHealth() <= 0) {
                                 if (!enemy->isDeathAnimationTrigger()) {
-                                    cowsXp += ((float)enemy->GetAttackDamage() / 10) * xpMod;
+                                    cowsXp += ((float)enemy->GetAttackDamage() / 5) * xpMod;
                                     cowsKilled += 1;
                                 }
 
@@ -1342,7 +1346,7 @@ void android_main(android_app* app)
                 gameOverTimer += 1.0f * frameDeltaTime;
                 if (gameOverTimer > GAME_OVER_FINISH_TIME) {
                     gameOverTimer = 0.0f;
-                    GameReset();
+                    GameReset(device);
                     gameOverToReset = false;
                     state = STATE_GAME;
                 }
