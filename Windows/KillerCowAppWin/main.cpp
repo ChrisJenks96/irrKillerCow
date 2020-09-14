@@ -80,7 +80,7 @@ vector3df bigEnemyNewPos;
 float bigEnemyMoveCounter = 0.0f;
 float bigEnemyCapsuleTakeoff = 1.0f;
 float bigEnemyMoveMax = 2.1f;
-float bigEnemyCapVelocity = -0.0f;
+float bigEnemyCapVelocity = 0.0f;
 bool bigEnemyOnMove = false;
 bool bigEnemyStopShooting = false;
 bool bigEnemyFirstMove = false;

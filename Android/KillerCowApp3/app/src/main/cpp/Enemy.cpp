@@ -26,7 +26,7 @@ Enemy::Enemy(IrrlichtDevice* d, const float distAway)
 
 	soundEffectID = rand() % 3;
     healthDepleteTimer = 0.0f;
-    int health = BASE_COW_HEALTH;
+    health = BASE_COW_HEALTH;
 }
 
 void Enemy::RandomPosition(const float distAway)
