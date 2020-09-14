@@ -8,12 +8,15 @@ using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+using namespace audio;
 
 #include "Player.h"
 #include "Enemy.h"
 #include <time.h>
 #include "ER.h"
 #include "LightningSceneNode.h"
+
+#include <CAudioDriver.h>
 //#include <fmod.hpp>
 
 int QUAD_SEGMENT_INCREMENT = -10.0f;
@@ -33,15 +36,17 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 #define STARTING_ENEMIES 4
 
 //MUSIC RELATED STUFF
-/*FMOD::System* FMODSystem;
-FMOD::Channel* channel = 0;
-FMOD::Channel* channel_bkg = 0;
-FMOD::ChannelGroup* channelGroupLightning;
-FMOD::ChannelGroup* channelGroupBKGMusic;
+//FMOD::System* FMODSystem;
+CAudioDriver* AudioSystem;
+//FMOD::Channel* channel = 0;
+//FMOD::Channel* channel_bkg = 0;
+//FMOD::ChannelGroup* channelGroupLightning;
+//FMOD::ChannelGroup* channelGroupBKGMusic;
 
-FMOD_MODE currMode;
-FMOD::Sound* mainMenuMusic;
-FMOD::Sound* backgroundMusic;
+//FMOD_MODE currMode;
+IAudioSound* mainMenuMusic;
+//FMOD::Sound* mainMenuMusic;
+/*FMOD::Sound* backgroundMusic;
 FMOD::Sound* lightningEffectStart;
 FMOD::Sound* lightningEffectMid;
 FMOD::Sound* lightningEffectEnd;
@@ -195,6 +200,7 @@ static void StaticMeshesLoad(engineDevice* device)
 
 			//groundSceneNode->setMaterialTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 			groundSceneNode->setMaterialTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
+
 			/*groundSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/base_plane/dirt.png"));
 			groundSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/base_plane/grass_dirt.png"));
 			groundSceneNode->getMaterial(0).getTextureMatrix(0).setScale(18.0f);
@@ -246,11 +252,13 @@ static void StaticMeshesLoad(engineDevice* device)
 		ufoSceneNode->setScale(vector3df(1.25f, 1.25f, 1.25f));
 
 		if (ufoSceneNode){
-			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, false);
 			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			ufoSceneNode->setVisible(false);
 
-			ufoSceneNode->setMaterialTexture(0, driver->getTexture("media/ufo/body.png"));
+			ufoSceneNode->getMaterial(0).Textures[0] = driver->getTexture("media/ufo/body.png");
+			ufoSceneNode->getMaterial(0).Textures[2] = driver->getTexture("media/ufo/exhaust.png");
+			//ufoSceneNode->setMaterialTexture(0, driver->getTexture("media/ufo/body.png"));
 			/*ufoSceneNode->getMaterial(0).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
 			ufoSceneNode->getMaterial(0).Shininess = 60;
 			ufoSceneNode->getMaterial(1).setTexture(0, driver->getTexture("media/ufo/exhaust.png"));
@@ -746,6 +754,9 @@ int Sys_Init()
 	//cam = smgr->addCameraSceneNodeFPS(0, 100.0f, 0.03f);
 	cam = smgr->addCameraSceneNode();
 
+	AudioSystem = new CAudioDriver(device->getFileSystem());
+	mainMenuMusic = AudioSystem->addSound("media/music/KillerCowOST.mp3", 1, false, false);
+
 	/*FMOD_RESULT r;
 	r = FMOD::System_Create(&FMODSystem);
 	if (r == FMOD_OK)
@@ -1134,6 +1145,9 @@ int engineMain(unsigned int argc, void *argv)
 				//channel->setVolume(0.8f);
 				//FMODSystem->update();
 
+				if (!mainMenuMusic->isPlaying())
+					mainMenuMusic->play();
+
 				if (pad.Buttons != 0) {
 					if (pad.Buttons & PSP_CTRL_CROSS) {
 						CutsceneInit(device);
@@ -1280,6 +1294,7 @@ int engineMain(unsigned int argc, void *argv)
 
 	//cutsceneLightning->drop();
 	//cutsceneLightning = 0;
+	delete AudioSystem;
 	delete ef;
 	delete be;
 	//FMODSystem->close();
