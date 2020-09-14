@@ -16,19 +16,19 @@ using namespace gui;
 #define LIGHTNING_SCALE 0.4f
 
 #define ZOOM_INTO_BOSS_SPEED 1.3f
-#define ZOOM_INTO_BOSS_DEAD_SPEED 0.8f
-static vector3df defaultCamPos(3.0f, 10.0f, -9.0f);
-static vector3df bossFightCamPos(8.0f, 15.0f, -14.0f);
+#define ZOOM_INTO_BOSS_DEAD_SPEED 1.8f
+static vector3df defaultCamPos(10.0f, 17.0f, -16.0f);
+static vector3df bossFightCamPos( 14.0f, 21.0f, -20.0f);
 
 #define GROUNDSCENENODE_BASE_ID 1
 
 static vector3df SceneNodeDir(ISceneNode* node)
 {
-	//matrix4 mat = node->getAbsoluteTransformation();
-	//vector3df in(mat[8], mat[9], mat[10]);
-	//in.normalize();
-	//return in;
-	return vector3df(0.0f, 0.0f, 0.0f);
+	matrix4 mat = node->getAbsoluteTransformation();
+	vector3df in(mat.M[8], mat.M[9], mat.M[10]);
+	in.normalize();
+	return in;
+	//return vector3df(0.0f, 0.0f, 0.0f);
 }
 
 static int transition_alpha = 255;  //the alpha value of the rectangle
@@ -97,8 +97,8 @@ static vector3df getSceneNodeFromScreenCoordinatesBB(ISceneManager* smgr, IVideo
 #define LIGHTNING_TYPES 5
 typedef struct LIGHTNING_TYPE
 {
-	stringw texture;
-	stringw shield_texture;
+	stringc texture;
+	stringc shield_texture;
 	SColorf col;
 	int damage;
 	float energyDepleteRate;

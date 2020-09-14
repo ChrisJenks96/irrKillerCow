@@ -17,6 +17,7 @@ LIBS= -lengine -lSDL -lpspirkeyb -lpspgum -lpspgu -lglut -lGLU -lGL  -lm -lpsppo
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = Killer Cows
+#PSP_LARGE_MEMORY = 1
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

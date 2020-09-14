@@ -43,7 +43,7 @@ class Player
 		void LookAt(vector3df p, const float offset);
 		ISceneNode* Fire(engineDevice* device, const float length);
 		void WeaponFiringLightToggle(bool t) { weaponFiringLight->setVisible(t); }
-		void ResetEmission() { node->getMaterial(0).EmissiveColor = SColor(255, 0, 0, 0); }
+		void ResetEmission() { node->getMaterial(0).EmissiveColor = SColor(0, 0, 0, 0); }
 		void Idle();
 		int GetEnergy() { return energy; }
 		void RemoveEnergy(const float dt);

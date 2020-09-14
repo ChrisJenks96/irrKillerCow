@@ -27,17 +27,18 @@ Enemy::Enemy(engineDevice* d, const float distAway)
 		RandomPosition(distAway);
 		if (node)
 		{
-			node->setMaterialFlag(EMF_LIGHTING, false);
+			node->setMaterialFlag(EMF_LIGHTING, true);
 			node->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
 			node->setMD2Animation("idle");
 			node->setMaterialTexture(0, driver->getTexture("media/cow/cow.png"));
+			node->getMaterial(0).EmissiveColor = SColor(0, 0, 0, 0);
 		}
 	}
 
-	/*scene::ITriangleSelector* selector = 0;
-	selector = smgr->createTriangleSelector(node);
+	scene::ITriangleSelector* selector = 0;
+	selector = smgr->createTriangleSelectorFromBoundingBox(node);
 	node->setTriangleSelector(selector);
-	selector->drop(); // We're done with this selector, so drop it now.*/
+	selector->drop(); // We're done with this selector, so drop it now.
 
 	soundEffectID = rand() % 3;
 }
