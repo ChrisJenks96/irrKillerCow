@@ -755,7 +755,7 @@ int Sys_Init()
 	cam = smgr->addCameraSceneNode();
 
 	AudioSystem = new CAudioDriver(device->getFileSystem());
-	mainMenuMusic = AudioSystem->addSound("media/music/KillerCowOST.mp3", 1, false, false);
+	mainMenuMusic = AudioSystem->addSound("media/music/KillerCowOST.mp3", 1, false, true);
 
 	/*FMOD_RESULT r;
 	r = FMOD::System_Create(&FMODSystem);
@@ -1141,15 +1141,17 @@ int engineMain(unsigned int argc, void *argv)
 			{
 				earthSceneNode->setRotation(earthSceneNode->getRotation() + vector3df(0.0f, -2.0f * frameDeltaTime, 0.0f));
 
+				if (!mainMenuMusic->isPlaying())
+					mainMenuMusic->play();
+
 				//FMODSystem->playSound(mainMenuMusic, channelGroupBKGMusic, false, &channel);
 				//channel->setVolume(0.8f);
 				//FMODSystem->update();
 
-				if (!mainMenuMusic->isPlaying())
-					mainMenuMusic->play();
-
 				if (pad.Buttons != 0) {
 					if (pad.Buttons & PSP_CTRL_CROSS) {
+						mainMenuMusic->stop();
+						AudioSystem->removeSound(mainMenuMusic);
 						CutsceneInit(device);
 						//mainMenuMusic->release();
 						state = STATE_INTRO_CUTSCENE;
