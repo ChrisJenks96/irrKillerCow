@@ -615,7 +615,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 					cutsceneLightning->setVisible(true);
 					if (e != NULL) 
 					{
-						/*if (e->getID() == 667)
+						if (e->getID() == 667)
 						{
 							be->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
 							if (be->GetHealth() <= 0) {
@@ -628,7 +628,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 							}
 						}
 						else
-						{*/
+						{
 							Enemy* enemy = ef->FindEnemy(e);
 							if (enemy != NULL) {
 								enemy->RemoveHealth(lightning_types[currentLightningType].damage, frameDeltaTime);
@@ -642,7 +642,7 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 									enemy->SetDeathAnimationTrigger(true);
 								}
 							}
-						//}
+						}
 					}
 				}
 			}
@@ -1259,11 +1259,11 @@ int engineMain(unsigned int argc, void *argv)
 						switch (whichPerk)
 						{
 						case 0:
-							shieldBtnToggle->setVisible(true);
+							//shieldBtnToggle->setVisible(true);
 							shieldTimer = 0.0f;
 							break;
 						case 1:
-							nukeBtnToggle->setVisible(true);
+							//nukeBtnToggle->setVisible(true);
 							break;
 						}
 
