@@ -17,6 +17,8 @@ using namespace audio;
 #include "LightningSceneNode.h"
 
 #include <CAudioDriver.h>
+#include "CTextureFont.hpp"
+
 //#include <fmod.hpp>
 
 int QUAD_SEGMENT_INCREMENT = -10.0f;
@@ -37,6 +39,7 @@ int QUAD_SEGMENT_INCREMENT = -10.0f;
 
 //MUSIC RELATED STUFF
 //FMOD::System* FMODSystem;
+ExtModules::CTextureFont* font;
 CAudioDriver* AudioSystem;
 //FMOD::Channel* channel = 0;
 //FMOD::Channel* channel_bkg = 0;
@@ -82,7 +85,7 @@ vector3df bigEnemyNewPos;
 float bigEnemyMoveCounter = 0.0f;
 float bigEnemyCapsuleTakeoff = 1.0f;
 float bigEnemyMoveMax = 2.1f;
-float bigEnemyCapVelocity = -0.0f;
+float bigEnemyCapVelocity = 0.0f;
 bool bigEnemyOnMove = false;
 bool bigEnemyStopShooting = false;
 bool bigEnemyFirstMove = false;
@@ -123,7 +126,6 @@ int cowsXpLvl = 1;
 float xpMod = 4.8f;
 float lightningUpgradeTimer = 0.0f;
 float lightningUpgradeWait = 3.0f;
-IGUIFont* font;
 
 //cutscene specifics
 int currentCutscene = 0;
@@ -712,22 +714,23 @@ void GameUpdate(engineDevice* device, const float& frameDeltaTime)
 
 void MenuInit(engineDevice* device)
 {
-	//font = device->getGUIEnvironment()->getFont("media/gui/myfont.xml");
+	font = new ExtModules::CTextureFont(device->getVideoDriver());
+	font->load("media/gui/fonthaettenschweiler.bmp");
 }
 
 void MenuFontDraw(engineDevice* device)
 {
 	stringw str = L"Click to Start Game";
-	//dimension2du s = device->getVideoDriver()->getScreenSize();
-	//font->draw(str.c_str(), core::rect<int>(s.Width / 2 - 100, s.Height - 60, 0, 0), video::SColor(255, 255, 255, 255));
+	dimension2d<int> s = device->getVideoDriver()->getScreenSize();
+	font->render(str.c_str(), rect<int>(s.Width / 2 - 44, s.Height - 30, 0, 0), video::SColor(255, 255, 255, 255));
 }
 
 void HighScoreFontDraw(engineDevice* device, const int cowsMuggedOff)
 {
 	stringw str = L"X ";
 	str += cowsMuggedOff;
-	//dimension2du s = device->getVideoDriver()->getScreenSize();
-	//font->draw(str.c_str(), core::rect<int>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
+	dimension2d<int> s = device->getVideoDriver()->getScreenSize();
+	font->render(str.c_str(), core::rect<int>((s.Width * 2) - 160, 32, 0, 0), video::SColor(255, 255, 255, 255), true);
 }
 
 int Sys_Init()
@@ -1198,12 +1201,9 @@ int engineMain(unsigned int argc, void *argv)
 
 			driver->beginScene(true, true, SColor(0, 0, 0, 0));
 			smgr->drawAll();
-			if (state == STATE_MENU)
-			{
-				//MenuFontDraw(device);	
+			if (state == STATE_MENU){
+				MenuFontDraw(device);	
 				driver->draw2DImage(title_logo, position2d<s32>((driver->getScreenSize().Width / 2) - (title_logo->getSize().Width / 2), 0));
-				driver->draw2DImage(ag_logo, position2d<s32>((driver->getScreenSize().Width) - (ag_logo->getSize().Width) - 20,
-					(driver->getScreenSize().Height) - (ag_logo->getSize().Height) - 20));
 			}
 
 			else if (state == STATE_INTRO_CUTSCENE) {
@@ -1221,15 +1221,16 @@ int engineMain(unsigned int argc, void *argv)
 			{
 				if (state == STATE_GAME_OVER)
 				{
-					/*stringw str = L"Cows Destroyed: ";
+					dimension2d<int> s = device->getVideoDriver()->getScreenSize();
+					stringw str = L"Cows Destroyed: ";
 					str += cowsKilled;
-					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->render(str.c_str(), core::rect<int>(s.Width, s.Height - 110, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Record: ";
 					str += savedCowsKilled;
-					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->render(str.c_str(), core::rect<int>(s.Width, s.Height - 80, 0, 0), video::SColor(255, 255, 255, 255), true);
 					str = L"Total Cows Destroyed: ";
 					str += totalCowsKilled;
-					font->draw(str.c_str(), core::rect<int>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);*/
+					font->render(str.c_str(), core::rect<int>(s.Width, s.Height - 50, 0, 0), video::SColor(255, 255, 255, 255), true);
 
 					driver->draw2DImage(go_logo, position2d<s32>(driver->getScreenSize().Width / 2 - (go_logo->getSize().Width / 2), 20));
 				}
@@ -1270,23 +1271,23 @@ int engineMain(unsigned int argc, void *argv)
 						cowsXpLvl += 1;
 					}
 
-					/*unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
-					unlock_outside->draw();
-					unlock_inside->draw();
-					if (shieldBtnToggle->isVisible())
-						shieldBtnToggle->draw();
-					if (nukeBtnToggle->isVisible())
-						nukeBtnToggle->draw();
-					cow_icon->draw();
-					alien_icon->draw();
-					dimension2du s = device->getVideoDriver()->getScreenSize();
+					//unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+					//unlock_outside->draw();
+					//unlock_inside->draw();
+					//if (shieldBtnToggle->isVisible())
+						//shieldBtnToggle->draw();
+					//if (nukeBtnToggle->isVisible())
+						//nukeBtnToggle->draw();
+					//cow_icon->draw();
+					//alien_icon->draw();
+					dimension2d<int> s = device->getVideoDriver()->getScreenSize();
 					stringw str;
 					str += (int)cowsXp;
 					str += L"/100 | LVL ";
 					str += cowsXpLvl;
-					font->draw(str.c_str(), core::rect<int>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
+					font->render(str.c_str(), core::rect<int>(320, 70, 0, 0), video::SColor(255, 255, 255, 255), true);
 
-					HighScoreFontDraw(device, cowsKilled);*/
+					HighScoreFontDraw(device, cowsKilled);
 				}
 			}
 
@@ -1296,6 +1297,7 @@ int engineMain(unsigned int argc, void *argv)
 
 	//cutsceneLightning->drop();
 	//cutsceneLightning = 0;
+	delete font;
 	delete AudioSystem;
 	delete ef;
 	delete be;
