@@ -254,8 +254,8 @@ static void StaticMeshesLoad(engineDevice* device)
 		ufoSceneNode->setScale(vector3df(1.25f, 1.25f, 1.25f));
 
 		if (ufoSceneNode){
-			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, false);
-			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, false);
+			ufoSceneNode->setMaterialFlag(EMF_LIGHTING, true);
+			ufoSceneNode->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);
 			ufoSceneNode->setVisible(false);
 
 			ufoSceneNode->getMaterial(0).Textures[0] = driver->getTexture("media/ufo/body.png");
@@ -345,7 +345,7 @@ void CutsceneInit(engineDevice* device)
 	cutsceneGroundSceneNode[0]->setVisible(true);
 
 	ufoSceneNode->setPosition(vector3df(0.0f, CUTSCENE_UFO_HEIGHT, 0.0f));
-	ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
+	ufoSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
 	ufoBladesSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 	cam->setPosition(cutscene1CamPosition);
 	cam->setTarget(ufoSceneNode->getPosition());
@@ -396,7 +396,7 @@ void CutsceneUpdate(engineDevice* device, const float dt)
 				cam->setPosition(cutscene2CamPosition);
 				//move the ufo back ready for the next scene (it will shoot past the screen)
 				ufoSceneNode->setPosition(ufoSceneNode->getPosition() - vector3df(0.0f, 0.0f, 200.0f));
-				ufoSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
+				ufoSceneNode->setRotation(vector3df(0.0f, -90.0f, 0.0f));
 				ufoBladesSceneNode->setRotation(vector3df(0.0f, 90.0f, 0.0f));
 				currentCutscene = 1;
 			}
@@ -837,14 +837,15 @@ int engineMain(unsigned int argc, void *argv)
 		ITexture* ag_logo = driver->getTexture("media/gui/albon_games_logo_small.png");
 		ITexture* go_logo = driver->getTexture("media/gui/go.png");
 
-		/*IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), vector2di(85, 53));
-		unlock_inside->setMaxSize(dimension2du(p.UnlockGUIValueUpdate(cowsXp), 10));
+		/*IGUIImage* unlock_inside = gui->addImage(driver->getTexture("media/gui/unlock_inside.png"), core::position2d<s32>(85, 53));
+		unlock_inside->setMaxSize(dimension2d<int>(p.UnlockGUIValueUpdate(cowsXp), 10));
 		IGUIImage* health_inside = gui->addImage(driver->getTexture("media/gui/healthbar_inside.png"), vector2di(85, 13));
 		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
 		IGUIImage* heat_inside = gui->addImage(driver->getTexture("media/gui/heat_inside.png"), vector2di(85, 33));
-		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));
-		IGUIImage* cow_icon = gui->addImage(driver->getTexture("media/gui/cow_icon.png"), vector2di(driver->getViewPort().getWidth() - 170, 10));
-		cow_icon->setMaxSize(dimension2du(64, 64));
+		health_inside->setMaxSize(dimension2du(HEALTH_GUI_SIZE_X, 10));*/
+		ITexture* cow_icon = driver->getTexture("media/gui/cow_icon.png");
+		ITexture* alien_icon = driver->getTexture("media/gui/alien_icon.png");
+		/*cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* alien_icon = gui->addImage(driver->getTexture("media/gui/alien_icon.png"), vector2di(14, 10));
 		cow_icon->setMaxSize(dimension2du(64, 64));
 		IGUIImage* unlock_outside = gui->addImage(driver->getTexture("media/gui/healthbar_outside.png"), vector2di(80, 50));
@@ -1279,6 +1280,8 @@ int engineMain(unsigned int argc, void *argv)
 					//if (nukeBtnToggle->isVisible())
 						//nukeBtnToggle->draw();
 					//cow_icon->draw();
+					driver->draw2DImage(alien_icon, position2d<s32>(14, 10));
+					driver->draw2DImage(cow_icon, position2d<s32>(driver->getViewPort().getWidth() - 170, 10));
 					//alien_icon->draw();
 					dimension2d<int> s = device->getVideoDriver()->getScreenSize();
 					stringw str;
